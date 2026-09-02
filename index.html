@@ -77,33 +77,44 @@
 
     .table-header-title {
       background: #f1f5f9;
-      padding: 10px 16px;
+      padding: 8px 12px;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap; /* 2줄 줄바꿈 금지 */
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
+      overflow-x: auto;
     }
 
     .header-controls-left {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      white-space: nowrap;
     }
 
     .header-controls-right {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .header-title-text {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #1e293b;
-      margin-right: 4px;
+      margin-right: 2px;
+      white-space: nowrap;
+    }
+
+    #currentDateLabel {
+      font-size: 0.775rem; /* 텍스트 크기 축소 */
+      font-weight: 500;
+      color: #64748b;
       white-space: nowrap;
     }
 
@@ -708,7 +719,7 @@
         </div>
 
         <div class="header-controls-right">
-          <span id="currentDateLabel" style="font-size: 0.85rem; font-weight: 500; color: #64748b;"></span>
+          <span id="currentDateLabel"></span>
           <button class="btn btn-primary btn-sm" onclick="openAddModal()">
             <i class="fa-solid fa-plus"></i> 보강 등록하기
           </button>
@@ -1235,15 +1246,15 @@
     function updateDateLabel(startDate, endDate) {
       const label = document.getElementById('currentDateLabel');
       if (!startDate && !endDate) {
-        label.textContent = '[ 전체 보강 목록 ]';
+        label.textContent = '[ 전체 목록 ]';
       } else if (startDate && endDate) {
         if (startDate === endDate) {
-          label.textContent = `[ ${formatFormattedDate(startDate)} 보강 목록 ]`;
+          label.textContent = `[ ${formatFormattedDate(startDate)} ]`;
         } else {
-          label.textContent = `[ ${formatFormattedDate(startDate)} ~ ${formatFormattedDate(endDate)} 보강 목록 ]`;
+          label.textContent = `[ ${formatFormattedDate(startDate)} ~ ${formatFormattedDate(endDate)} ]`;
         }
       } else {
-        label.textContent = `[ ${formatFormattedDate(startDate)} 보강 목록 ]`;
+        label.textContent = `[ ${formatFormattedDate(startDate)} ]`;
       }
     }
 
