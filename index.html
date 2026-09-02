@@ -292,6 +292,67 @@
       font-size: 1.02rem;
     }
 
+    /* 보강 교사 열 특별 시각화 강조 스타일 */
+    .schedule-table th.th-highlight-sub {
+      background: linear-gradient(135deg, #047857 0%, #065f46 100%) !important;
+      color: #ffffff;
+      font-size: 0.95rem;
+      border: 1px solid #064e3b !important;
+      box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    .schedule-table td.td-highlight-sub {
+      background-color: #ecfdf5 !important; /* 연한 에메랄드 은은한 배경 강조 */
+      border-left: 2px solid #059669 !important;
+      border-right: 2px solid #059669 !important;
+    }
+
+    .sub-teacher-card {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #ffffff;
+      border: 1.5px solid #059669;
+      border-radius: 20px;
+      padding: 5px 12px;
+      box-shadow: 0 2px 5px rgba(5, 150, 105, 0.18);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .sub-teacher-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(5, 150, 105, 0.25);
+    }
+
+    .sub-teacher-card .sub-icon {
+      color: #059669;
+      font-size: 0.95rem;
+    }
+
+    .sub-teacher-card .sub-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #065f46;
+      letter-spacing: -0.2px;
+    }
+
+    .sub-teacher-card .sub-badge {
+      background: #059669;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 2px;
+    }
+
+    .col-filter-highlight {
+      border-color: #059669 !important;
+      background: #f0fdf4 !important;
+      font-weight: 600;
+    }
+
     .teacher-orig {
       color: #e11d48;
       font-weight: 600;
@@ -678,10 +739,12 @@
               <th style="width: 16%;">날짜(요일)</th>
               <th style="width: 10%;">교시</th>
               <th style="width: 17%;">학급</th>
-              <th style="width: 17%;">보강 교사</th>
-              <th style="width: 17%;">보강 사유</th>
-              <th style="width: 17%;">결강 교사(원교사)</th>
-              <th style="width: 6%;">작업</th>
+              <th class="th-highlight-sub" style="width: 22%;">
+                <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 (알림)
+              </th>
+              <th style="width: 15%;">보강 사유</th>
+              <th style="width: 15%;">결강 교사(원교사)</th>
+              <th style="width: 7%;">작업</th>
             </tr>
             <!-- 열별 개별 필터 헤더 행 -->
             <tr class="filter-header-row">
@@ -740,8 +803,8 @@
                   </optgroup>
                 </select>
               </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColSubTeacher" placeholder="보강교사 검색..." onkeyup="applyColumnFilters()">
+              <th style="background: #ecfdf5;">
+                <input type="text" class="col-filter-input col-filter-highlight" id="filterColSubTeacher" placeholder="🔔 보강교사 검색..." onkeyup="applyColumnFilters()">
               </th>
               <th>
                 <!-- 사유 드롭다운 선택 -->
@@ -1189,7 +1252,13 @@
           <td style="font-weight: 600;">${formattedDateText}</td>
           <td><span class="badge-period">${escapeHtml(item.period)}</span></td>
           <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
-          <td><span class="teacher-sub">${escapeHtml(item.substituteTeacher)}</span></td>
+          <td class="td-highlight-sub">
+            <div class="sub-teacher-card">
+              <i class="fa-solid fa-user-check sub-icon"></i>
+              <span class="sub-name">${escapeHtml(item.substituteTeacher)}</span>
+              <span class="sub-badge">보강</span>
+            </div>
+          </td>
           <td><span class="badge-reason">${escapeHtml(item.reason)}</span></td>
           <td><span class="teacher-orig">${escapeHtml(item.originalTeacher)}</span></td>
           <td>
