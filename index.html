@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>홍익-보강 알리미 | 온라인 교무실</title>
+  <title>보강 알리미 | 온라인 교무실</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,9 +13,9 @@
   
   <style>
     :root {
-      --primary-color: #006b67;       /* 교사 지도표 헤더 깊은 청록색 */
+      --primary-color: #006b67;       /* 보강 목록 헤더 청록색 */
       --primary-hover: #00524f;
-      --primary-light: #e6f4f1;       /* 테이블 짝수행/배경 연한 민트 */
+      --primary-light: #e6f4f1;       /* 테이블 짝수행 연한 민트 */
       --primary-border: #b2dfdb;
       --accent-color: #0d9488;
       --text-main: #1f2937;
@@ -50,12 +50,12 @@
     /* 상단 대시보드 헤더 */
     .app-header {
       text-align: center;
-      margin-bottom: 24px;
-      padding-bottom: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
     }
 
     .app-title {
-      font-size: 2rem;
+      font-size: 2.1rem;
       font-weight: 700;
       color: var(--primary-color);
       letter-spacing: -0.5px;
@@ -67,7 +67,7 @@
     }
 
     .app-subtitle {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: 600;
       color: #334155;
       margin-bottom: 8px;
@@ -75,21 +75,21 @@
 
     .notice-banner {
       display: inline-block;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       color: #475569;
       background: #f1f5f9;
-      padding: 6px 16px;
+      padding: 5px 16px;
       border-radius: 20px;
       border: 1px solid #e2e8f0;
     }
 
-    /* 상단 컨트롤 바 */
+    /* 상단 컨트롤 패널 (기간 검색 지원) */
     .control-panel {
       background: var(--card-bg);
       border-radius: var(--radius);
       padding: 16px 20px;
       box-shadow: var(--shadow-sm);
-      border: 1px solid #e2e8f0;
+      border: 1px solid #cbd5e1;
       margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
@@ -98,32 +98,30 @@
       gap: 12px;
     }
 
-    .left-controls {
+    .range-picker-wrap {
       display: flex;
+      align-items: center;
       flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .date-picker-wrap {
-      display: flex;
-      align-items: center;
       gap: 8px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
       padding: 6px 12px;
       border-radius: 6px;
-      font-weight: 500;
     }
 
-    .date-picker-wrap input[type="date"] {
+    .range-picker-wrap input[type="date"] {
       border: none;
       background: transparent;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--text-main);
       outline: none;
       cursor: pointer;
+    }
+
+    .date-separator {
+      font-weight: 700;
+      color: #64748b;
     }
 
     .btn {
@@ -162,8 +160,8 @@
     }
 
     .btn-sm {
-      padding: 5px 10px;
-      font-size: 0.825rem;
+      padding: 5px 12px;
+      font-size: 0.85rem;
     }
 
     .search-wrap {
@@ -176,12 +174,12 @@
       border-radius: 6px;
       font-size: 0.9rem;
       outline: none;
-      width: 180px;
+      width: 170px;
       transition: width 0.2s, border-color 0.2s;
     }
 
     .search-wrap input:focus {
-      width: 220px;
+      width: 210px;
       border-color: var(--primary-color);
     }
 
@@ -194,7 +192,7 @@
       font-size: 0.85rem;
     }
 
-    /* 현황 카드/표 컨테이너 (첨부 이미지 교사 지도표 스타일 반영) */
+    /* 보강 목록 테이블 컨테이너 */
     .table-card {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -230,16 +228,16 @@
       background-color: var(--primary-color);
       color: #ffffff;
       font-weight: 600;
-      font-size: 0.95rem;
-      padding: 14px 12px;
+      font-size: 0.925rem;
+      padding: 13px 10px;
       border: 1px solid #005753;
       white-space: nowrap;
     }
 
     .schedule-table td {
-      padding: 14px 12px;
+      padding: 13px 10px;
       border: 1px solid #e2e8f0;
-      font-size: 0.95rem;
+      font-size: 0.925rem;
       color: var(--text-main);
       vertical-align: middle;
     }
@@ -252,14 +250,14 @@
       background-color: #d1ebe5;
     }
 
-    /* 뱃지 및 상태 표기 */
+    /* 뱃지 및 스타일링 */
     .badge-period {
       display: inline-block;
       background: #0284c7;
       color: #fff;
       font-size: 0.8rem;
       font-weight: 700;
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 12px;
     }
 
@@ -273,29 +271,15 @@
       border-radius: 6px;
     }
 
-    .teacher-flow {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-weight: 600;
-    }
-
-    .teacher-orig {
-      color: #e11d48; /* 결강 교사 빨강/장미색 포인트 */
-      text-decoration: line-through;
-      font-weight: 500;
-    }
-
-    .arrow-icon {
-      color: var(--primary-color);
-      font-size: 0.85rem;
-    }
-
     .teacher-sub {
       color: #047857; /* 보강 교사 초록 포인트 */
       font-weight: 700;
       font-size: 1.02rem;
+    }
+
+    .teacher-orig {
+      color: #e11d48; /* 결강 교사 빨강/장미색 */
+      font-weight: 600;
     }
 
     .badge-reason {
@@ -309,21 +293,46 @@
       border-radius: 4px;
     }
 
-    .btn-delete {
-      background: transparent;
-      color: #ef4444;
-      border: none;
+    .action-btns {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-edit {
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #bfdbfe;
       cursor: pointer;
-      padding: 6px;
+      padding: 4px 8px;
       border-radius: 4px;
-      transition: background 0.2s;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-edit:hover {
+      background: #dbeafe;
+    }
+
+    .btn-delete {
+      background: #fef2f2;
+      color: #ef4444;
+      border: 1px solid #fecaca;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s;
     }
 
     .btn-delete:hover {
       background: #fee2e2;
     }
 
-    /* 빈 상태 안내 */
+    /* 빈 상태 */
     .empty-state {
       padding: 48px 20px;
       text-align: center;
@@ -344,10 +353,7 @@
     /* 모달 스타일 */
     .modal-overlay {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(15, 23, 42, 0.55);
       backdrop-filter: blur(3px);
       display: flex;
@@ -407,9 +413,7 @@
       transition: opacity 0.2s;
     }
 
-    .modal-close-btn:hover {
-      opacity: 1;
-    }
+    .modal-close-btn:hover { opacity: 1; }
 
     .modal-body {
       padding: 24px;
@@ -457,7 +461,7 @@
       box-shadow: 0 0 0 3px rgba(0, 107, 103, 0.12);
     }
 
-    /* 교시 선택 칩 버튼들 */
+    /* 교시 선택 칩 */
     .period-chips {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -484,14 +488,12 @@
       box-shadow: 0 2px 4px rgba(0, 107, 103, 0.2);
     }
 
-    /* 학급 드롭다운 및 그리드 */
     .class-select-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
     }
 
-    /* 사유 태그 버튼 */
     .reason-tags {
       display: flex;
       flex-wrap: wrap;
@@ -526,7 +528,6 @@
       gap: 10px;
     }
 
-    /* 로딩 스피너 */
     .spinner {
       border: 3px solid rgba(255,255,255,0.3);
       border-radius: 50%;
@@ -542,13 +543,12 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* 반응형 레이아웃 */
     @media (max-width: 768px) {
-      .app-title { font-size: 1.5rem; }
+      .app-title { font-size: 1.6rem; }
       .control-panel { flex-direction: column; align-items: stretch; }
-      .left-controls { justify-content: space-between; }
+      .range-picker-wrap { justify-content: space-between; }
       .period-chips { grid-template-columns: repeat(4, 1fr); }
-      .schedule-table th, .schedule-table td { padding: 10px 8px; font-size: 0.85rem; }
+      .schedule-table th, .schedule-table td { padding: 10px 6px; font-size: 0.85rem; }
     }
   </style>
 </head>
@@ -558,21 +558,26 @@
     <!-- 헤더 영역 -->
     <header class="app-header">
       <h1 class="app-title">
-        <i class="fa-solid fa-clipboard-user"></i> 홍익-보강 알리미
+        <i class="fa-solid fa-clipboard-user"></i> 보강 알리미
       </h1>
       <div class="app-subtitle">온라인 교무실 보강 현황판</div>
       <div class="notice-banner">
-        <i class="fa-solid fa-circle-info"></i> ※ 보강 정보 등록 및 삭제는 모든 선생님께서 자유롭게 작성하실 수 있습니다.
+        <i class="fa-solid fa-circle-info"></i> ※ 보강 정보 등록, 수정, 삭제는 모든 선생님께서 자유롭게 하실 수 있습니다.
       </div>
     </header>
 
-    <!-- 상단 조작 패널 -->
+    <!-- 상단 조작 패널 (기간 검색 및 오늘/전체 버튼) -->
     <section class="control-panel">
-      <div class="left-controls">
-        <div class="date-picker-wrap">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+        <div class="range-picker-wrap">
           <i class="fa-regular fa-calendar-days" style="color: var(--primary-color);"></i>
-          <input type="date" id="filterDate" onchange="loadRecords()">
+          <input type="date" id="filterStartDate">
+          <span class="date-separator">~</span>
+          <input type="date" id="filterEndDate">
         </div>
+        <button class="btn btn-outline btn-sm" onclick="loadRecords()">
+          <i class="fa-solid fa-magnifying-glass"></i> 조회
+        </button>
         <button class="btn btn-outline btn-sm" onclick="setTodayDate()">
           <i class="fa-solid fa-clock"></i> 오늘
         </button>
@@ -581,7 +586,7 @@
         </button>
       </div>
 
-      <div style="display: flex; gap: 10px; align-items: center;">
+      <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
         <div class="search-wrap">
           <i class="fa-solid fa-magnifying-glass"></i>
           <input type="text" id="searchInput" placeholder="교사명 또는 학급 검색" onkeyup="filterTable()">
@@ -592,10 +597,10 @@
       </div>
     </section>
 
-    <!-- 메인 보강 지도표 카드 (첨부 이미지 교사 지도표 스타일 반영) -->
+    <!-- 메인 보강 목록 테이블 -->
     <main class="table-card">
       <div class="table-header-title">
-        <span><i class="fa-solid fa-table-list" style="color: var(--primary-color);"></i> 교사 보강 지도표</span>
+        <span><i class="fa-solid fa-table-list" style="color: var(--primary-color);"></i> 보강 목록</span>
         <span id="currentDateLabel" style="font-size: 0.9rem; font-weight: 500; color: #64748b;"></span>
       </div>
 
@@ -603,17 +608,17 @@
         <table class="schedule-table">
           <thead>
             <tr>
-              <th style="width: 14%;">날짜(요일)</th>
-              <th style="width: 10%;">교시</th>
-              <th style="width: 14%;">학급</th>
-              <th style="width: 18%;">결강 교사 (원교사)</th>
-              <th style="width: 18%;">보강 교사</th>
-              <th style="width: 18%;">보강 사유</th>
-              <th style="width: 8%;">삭제</th>
+              <th style="width: 15%;">날짜(요일)</th>
+              <th style="width: 9%;">교시</th>
+              <th style="width: 13%;">학급</th>
+              <th style="width: 17%;">보강 교사</th>
+              <th style="width: 17%;">보강 사유</th>
+              <th style="width: 17%;">결강 교사(원교사)</th>
+              <th style="width: 12%;">작업</th>
             </tr>
           </thead>
           <tbody id="recordTableBody">
-            <!-- JavaScript 데이터 동적 삽입 영역 -->
+            <!-- JavaScript 데이터 동적 생성 -->
           </tbody>
         </table>
 
@@ -626,18 +631,19 @@
     </main>
   </div>
 
-  <!-- 보강 등록 모달 팝업 -->
+  <!-- 보강 등록/수정 모달 팝업 -->
   <div class="modal-overlay" id="addModal">
     <div class="modal-card">
       <div class="modal-header">
-        <h3><i class="fa-solid fa-pen-to-square"></i> 신규 보강 내역 등록</h3>
+        <h3 id="modalTitle"><i class="fa-solid fa-pen-to-square"></i> 보강 내역 등록</h3>
         <button class="modal-close-btn" onclick="closeAddModal()">&times;</button>
       </div>
       
       <form id="addForm" onsubmit="handleFormSubmit(event)">
+        <input type="hidden" id="editingRecordId" value="">
         <div class="modal-body">
           
-          <!-- 1단계: 날짜 지정 -->
+          <!-- 1. 날짜 지정 -->
           <div class="form-group">
             <label class="form-label">
               <span class="step-num">1</span> 날짜 지정
@@ -645,7 +651,7 @@
             <input type="date" class="form-control" id="inputDate" required>
           </div>
 
-          <!-- 2단계: 교시 선택 -->
+          <!-- 2. 교시 선택 -->
           <div class="form-group">
             <label class="form-label">
               <span class="step-num">2</span> 교시 선택 (1~7교시)
@@ -662,41 +668,35 @@
             <input type="hidden" id="inputPeriod" value="1교시">
           </div>
 
-          <!-- 3단계: 학급 선택 -->
+          <!-- 3. 학급 선택 -->
           <div class="form-group">
             <label class="form-label">
               <span class="step-num">3</span> 학급 선택
             </label>
             <div class="class-select-grid">
-              <select class="form-control" id="inputGrade" onchange="updateClassOptions()">
+              <select class="form-control" id="inputGrade">
                 <option value="1학년">1학년</option>
                 <option value="2학년">2학년</option>
                 <option value="3학년">3학년</option>
               </select>
               <select class="form-control" id="inputClass">
-                <!-- 1반 ~ 9반 옵션 동적 생성 -->
+                <!-- 1반 ~ 9반 자동 생성 -->
               </select>
             </div>
           </div>
 
-          <!-- 4단계: 교사 이름 텍스트 직접 입력 및 사유 -->
+          <!-- 4. 보강 교사 -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">4</span> 결강 교사 (원교사 이름 입력)
-            </label>
-            <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-num">5</span> 보강 교사 (보강 들어갈 교사 이름 입력)
+              <span class="step-num">4</span> 보강 교사 (보강 들어갈 교사 이름 입력)
             </label>
             <input type="text" class="form-control" id="inputSubstituteTeacher" placeholder="예: 김철수" required>
           </div>
 
+          <!-- 5. 보강 사유 -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">6</span> 보강 유발 사유
+              <span class="step-num">5</span> 보강 유발 사유
             </label>
             <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등" required>
             <div class="reason-tags">
@@ -707,6 +707,14 @@
               <span class="reason-tag" onclick="setReason('특별휴가')">#특별휴가</span>
               <span class="reason-tag" onclick="setReason('조퇴/외출')">#조퇴/외출</span>
             </div>
+          </div>
+
+          <!-- 6. 결강 교사(원교사) -->
+          <div class="form-group">
+            <label class="form-label">
+              <span class="step-num">6</span> 결강 교사 (원교사 이름 입력)
+            </label>
+            <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동" required>
           </div>
 
         </div>
@@ -722,30 +730,20 @@
   </div>
 
   <script>
-    // 전역 상태 변수
     let currentRecords = [];
     let isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
 
-    // 모의(Mock) 데이터 (로컬 브라우저 테스트 및 가스 미연결 시 사용)
+    // 모의(Mock) 데이터 (로컬 테스트용)
     const mockData = [
       { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '1학년 3반', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장' },
       { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '2학년 5반', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가' },
       { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '3학년 1반', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가' }
     ];
 
-    // 페이지 로드 초기화
     document.addEventListener('DOMContentLoaded', function() {
-      initDates();
       initClassOptions();
-      loadRecords();
+      setTodayDate(); // 자동으로 오늘 날짜 세팅 및 조회 실행
     });
-
-    // 오늘 날짜 세팅
-    function initDates() {
-      const todayStr = getTodayString();
-      document.getElementById('filterDate').value = todayStr;
-      document.getElementById('inputDate').value = todayStr;
-    }
 
     function getTodayString() {
       const today = new Date();
@@ -757,16 +755,18 @@
 
     function setTodayDate() {
       const todayStr = getTodayString();
-      document.getElementById('filterDate').value = todayStr;
+      document.getElementById('filterStartDate').value = todayStr;
+      document.getElementById('filterEndDate').value = '';
+      document.getElementById('inputDate').value = todayStr;
       loadRecords();
     }
 
     function setAllDate() {
-      document.getElementById('filterDate').value = '';
+      document.getElementById('filterStartDate').value = '';
+      document.getElementById('filterEndDate').value = '';
       loadRecords();
     }
 
-    // 학급 옵션 동적 생성 (1반 ~ 9반)
     function initClassOptions() {
       const classSelect = document.getElementById('inputClass');
       classSelect.innerHTML = '';
@@ -778,11 +778,6 @@
       }
     }
 
-    function updateClassOptions() {
-      // 학년 변경 시 추가 처리 필 필요 시 구현
-    }
-
-    // 교시 칩 선택
     function selectPeriod(periodNum) {
       const chips = document.querySelectorAll('.period-chip');
       chips.forEach((chip, idx) => {
@@ -795,15 +790,16 @@
       document.getElementById('inputPeriod').value = `${periodNum}교시`;
     }
 
-    // 사유 태그 클릭 시 텍스트 채우기
     function setReason(reasonText) {
       document.getElementById('inputReason').value = reasonText;
     }
 
     // 보강 내역 불러오기
     function loadRecords() {
-      const filterDate = document.getElementById('filterDate').value || 'ALL';
-      updateDateLabel(filterDate);
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
+      
+      updateDateLabel(startDate, endDate);
 
       if (isGasEnvironment) {
         google.script.run
@@ -814,37 +810,64 @@
           .withFailureHandler(function(err) {
             alert('데이터를 불러오는데 실패했습니다: ' + err.message);
           })
-          .getSubstitutionRecords(filterDate);
+          .getSubstitutionRecords(startDate || 'ALL', endDate);
       } else {
-        // 모의(Mock) 데이터 필터링
         setTimeout(() => {
-          if (filterDate === 'ALL') {
+          if (!startDate || startDate === 'ALL') {
             currentRecords = [...mockData];
+          } else if (startDate && endDate) {
+            currentRecords = mockData.filter(r => r.date >= startDate && r.date <= endDate);
           } else {
-            currentRecords = mockData.filter(r => r.date === filterDate);
+            currentRecords = mockData.filter(r => r.date === startDate);
           }
           renderTable(currentRecords);
         }, 100);
       }
     }
 
-    function updateDateLabel(filterDate) {
+    function updateDateLabel(startDate, endDate) {
       const label = document.getElementById('currentDateLabel');
-      if (!filterDate || filterDate === 'ALL') {
-        label.textContent = '[ 전체 기간 조회 ]';
+      if (!startDate && !endDate) {
+        label.textContent = '[ 전체 보강 목록 ]';
+      } else if (startDate && endDate) {
+        label.textContent = `[ ${formatFormattedDate(startDate)} ~ ${formatFormattedDate(endDate)} 보강 목록 ]`;
       } else {
-        const dayOfWeek = getDayOfWeekString(filterDate);
-        label.textContent = `[ ${filterDate} (${dayOfWeek}) 보강 현황 ]`;
+        label.textContent = `[ ${formatFormattedDate(startDate)} 보강 목록 ]`;
       }
     }
 
-    function getDayOfWeekString(dateStr) {
-      const days = ['일', '월', '화', '수', '목', '금', '토'];
-      const d = new Date(dateStr);
-      return days[d.getDay()] || '';
+    // 날짜를 YYYY-MM-DD (요일) 형식으로 고정 변환하는 헬퍼 함수
+    function formatFormattedDate(rawDateStr) {
+      if (!rawDateStr) return '';
+      let dateObj = null;
+
+      // 이미 YYYY-MM-DD 패턴인 경우
+      const match = String(rawDateStr).trim().match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
+      if (match) {
+        const y = match[1];
+        const m = match[2];
+        const d = match[3];
+        dateObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayStr = days[dateObj.getDay()];
+        return `${y}-${m}-${d} (${dayStr})`;
+      }
+
+      // GMT 문자열 등 기타 구조일 때
+      dateObj = new Date(rawDateStr);
+      if (!isNaN(dateObj.getTime())) {
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        const dayStr = days[dateObj.getDay()];
+        return `${y}-${m}-${d} (${dayStr})`;
+      }
+
+      return rawDateStr;
     }
 
-    // 테이블 렌더링
+    // 테이블 렌더링 (요청된 컬럼 순서 반영)
     function renderTable(records) {
       const tbody = document.getElementById('recordTableBody');
       const emptyState = document.getElementById('emptyState');
@@ -859,31 +882,30 @@
 
       records.forEach(item => {
         const tr = document.createElement('tr');
-        const dayOfWeek = getDayOfWeekString(item.date);
+        const formattedDateText = formatFormattedDate(item.date);
         
         tr.innerHTML = `
-          <td style="font-weight: 600;">${item.date} (${dayOfWeek})</td>
-          <td><span class="badge-period">${item.period}</span></td>
-          <td><span class="badge-class">${item.className}</span></td>
+          <td style="font-weight: 600;">${formattedDateText}</td>
+          <td><span class="badge-period">${escapeHtml(item.period)}</span></td>
+          <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
+          <td><span class="teacher-sub">${escapeHtml(item.substituteTeacher)}</span></td>
+          <td><span class="badge-reason">${escapeHtml(item.reason)}</span></td>
           <td><span class="teacher-orig">${escapeHtml(item.originalTeacher)}</span></td>
           <td>
-            <div class="teacher-flow">
-              <i class="fa-solid fa-arrow-right arrow-icon"></i>
-              <span class="teacher-sub">${escapeHtml(item.substituteTeacher)}</span>
+            <div class="action-btns">
+              <button class="btn-edit" title="수정" onclick="openEditModal('${item.id}')">
+                <i class="fa-solid fa-pen-to-square"></i> 수정
+              </button>
+              <button class="btn-delete" title="삭제" onclick="deleteRecord('${item.id}')">
+                <i class="fa-solid fa-trash-can"></i> 삭제
+              </button>
             </div>
-          </td>
-          <td><span class="badge-reason">${escapeHtml(item.reason)}</span></td>
-          <td>
-            <button class="btn-delete" title="삭제" onclick="deleteRecord('${item.id}')">
-              <i class="fa-solid fa-trash-can"></i>
-            </button>
           </td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // 테이블 실시간 필터링
     function filterTable() {
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
       if (!query) {
@@ -901,8 +923,44 @@
       renderTable(filtered);
     }
 
-    // 모달 제어
+    // 모달 제어 (신규 등록 및 수정 분기)
     function openAddModal() {
+      document.getElementById('editingRecordId').value = '';
+      document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> 보강 내역 등록`;
+      document.getElementById('btnSubmitText').textContent = '등록하기';
+      resetForm();
+      document.getElementById('addModal').classList.add('active');
+    }
+
+    function openEditModal(id) {
+      const target = currentRecords.find(r => String(r.id) === String(id));
+      if (!target) return;
+
+      document.getElementById('editingRecordId').value = target.id;
+      document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> 보강 내역 수정`;
+      document.getElementById('btnSubmitText').textContent = '수정 완료';
+
+      // 날짜 값 복원 (YYYY-MM-DD extraction)
+      let dateVal = target.date;
+      const match = String(target.date).match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
+      if (match) dateVal = `${match[1]}-${match[2]}-${match[3]}`;
+      document.getElementById('inputDate').value = dateVal;
+
+      // 교시 복원
+      const periodNum = parseInt(target.period) || 1;
+      selectPeriod(periodNum);
+
+      // 학급 복원
+      const classParts = target.className.split(' ');
+      if (classParts.length >= 2) {
+        document.getElementById('inputGrade').value = classParts[0];
+        document.getElementById('inputClass').value = classParts[1];
+      }
+
+      document.getElementById('inputSubstituteTeacher').value = target.substituteTeacher;
+      document.getElementById('inputReason').value = target.reason;
+      document.getElementById('inputOriginalTeacher').value = target.originalTeacher;
+
       document.getElementById('addModal').classList.add('active');
     }
 
@@ -910,17 +968,18 @@
       document.getElementById('addModal').classList.remove('active');
     }
 
-    // 폼 제출 처리
+    // 폼 제출 (등록 또는 수정)
     function handleFormSubmit(e) {
       e.preventDefault();
 
+      const editingId = document.getElementById('editingRecordId').value;
       const date = document.getElementById('inputDate').value;
       const period = document.getElementById('inputPeriod').value;
       const grade = document.getElementById('inputGrade').value;
       const classNum = document.getElementById('inputClass').value;
-      const originalTeacher = document.getElementById('inputOriginalTeacher').value.trim();
       const substituteTeacher = document.getElementById('inputSubstituteTeacher').value.trim();
       const reason = document.getElementById('inputReason').value.trim();
+      const originalTeacher = document.getElementById('inputOriginalTeacher').value.trim();
 
       if (!date || !period || !originalTeacher || !substituteTeacher) {
         alert('필수 정보를 모두 입력해 주세요.');
@@ -928,69 +987,99 @@
       }
 
       const record = {
+        id: editingId,
         date: date,
         period: period,
         className: `${grade} ${classNum}`,
-        originalTeacher: originalTeacher,
         substituteTeacher: substituteTeacher,
-        reason: reason || '사유 없음'
+        reason: reason || '사유 없음',
+        originalTeacher: originalTeacher
       };
 
-      setSubmittingState(true);
+      setSubmittingState(true, editingId ? '수정 중...' : '저장 중...');
 
-      if (isGasEnvironment) {
-        google.script.run
-          .withSuccessHandler(function(res) {
+      if (editingId) {
+        // 수정 요청
+        if (isGasEnvironment) {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              setSubmittingState(false);
+              if (res.success) {
+                closeAddModal();
+                loadRecords();
+              } else {
+                alert('수정 실패: ' + res.message);
+              }
+            })
+            .withFailureHandler(function(err) {
+              setSubmittingState(false);
+              alert('수정 중 오류가 발생했습니다: ' + err.message);
+            })
+            .updateSubstitutionRecord(record);
+        } else {
+          setTimeout(() => {
             setSubmittingState(false);
-            if (res.success) {
-              closeAddModal();
-              resetForm();
-              // 입력한 날짜로 조회 필터 변경 후 리로드
-              document.getElementById('filterDate').value = date;
-              loadRecords();
-            } else {
-              alert('저장 실패: ' + res.message);
-            }
-          })
-          .withFailureHandler(function(err) {
-            setSubmittingState(false);
-            alert('저장 중 오류가 발생했습니다: ' + err.message);
-          })
-          .addSubstitutionRecord(record);
+            const idx = mockData.findIndex(r => r.id === editingId);
+            if (idx !== -1) mockData[idx] = { ...record };
+            closeAddModal();
+            loadRecords();
+          }, 300);
+        }
       } else {
-        // 모의(Mock) 저장
-        setTimeout(() => {
-          setSubmittingState(false);
-          const newId = 'SUB-' + Date.now();
-          mockData.unshift({ id: newId, ...record });
-          closeAddModal();
-          resetForm();
-          document.getElementById('filterDate').value = date;
-          loadRecords();
-        }, 300);
+        // 신규 등록 요청
+        if (isGasEnvironment) {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              setSubmittingState(false);
+              if (res.success) {
+                closeAddModal();
+                document.getElementById('filterStartDate').value = date;
+                document.getElementById('filterEndDate').value = '';
+                loadRecords();
+              } else {
+                alert('저장 실패: ' + res.message);
+              }
+            })
+            .withFailureHandler(function(err) {
+              setSubmittingState(false);
+              alert('저장 중 오류가 발생했습니다: ' + err.message);
+            })
+            .addSubstitutionRecord(record);
+        } else {
+          setTimeout(() => {
+            setSubmittingState(false);
+            const newId = 'SUB-' + Date.now();
+            mockData.unshift({ ...record, id: newId });
+            closeAddModal();
+            document.getElementById('filterStartDate').value = date;
+            document.getElementById('filterEndDate').value = '';
+            loadRecords();
+          }, 300);
+        }
       }
     }
 
-    function setSubmittingState(isSubmitting) {
+    function setSubmittingState(isSubmitting, labelText) {
       const btn = document.getElementById('btnSubmit');
       const textSpan = document.getElementById('btnSubmitText');
       if (isSubmitting) {
         btn.disabled = true;
-        textSpan.innerHTML = `<span class="spinner"></span> 저장 중...`;
+        textSpan.innerHTML = `<span class="spinner"></span> ${labelText}`;
       } else {
         btn.disabled = false;
-        textSpan.innerHTML = `등록하기`;
+        textSpan.innerHTML = document.getElementById('editingRecordId').value ? '수정 완료' : '등록하기';
       }
     }
 
     function resetForm() {
-      document.getElementById('inputOriginalTeacher').value = '';
+      const todayStr = getTodayString();
+      document.getElementById('inputDate').value = todayStr;
       document.getElementById('inputSubstituteTeacher').value = '';
       document.getElementById('inputReason').value = '';
+      document.getElementById('inputOriginalTeacher').value = '';
       selectPeriod(1);
     }
 
-    // 삭제 처리
     function deleteRecord(id) {
       if (!confirm('해당 보강 내역을 삭제하시겠습니까?')) return;
 

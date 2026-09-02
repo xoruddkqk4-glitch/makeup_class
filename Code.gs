@@ -1,11 +1,11 @@
 /**
- * 홍익-보강 알리미 (Google Apps Script Backend)
+ * 보강 알리미 (Google Apps Script Backend)
  */
 
 function doGet(e) {
   var htmlOutput = HtmlService.createTemplateFromFile('index').evaluate();
   htmlOutput
-    .setTitle('홍익-보강 알리미 | 온라인 교무실')
+    .setTitle('보강 알리미 | 온라인 교무실')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
     .addMetaTag('viewport', 'width=device-width, initial-scale=1.0');
   return htmlOutput;
@@ -36,7 +36,7 @@ function getDbSheet() {
   }
 
   if (!ss) {
-    ss = SpreadsheetApp.create('홍익_보강알리미_DB');
+    ss = SpreadsheetApp.create('보강알리미_DB');
     scriptProperties.setProperty('SPREADSHEET_ID', ss.getId());
   }
 
@@ -61,10 +61,33 @@ function getDbSheet() {
 }
 
 /**
- * 보강 내역을 조회합니다.
- * @param {string} filterDate YYYY-MM-DD 또는 'ALL'
+ * 날짜 객체 또는 문자열을 YYYY-MM-DD 포맷으로 변환하는 헬퍼 함수
  */
-function getSubstitutionRecords(filterDate) {
+function formatDateString(val) {
+  if (!val) return '';
+  if (val instanceof Date) {
+    return Utilities.formatDate(val, Session.getScriptTimeZone() || 'GMT+9', 'yyyy-MM-dd');
+  }
+  var str = String(val).trim();
+  if (str.indexOf('GMT') !== -1 || str.indexOf('한국 표준시') !== -1) {
+    var d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      return Utilities.formatDate(d, Session.getScriptTimeZone() || 'GMT+9', 'yyyy-MM-dd');
+    }
+  }
+  var match = str.match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
+  if (match) {
+    return match[1] + '-' + match[2] + '-' + match[3];
+  }
+  return str;
+}
+
+/**
+ * 보강 내역을 조회합니다. (단일 날짜 또는 시작일~종료일 기간 검색 지원)
+ * @param {string} startDate 시작 날짜 (YYYY-MM-DD 또는 'ALL')
+ * @param {string} endDate 종료 날짜 (YYYY-MM-DD, 옵션)
+ */
+function getSubstitutionRecords(startDate, endDate) {
   try {
     var sheet = getDbSheet();
     var data = sheet.getDataRange().getValues();
@@ -75,10 +98,15 @@ function getSubstitutionRecords(filterDate) {
       var row = data[i];
       if (!row[0]) continue; // ID가 없는 행 스킵
 
-      var rowDate = String(row[1]).trim();
-      // 날짜 필터링 (전체 또는 특정 날짜)
-      if (filterDate && filterDate !== 'ALL' && rowDate !== filterDate) {
-        continue;
+      var rowDate = formatDateString(row[1]);
+
+      // 날짜 필터링 (전체, 단일 날짜, 또는 기간 검색)
+      if (startDate && startDate !== 'ALL') {
+        if (endDate && endDate.trim() !== '') {
+          if (rowDate < startDate || rowDate > endDate) continue;
+        } else {
+          if (rowDate !== startDate) continue;
+        }
       }
 
       records.push({
@@ -115,17 +143,18 @@ function getSubstitutionRecords(filterDate) {
  */
 function addSubstitutionRecord(record) {
   try {
-    if (!record.date || !record.period || !record.className || !record.originalTeacher || !record.substituteTeacher) {
+    if (!record.date || !record.period || !record.className || !record.substituteTeacher || !record.originalTeacher) {
       throw new Error('필수 입력 항목이 누락되었습니다.');
     }
 
     var sheet = getDbSheet();
     var newId = 'SUB-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000);
     var nowIso = new Date().toISOString();
+    var formattedDate = formatDateString(record.date);
 
     sheet.appendRow([
       newId,
-      record.date,
+      formattedDate,
       record.period,
       record.className,
       record.originalTeacher,
@@ -144,6 +173,46 @@ function addSubstitutionRecord(record) {
     return {
       success: false,
       message: err.message || '저장 중 오류가 발생했습니다.'
+    };
+  }
+}
+
+/**
+ * 기존 보강 내역을 수정합니다.
+ */
+function updateSubstitutionRecord(record) {
+  try {
+    if (!record.id || !record.date || !record.period || !record.className || !record.substituteTeacher || !record.originalTeacher) {
+      throw new Error('필수 수정 정보가 누락되었습니다.');
+    }
+
+    var sheet = getDbSheet();
+    var data = sheet.getDataRange().getValues();
+    var formattedDate = formatDateString(record.date);
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(record.id)) {
+        var rowNum = i + 1;
+        sheet.getRange(rowNum, 2).setValue(formattedDate);
+        sheet.getRange(rowNum, 3).setValue(record.period);
+        sheet.getRange(rowNum, 4).setValue(record.className);
+        sheet.getRange(rowNum, 5).setValue(record.originalTeacher);
+        sheet.getRange(rowNum, 6).setValue(record.substituteTeacher);
+        sheet.getRange(rowNum, 7).setValue(record.reason || '사유 없음');
+        sheet.getRange(rowNum, 8).setValue(new Date().toISOString());
+
+        return {
+          success: true,
+          message: '보강 내역이 성공적으로 수정되었습니다.'
+        };
+      }
+    }
+    return { success: false, message: '수정할 보강 내역을 찾을 수 없습니다.' };
+  } catch (err) {
+    Logger.log('Error in updateSubstitutionRecord: ' + err.toString());
+    return {
+      success: false,
+      message: err.message || '수정 중 오류가 발생했습니다.'
     };
   }
 }
