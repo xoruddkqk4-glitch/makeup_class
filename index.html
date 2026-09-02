@@ -79,34 +79,36 @@
 
     .table-header-title {
       background: #f1f5f9;
-      padding: 8px 12px;
+      padding: 6px 10px;
       border-bottom: 1px solid #e2e8f0;
       display: flex;
       flex-wrap: nowrap; /* 2줄 줄바꿈 금지 */
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      overflow-x: auto;
+      gap: 6px;
+      overflow-x: hidden; /* 가로 스크롤바 원천 방지 */
     }
 
     .header-controls-left {
       display: flex;
       flex-wrap: nowrap;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       white-space: nowrap;
+      flex-shrink: 1;
+      min-width: 0;
     }
 
     .header-controls-right {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       white-space: nowrap;
       flex-shrink: 0;
     }
 
     .header-title-text {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #1e293b;
       margin-right: 2px;
@@ -114,19 +116,23 @@
     }
 
     #currentDateLabel {
-      font-size: 0.775rem; /* 텍스트 크기 축소 */
+      font-size: 0.775rem;
       font-weight: 500;
       color: #64748b;
       white-space: nowrap;
+      flex-shrink: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: font-size 0.15s ease, letter-spacing 0.15s ease;
     }
 
     .range-picker-wrap {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 4px 8px;
+      padding: 3px 6px;
       border-radius: 6px;
     }
 
@@ -1083,6 +1089,7 @@
       updateRoomOptions();
       updateSortIconsUI();
       setTodayDate();
+      window.addEventListener('resize', adjustDateLabelFontSize);
     });
 
     // 사유 태그 초기화 및 로컬스토리지 관리
@@ -1328,6 +1335,37 @@
         }
       } else {
         label.textContent = `[ ${formatFormattedDate(startDate)} ]`;
+      }
+      adjustDateLabelFontSize();
+    }
+
+    // 기간 표시 텍스트 글자 크기 동적 자동 축소 (가로 스크롤바 방지)
+    function adjustDateLabelFontSize() {
+      const label = document.getElementById('currentDateLabel');
+      if (!label) return;
+
+      label.style.fontSize = '0.775rem';
+      label.style.letterSpacing = 'normal';
+
+      const textLen = label.textContent.length;
+      if (textLen > 32) {
+        label.style.fontSize = '0.675rem';
+        label.style.letterSpacing = '-0.3px';
+      } else if (textLen > 22) {
+        label.style.fontSize = '0.725rem';
+        label.style.letterSpacing = '-0.2px';
+      }
+
+      const toolbar = document.querySelector('.table-header-title');
+      if (toolbar) {
+        let currentSizePx = parseFloat(window.getComputedStyle(label).fontSize);
+        let loopLimit = 0;
+        while (toolbar.scrollWidth > toolbar.clientWidth && currentSizePx > 8 && loopLimit < 12) {
+          currentSizePx -= 0.4;
+          label.style.fontSize = currentSizePx + 'px';
+          label.style.letterSpacing = '-0.4px';
+          loopLimit++;
+        }
       }
     }
 
