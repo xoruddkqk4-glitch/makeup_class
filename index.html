@@ -415,7 +415,7 @@
       font-weight: 500;
     }
 
-    /* 모달 스타일 */
+    /* 모달 스타일 (가로 확장 & 세로 축소 2열 배치) */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -428,7 +428,7 @@
       opacity: 0;
       visibility: hidden;
       transition: all 0.25s ease;
-      padding: 16px;
+      padding: 12px;
     }
 
     .modal-overlay.active {
@@ -440,11 +440,14 @@
       background: #ffffff;
       border-radius: 12px;
       width: 100%;
-      max-width: 540px;
+      max-width: 800px; /* 기존 540px -> 800px 가로 확장 */
       box-shadow: var(--shadow-lg);
       overflow: hidden;
-      transform: translateY(20px);
+      transform: translateY(15px);
       transition: transform 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      max-height: 90vh;
     }
 
     .modal-overlay.active .modal-card {
@@ -454,14 +457,14 @@
     .modal-header {
       background: var(--primary-color);
       color: #ffffff;
-      padding: 16px 24px;
+      padding: 12px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .modal-header h3 {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -481,13 +484,19 @@
     .modal-close-btn:hover { opacity: 1; }
 
     .modal-body {
-      padding: 24px;
-      max-height: 80vh;
+      padding: 16px 20px;
       overflow-y: auto;
     }
 
+    /* 2열 폼 그리드 배치 (세로 길이 대폭 단축) */
+    .modal-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 20px;
+    }
+
     .form-group {
-      margin-bottom: 18px;
+      margin-bottom: 10px;
     }
 
     .form-label {
@@ -823,76 +832,84 @@
       <form id="addForm" onsubmit="handleFormSubmit(event)">
         <input type="hidden" id="editingRecordId" value="">
         <div class="modal-body">
-          
-          <!-- 1. 날짜 지정 -->
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-title"><span class="step-num">1</span> 날짜 지정</span>
-            </label>
-            <input type="date" class="form-control" id="inputDate" required>
-          </div>
+          <div class="modal-form-grid">
+            
+            <!-- 좌측 열 -->
+            <div class="grid-col">
+              <!-- 1. 날짜 지정 -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title"><span class="step-num">1</span> 날짜 지정</span>
+                </label>
+                <input type="date" class="form-control" id="inputDate" required>
+              </div>
 
-          <!-- 2. 교시 선택 -->
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-title"><span class="step-num">2</span> 교시 선택 (1~7교시)</span>
-            </label>
-            <div class="period-chips" id="periodChips">
-              <div class="period-chip selected" onclick="selectPeriod(1)">1교시</div>
-              <div class="period-chip" onclick="selectPeriod(2)">2교시</div>
-              <div class="period-chip" onclick="selectPeriod(3)">3교시</div>
-              <div class="period-chip" onclick="selectPeriod(4)">4교시</div>
-              <div class="period-chip" onclick="selectPeriod(5)">5교시</div>
-              <div class="period-chip" onclick="selectPeriod(6)">6교시</div>
-              <div class="period-chip" onclick="selectPeriod(7)">7교시</div>
+              <!-- 2. 교시 선택 -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title"><span class="step-num">2</span> 교시 선택 (1~7교시)</span>
+                </label>
+                <div class="period-chips" id="periodChips">
+                  <div class="period-chip selected" onclick="selectPeriod(1)">1교시</div>
+                  <div class="period-chip" onclick="selectPeriod(2)">2교시</div>
+                  <div class="period-chip" onclick="selectPeriod(3)">3교시</div>
+                  <div class="period-chip" onclick="selectPeriod(4)">4교시</div>
+                  <div class="period-chip" onclick="selectPeriod(5)">5교시</div>
+                  <div class="period-chip" onclick="selectPeriod(6)">6교시</div>
+                  <div class="period-chip" onclick="selectPeriod(7)">7교시</div>
+                </div>
+                <input type="hidden" id="inputPeriod" value="1교시">
+              </div>
+
+              <!-- 3. 학급 선택 -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title"><span class="step-num">3</span> 학급 선택</span>
+                </label>
+                <div class="class-select-grid">
+                  <select class="form-control" id="inputGrade">
+                    <option value="1학년">1학년</option>
+                    <option value="2학년">2학년</option>
+                    <option value="3학년">3학년</option>
+                  </select>
+                  <select class="form-control" id="inputClass">
+                    <!-- 1반 ~ 9반 자동 생성 -->
+                  </select>
+                </div>
+              </div>
             </div>
-            <input type="hidden" id="inputPeriod" value="1교시">
-          </div>
 
-          <!-- 3. 학급 선택 -->
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-title"><span class="step-num">3</span> 학급 선택</span>
-            </label>
-            <div class="class-select-grid">
-              <select class="form-control" id="inputGrade">
-                <option value="1학년">1학년</option>
-                <option value="2학년">2학년</option>
-                <option value="3학년">3학년</option>
-              </select>
-              <select class="form-control" id="inputClass">
-                <!-- 1반 ~ 9반 자동 생성 -->
-              </select>
+            <!-- 우측 열 (보강 교사 강조) -->
+            <div class="grid-col">
+              <!-- 4. 보강 교사 -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title" style="color: #047857;"><span class="step-num" style="background: #ecfdf5; color: #047857;">4</span> 보강 교사 (보강 들어갈 교사)</span>
+                </label>
+                <input type="text" class="form-control" id="inputSubstituteTeacher" placeholder="예: 김철수" style="border-color: #059669; font-weight: 600;" required>
+              </div>
+
+              <!-- 5. 보강 사유 (사용자가 추가/삭제 가능한 퀵 태그) -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title"><span class="step-num">5</span> 보강 유발 사유</span>
+                </label>
+                <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등" required>
+                <div class="reason-tags-container" id="reasonTagsContainer">
+                  <!-- 동적 태그 칩 생성 -->
+                </div>
+              </div>
+
+              <!-- 6. 결강 교사(원교사) -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title"><span class="step-num">6</span> 결강 교사 (원교사 이름)</span>
+                </label>
+                <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동" required>
+              </div>
             </div>
-          </div>
 
-          <!-- 4. 보강 교사 -->
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-title"><span class="step-num">4</span> 보강 교사 (보강 들어갈 교사 이름 입력)</span>
-            </label>
-            <input type="text" class="form-control" id="inputSubstituteTeacher" placeholder="예: 김철수" required>
           </div>
-
-          <!-- 5. 보강 사유 (사용자가 추가/삭제 가능한 퀵 태그) -->
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-title"><span class="step-num">5</span> 보강 유발 사유</span>
-            </label>
-            <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등" required>
-            <div class="reason-tags-container" id="reasonTagsContainer">
-              <!-- 동적 태그 칩 생성 -->
-            </div>
-          </div>
-
-          <!-- 6. 결강 교사(원교사) -->
-          <div class="form-group">
-            <label class="form-label">
-              <span class="step-title"><span class="step-num">6</span> 결강 교사 (원교사 이름 입력)</span>
-            </label>
-            <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동" required>
-          </div>
-
         </div>
 
         <div class="modal-footer">
