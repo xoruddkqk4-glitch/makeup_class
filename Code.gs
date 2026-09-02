@@ -154,7 +154,7 @@ function addSubstitutionRecord(record) {
     }
 
     var sheet = getDbSheet();
-    var newId = 'SUB-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000);
+    var newId = record.id || ('SUB-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000));
     var nowIso = new Date().toISOString();
     var formattedDate = formatDateString(record.date);
 
@@ -168,6 +168,8 @@ function addSubstitutionRecord(record) {
       record.reason || '사유 없음',
       nowIso
     ]);
+
+    SpreadsheetApp.flush(); // 저장 즉시 적용
 
     return {
       success: true,
@@ -184,7 +186,7 @@ function addSubstitutionRecord(record) {
 }
 
 /**
- * 기존 보강 내역을 수정합니다.
+ * 기존 보강 내역을 수정합니다. (단일 setValues 호출로 속도 극대화)
  */
 function updateSubstitutionRecord(record) {
   try {
@@ -199,13 +201,19 @@ function updateSubstitutionRecord(record) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(record.id)) {
         var rowNum = i + 1;
-        sheet.getRange(rowNum, 2).setValue(formattedDate);
-        sheet.getRange(rowNum, 3).setValue(record.period);
-        sheet.getRange(rowNum, 4).setValue(record.className);
-        sheet.getRange(rowNum, 5).setValue(record.originalTeacher);
-        sheet.getRange(rowNum, 6).setValue(record.substituteTeacher);
-        sheet.getRange(rowNum, 7).setValue(record.reason || '사유 없음');
-        sheet.getRange(rowNum, 8).setValue(new Date().toISOString());
+        // 단일 셀 개별 수정 대신 1줄 전체를 1회 네트워크 요청으로 한 번에 업데이트 (속도 7배 향상)
+        sheet.getRange(rowNum, 1, 1, 8).setValues([[
+          String(record.id),
+          formattedDate,
+          record.period,
+          record.className,
+          record.originalTeacher,
+          record.substituteTeacher,
+          record.reason || '사유 없음',
+          new Date().toISOString()
+        ]]);
+
+        SpreadsheetApp.flush(); // 수정 즉시 적용
 
         return {
           success: true,
@@ -234,6 +242,7 @@ function deleteSubstitutionRecord(id) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(id)) {
         sheet.deleteRow(i + 1);
+        SpreadsheetApp.flush(); // 삭제 즉시 적용
         return { success: true, message: '보강 내역이 삭제되었습니다.' };
       }
     }

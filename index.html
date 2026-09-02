@@ -1416,7 +1416,7 @@
       document.getElementById('addModal').classList.remove('active');
     }
 
-    // 폼 제출
+    // 폼 제출 (낙관적 UI 적용: 즉시 화면 갱신 후 백그라운드 저장)
     function handleFormSubmit(e) {
       e.preventDefault();
 
@@ -1433,8 +1433,9 @@
         return;
       }
 
+      const targetId = editingId || ('SUB-' + Date.now());
       const record = {
-        id: editingId,
+        id: targetId,
         date: date,
         period: period,
         className: roomVal,
@@ -1443,63 +1444,44 @@
         originalTeacher: originalTeacher
       };
 
-      setSubmittingState(true, editingId ? '수정 중...' : '저장 중...');
+      // 1. 모달 즉시 닫기 & 로컬 UI 즉시 갱신 (0초 즉시 반응)
+      closeAddModal();
 
       if (editingId) {
-        if (isGasEnvironment) {
+        const idx = currentRecords.findIndex(r => String(r.id) === String(editingId));
+        if (idx !== -1) currentRecords[idx] = { ...record };
+      } else {
+        document.getElementById('filterStartDate').value = date;
+        document.getElementById('filterEndDate').value = date;
+        currentRecords.unshift({ ...record });
+      }
+
+      // 화면 즉시 리렌더링
+      applyColumnFilters();
+
+      // 2. 백그라운드 구글 스프레드시트 DB 동기화
+      if (isGasEnvironment) {
+        if (editingId) {
           google.script.run
-            .withSuccessHandler(function(res) {
-              setSubmittingState(false);
-              if (res.success) {
-                closeAddModal();
-                loadRecords();
-              } else {
-                alert('수정 실패: ' + res.message);
-              }
-            })
             .withFailureHandler(function(err) {
-              setSubmittingState(false);
-              alert('수정 중 오류가 발생했습니다: ' + err.message);
+              alert('수정 동기화 중 오류가 발생했습니다. 데이터를 재로드합니다: ' + err.message);
+              loadRecords();
             })
             .updateSubstitutionRecord(record);
         } else {
-          setTimeout(() => {
-            setSubmittingState(false);
-            const idx = mockData.findIndex(r => r.id === editingId);
-            if (idx !== -1) mockData[idx] = { ...record };
-            closeAddModal();
-            loadRecords();
-          }, 300);
-        }
-      } else {
-        if (isGasEnvironment) {
           google.script.run
-            .withSuccessHandler(function(res) {
-              setSubmittingState(false);
-              if (res.success) {
-                closeAddModal();
-                document.getElementById('filterStartDate').value = date;
-                document.getElementById('filterEndDate').value = date;
-                loadRecords();
-              } else {
-                alert('저장 실패: ' + res.message);
-              }
-            })
             .withFailureHandler(function(err) {
-              setSubmittingState(false);
-              alert('저장 중 오류가 발생했습니다: ' + err.message);
+              alert('저장 동기화 중 오류가 발생했습니다. 데이터를 재로드합니다: ' + err.message);
+              loadRecords();
             })
             .addSubstitutionRecord(record);
+        }
+      } else {
+        if (editingId) {
+          const idx = mockData.findIndex(r => r.id === editingId);
+          if (idx !== -1) mockData[idx] = { ...record };
         } else {
-          setTimeout(() => {
-            setSubmittingState(false);
-            const newId = 'SUB-' + Date.now();
-            mockData.unshift({ ...record, id: newId });
-            closeAddModal();
-            document.getElementById('filterStartDate').value = date;
-            document.getElementById('filterEndDate').value = date;
-            loadRecords();
-          }, 300);
+          mockData.unshift({ ...record });
         }
       }
     }
@@ -1530,23 +1512,21 @@
     function deleteRecord(id) {
       if (!confirm('해당 보강 내역을 삭제하시겠습니까?')) return;
 
+      // 1. 화면에서 즉시 제거 (0초 즉시 반응)
+      currentRecords = currentRecords.filter(r => String(r.id) !== String(id));
+      applyColumnFilters();
+
+      // 2. 백그라운드 DB 삭제 처리
       if (isGasEnvironment) {
         google.script.run
-          .withSuccessHandler(function(res) {
-            if (res.success) {
-              loadRecords();
-            } else {
-              alert('삭제 실패: ' + res.message);
-            }
-          })
           .withFailureHandler(function(err) {
-            alert('삭제 시 오류가 발생했습니다: ' + err.message);
+            alert('삭제 동기화 중 오류가 발생했습니다. 데이터를 재로드합니다: ' + err.message);
+            loadRecords();
           })
           .deleteSubstitutionRecord(id);
       } else {
         const idx = mockData.findIndex(r => r.id === id);
         if (idx !== -1) mockData.splice(idx, 1);
-        loadRecords();
       }
     }
 
