@@ -721,7 +721,7 @@
             <tr>
               <th style="width: 16%;">날짜(요일)</th>
               <th style="width: 10%;">교시</th>
-              <th style="width: 17%;">학급</th>
+              <th style="width: 15%;">교실</th>
               <th class="th-highlight-sub" style="width: 22%;">
                 <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 (알림)
               </th>
@@ -745,44 +745,100 @@
                 </select>
               </th>
               <th>
-                <!-- 학년별 및 학급별 드롭다운 선택 -->
+                <!-- 층별 및 교실별 드롭다운 선택 -->
                 <select class="col-filter-select" id="filterColClass" onchange="applyColumnFilters()">
-                  <option value="">전체 학급</option>
-                  <optgroup label="1학년">
-                    <option value="1학년">1학년 전체</option>
-                    <option value="1학년 1반">1학년 1반</option>
-                    <option value="1학년 2반">1학년 2반</option>
-                    <option value="1학년 3반">1학년 3반</option>
-                    <option value="1학년 4반">1학년 4반</option>
-                    <option value="1학년 5반">1학년 5반</option>
-                    <option value="1학년 6반">1학년 6반</option>
-                    <option value="1학년 7반">1학년 7반</option>
-                    <option value="1학년 8반">1학년 8반</option>
-                    <option value="1학년 9반">1학년 9반</option>
+                  <option value="">전체 교실</option>
+                  <optgroup label="지하(B층)">
+                    <option value="B">지하(B층) 전체</option>
+                    <option value="B01">B01</option>
+                    <option value="B02">B02</option>
+                    <option value="B03">B03</option>
+                    <option value="B04">B04</option>
+                    <option value="B05">B05</option>
+                    <option value="B06">B06</option>
+                    <option value="B07">B07</option>
+                    <option value="B08">B08</option>
+                    <option value="B09">B09</option>
+                    <option value="B10">B10</option>
+                    <option value="B11">B11</option>
+                    <option value="B12">B12</option>
+                    <option value="B13">B13</option>
+                    <option value="B14">B14</option>
                   </optgroup>
-                  <optgroup label="2학년">
-                    <option value="2학년">2학년 전체</option>
-                    <option value="2학년 1반">2학년 1반</option>
-                    <option value="2학년 2반">2학년 2반</option>
-                    <option value="2학년 3반">2학년 3반</option>
-                    <option value="2학년 4반">2학년 4반</option>
-                    <option value="2학년 5반">2학년 5반</option>
-                    <option value="2학년 6반">2학년 6반</option>
-                    <option value="2학년 7반">2학년 7반</option>
-                    <option value="2학년 8반">2학년 8반</option>
-                    <option value="2학년 9반">2학년 9반</option>
+                  <optgroup label="1층">
+                    <option value="1층">1층 전체</option>
+                    <option value="101">101</option>
+                    <option value="102">102</option>
+                    <option value="103">103</option>
+                    <option value="104">104</option>
+                    <option value="105">105</option>
+                    <option value="106">106</option>
+                    <option value="107">107</option>
+                    <option value="108">108</option>
+                    <option value="109">109</option>
+                    <option value="110">110</option>
+                    <option value="111">111</option>
+                    <option value="112">112</option>
+                    <option value="113">113</option>
+                    <option value="114">114</option>
+                    <option value="115">115</option>
                   </optgroup>
-                  <optgroup label="3학년">
-                    <option value="3학년">3학년 전체</option>
-                    <option value="3학년 1반">3학년 1반</option>
-                    <option value="3학년 2반">3학년 2반</option>
-                    <option value="3학년 3반">3학년 3반</option>
-                    <option value="3학년 4반">3학년 4반</option>
-                    <option value="3학년 5반">3학년 5반</option>
-                    <option value="3학년 6반">3학년 6반</option>
-                    <option value="3학년 7반">3학년 7반</option>
-                    <option value="3학년 8반">3학년 8반</option>
-                    <option value="3학년 9반">3학년 9반</option>
+                  <optgroup label="2층">
+                    <option value="2층">2층 전체</option>
+                    <option value="201">201</option>
+                    <option value="202">202</option>
+                    <option value="203">203</option>
+                    <option value="204">204</option>
+                    <option value="205">205</option>
+                    <option value="206">206</option>
+                    <option value="207">207</option>
+                    <option value="208">208</option>
+                    <option value="209">209</option>
+                    <option value="210">210</option>
+                    <option value="211">211</option>
+                    <option value="212">212</option>
+                    <option value="213">213</option>
+                    <option value="214">214</option>
+                    <option value="215">215</option>
+                    <option value="216">216</option>
+                  </optgroup>
+                  <optgroup label="3층">
+                    <option value="3층">3층 전체</option>
+                    <option value="301">301</option>
+                    <option value="302">302</option>
+                    <option value="303">303</option>
+                    <option value="304">304</option>
+                    <option value="305">305</option>
+                    <option value="306">306</option>
+                    <option value="307">307</option>
+                    <option value="308">308</option>
+                    <option value="309">309</option>
+                    <option value="310">310</option>
+                    <option value="311">311</option>
+                    <option value="312">312</option>
+                    <option value="313">313</option>
+                    <option value="314">314</option>
+                    <option value="315">315</option>
+                    <option value="316">316</option>
+                  </optgroup>
+                  <optgroup label="4층">
+                    <option value="4층">4층 전체</option>
+                    <option value="401">401</option>
+                    <option value="402">402</option>
+                    <option value="403">403</option>
+                    <option value="404">404</option>
+                    <option value="405">405</option>
+                    <option value="406">406</option>
+                    <option value="407">407</option>
+                    <option value="408">408</option>
+                    <option value="409">409</option>
+                    <option value="410">410</option>
+                    <option value="411">411</option>
+                    <option value="412">412</option>
+                    <option value="413">413</option>
+                    <option value="414">414</option>
+                    <option value="415">415</option>
+                    <option value="416">416</option>
                   </optgroup>
                 </select>
               </th>
@@ -861,19 +917,21 @@
                 <input type="hidden" id="inputPeriod" value="1교시">
               </div>
 
-              <!-- 3. 학급 선택 -->
+              <!-- 3. 교실 선택 -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title"><span class="step-num">3</span> 학급 선택</span>
+                  <span class="step-title"><span class="step-num">3</span> 교실 선택</span>
                 </label>
                 <div class="class-select-grid">
-                  <select class="form-control" id="inputGrade">
-                    <option value="1학년">1학년</option>
-                    <option value="2학년">2학년</option>
-                    <option value="3학년">3학년</option>
+                  <select class="form-control" id="inputFloor" onchange="updateRoomOptions()">
+                    <option value="지하(B층)">지하(B층)</option>
+                    <option value="1층">1층</option>
+                    <option value="2층" selected>2층</option>
+                    <option value="3층">3층</option>
+                    <option value="4층">4층</option>
                   </select>
-                  <select class="form-control" id="inputClass">
-                    <!-- 1반 ~ 9반 자동 생성 -->
+                  <select class="form-control" id="inputRoom">
+                    <!-- 교실 목록 동적 생성 -->
                   </select>
                 </div>
               </div>
@@ -932,14 +990,14 @@
 
     // 모의(Mock) 데이터 (로컬 테스트용)
     const mockData = [
-      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '1학년 3반', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장' },
-      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '2학년 5반', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가' },
-      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '3학년 1반', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가' }
+      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장' },
+      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가' },
+      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가' }
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
       initReasonTags();
-      initClassOptions();
+      updateRoomOptions();
       setTodayDate();
     });
 
@@ -1090,14 +1148,38 @@
       loadRecords();
     }
 
-    function initClassOptions() {
-      const classSelect = document.getElementById('inputClass');
-      classSelect.innerHTML = '';
-      for (let i = 1; i <= 9; i++) {
+    // 층별 교실 동적 목록 생성 (B01-B14, 101-115, 201-216, 301-316, 401-416)
+    function updateRoomOptions() {
+      const floor = document.getElementById('inputFloor').value;
+      const roomSelect = document.getElementById('inputRoom');
+      roomSelect.innerHTML = '';
+
+      let prefix = '';
+      let end = 16;
+
+      if (floor === '지하(B층)') {
+        prefix = 'B';
+        end = 14;
+      } else if (floor === '1층') {
+        prefix = '1';
+        end = 15;
+      } else if (floor === '2층') {
+        prefix = '2';
+        end = 16;
+      } else if (floor === '3층') {
+        prefix = '3';
+        end = 16;
+      } else if (floor === '4층') {
+        prefix = '4';
+        end = 16;
+      }
+
+      for (let i = 1; i <= end; i++) {
+        const numStr = prefix + String(i).padStart(2, '0');
         const option = document.createElement('option');
-        option.value = `${i}반`;
-        option.textContent = `${i}반`;
-        classSelect.appendChild(option);
+        option.value = numStr;
+        option.textContent = numStr;
+        roomSelect.appendChild(option);
       }
     }
 
@@ -1193,7 +1275,7 @@
       return rawDateStr;
     }
 
-    // 열별 개별 필터링
+    // 열별 개별 필터링 (층별 전체 및 교실별 필터 대응)
     function applyColumnFilters() {
       const periodQuery = document.getElementById('filterColPeriod').value.trim();
       const classQuery = document.getElementById('filterColClass').value.trim();
@@ -1203,7 +1285,23 @@
 
       const filtered = currentRecords.filter(r => {
         if (periodQuery && r.period !== periodQuery) return false;
-        if (classQuery && !r.className.includes(classQuery)) return false;
+        
+        if (classQuery) {
+          if (classQuery === 'B' || classQuery === '지하(B층)') {
+            if (!String(r.className).startsWith('B')) return false;
+          } else if (classQuery === '1층') {
+            if (!String(r.className).startsWith('1')) return false;
+          } else if (classQuery === '2층') {
+            if (!String(r.className).startsWith('2')) return false;
+          } else if (classQuery === '3층') {
+            if (!String(r.className).startsWith('3')) return false;
+          } else if (classQuery === '4층') {
+            if (!String(r.className).startsWith('4')) return false;
+          } else {
+            if (!String(r.className).includes(classQuery)) return false;
+          }
+        }
+
         if (subTeacherQuery && !r.substituteTeacher.toLowerCase().includes(subTeacherQuery)) return false;
         if (reasonQuery && !r.reason.toLowerCase().includes(reasonQuery)) return false;
         if (origTeacherQuery && !r.originalTeacher.toLowerCase().includes(origTeacherQuery)) return false;
@@ -1292,11 +1390,20 @@
       const periodNum = parseInt(target.period) || 1;
       selectPeriod(periodNum);
 
-      const classParts = target.className.split(' ');
-      if (classParts.length >= 2) {
-        document.getElementById('inputGrade').value = classParts[0];
-        document.getElementById('inputClass').value = classParts[1];
+      const roomVal = String(target.className).trim();
+      if (roomVal.startsWith('B')) {
+        document.getElementById('inputFloor').value = '지하(B층)';
+      } else if (roomVal.startsWith('1')) {
+        document.getElementById('inputFloor').value = '1층';
+      } else if (roomVal.startsWith('2')) {
+        document.getElementById('inputFloor').value = '2층';
+      } else if (roomVal.startsWith('3')) {
+        document.getElementById('inputFloor').value = '3층';
+      } else if (roomVal.startsWith('4')) {
+        document.getElementById('inputFloor').value = '4층';
       }
+      updateRoomOptions();
+      document.getElementById('inputRoom').value = roomVal;
 
       document.getElementById('inputSubstituteTeacher').value = target.substituteTeacher;
       document.getElementById('inputReason').value = target.reason;
@@ -1316,8 +1423,7 @@
       const editingId = document.getElementById('editingRecordId').value;
       const date = document.getElementById('inputDate').value;
       const period = document.getElementById('inputPeriod').value;
-      const grade = document.getElementById('inputGrade').value;
-      const classNum = document.getElementById('inputClass').value;
+      const roomVal = document.getElementById('inputRoom').value;
       const substituteTeacher = document.getElementById('inputSubstituteTeacher').value.trim();
       const reason = document.getElementById('inputReason').value.trim();
       const originalTeacher = document.getElementById('inputOriginalTeacher').value.trim();
@@ -1331,7 +1437,7 @@
         id: editingId,
         date: date,
         period: period,
-        className: `${grade} ${classNum}`,
+        className: roomVal,
         substituteTeacher: substituteTeacher,
         reason: reason || '사유 없음',
         originalTeacher: originalTeacher
@@ -1413,6 +1519,8 @@
     function resetForm() {
       const todayStr = formatDateToString(getTodayDateObj());
       document.getElementById('inputDate').value = todayStr;
+      document.getElementById('inputFloor').value = '2층';
+      updateRoomOptions();
       document.getElementById('inputSubstituteTeacher').value = '';
       document.getElementById('inputReason').value = '';
       document.getElementById('inputOriginalTeacher').value = '';
