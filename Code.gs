@@ -50,11 +50,17 @@ function getDbSheet() {
     }
   }
 
-  // 헤더 생성 확인
+  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실')
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID', '날짜', '교시', '학급', '원교사', '보강교사', '사유', '등록시각']);
+    sheet.appendRow(['ID', '날짜', '교시', '교실', '원교사', '보강교사', '사유', '등록시각']);
     sheet.getRange(1, 1, 1, 8).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
+  } else {
+    // 기존 헤더가 '학급'인 경우 '교실'로 자동 갱신
+    var col4Header = sheet.getRange(1, 4).getValue();
+    if (col4Header === '학급') {
+      sheet.getRange(1, 4).setValue('교실');
+    }
   }
 
   return sheet;
