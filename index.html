@@ -1545,6 +1545,9 @@
 
       const now = new Date();
       const printTimeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      
+      // 다운로드 시점 날짜/시간 타임스탬프 (YYYYMMDD_HHMMSS)
+      const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
 
       // PDF 전용 A4 Portrait 인쇄 템플릿 생성
       const container = document.createElement('div');
@@ -1606,7 +1609,14 @@
         </div>
       `;
 
-      const filename = `보강내역_검색결과_${startDate || '전체'}_${endDate || '전체'}.pdf`;
+      let periodTag = '전체';
+      if (startDate && endDate) {
+        periodTag = (startDate === endDate ? startDate : `${startDate}~${endDate}`);
+      } else if (startDate) {
+        periodTag = startDate;
+      }
+
+      const filename = `보강내역_검색결과_${periodTag}_${timestamp}.pdf`;
       const opt = {
         margin: [8, 8, 8, 8],
         filename: filename,
