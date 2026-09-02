@@ -10,6 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- html2pdf.js for A4 Portrait PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   
   <style>
     :root {
@@ -215,6 +217,38 @@
       padding: 12px 8px;
       border: 1px solid #005753;
       white-space: nowrap;
+    }
+
+    /* 정렬 가능 헤더 스타일 */
+    .sortable-th {
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .sortable-th:hover {
+      background-color: #00524f !important;
+    }
+
+    .th-highlight-sub.sortable-th:hover {
+      background: linear-gradient(135deg, #065f46 0%, #044e39 100%) !important;
+    }
+
+    .sort-icon {
+      font-size: 0.775rem;
+      margin-left: 4px;
+      opacity: 0.65;
+      transition: all 0.2s ease;
+    }
+
+    .sortable-th.active-sort {
+      background-color: #004d49 !important;
+      box-shadow: inset 0 -3px 0 #fde047;
+    }
+
+    .sortable-th.active-sort .sort-icon {
+      opacity: 1;
+      color: #fde047;
     }
 
     /* 열별 개별 필터 헤더 행 */
@@ -742,6 +776,9 @@
 
         <div class="header-controls-right">
           <span id="currentDateLabel"></span>
+          <button class="btn btn-outline btn-sm" id="btnPdfDownload" onclick="downloadPDF()" title="A4 Portrait PDF 다운로드">
+            <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF 다운로드
+          </button>
           <button class="btn btn-primary btn-sm" onclick="openAddModal()">
             <i class="fa-solid fa-plus"></i> 보강 등록하기
           </button>
@@ -752,16 +789,24 @@
         <table class="schedule-table">
           <thead>
             <tr>
-          <thead>
-            <tr>
-              <th style="width: 16%;">날짜(요일)</th>
-              <th style="width: 10%;">교시</th>
-              <th style="width: 15%;">교실</th>
-              <th class="th-highlight-sub" style="width: 22%;">
-                <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 (알림)
+              <th id="th_date" class="sortable-th" style="width: 16%;" onclick="handleSort('date')" title="날짜 정렬">
+                날짜(요일) <i class="fa-solid fa-sort sort-icon" id="sortIcon_date"></i>
               </th>
-              <th style="width: 15%;">결강 교사(원교사)</th>
-              <th style="width: 15%;">보강 사유</th>
+              <th id="th_period" class="sortable-th" style="width: 10%;" onclick="handleSort('period')" title="교시 정렬">
+                교시 <i class="fa-solid fa-sort sort-icon" id="sortIcon_period"></i>
+              </th>
+              <th id="th_className" class="sortable-th" style="width: 15%;" onclick="handleSort('className')" title="교실 정렬">
+                교실 <i class="fa-solid fa-sort sort-icon" id="sortIcon_className"></i>
+              </th>
+              <th id="th_substituteTeacher" class="th-highlight-sub sortable-th" style="width: 22%;" onclick="handleSort('substituteTeacher')" title="보강 교사 정렬">
+                <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 (알림) <i class="fa-solid fa-sort sort-icon" id="sortIcon_substituteTeacher"></i>
+              </th>
+              <th id="th_originalTeacher" class="sortable-th" style="width: 15%;" onclick="handleSort('originalTeacher')" title="결강 교사 정렬">
+                결강 교사(원교사) <i class="fa-solid fa-sort sort-icon" id="sortIcon_originalTeacher"></i>
+              </th>
+              <th id="th_reason" class="sortable-th" style="width: 15%;" onclick="handleSort('reason')" title="보강 사유 정렬">
+                보강 사유 <i class="fa-solid fa-sort sort-icon" id="sortIcon_reason"></i>
+              </th>
               <th style="width: 7%;">작업</th>
             </tr>
             <!-- 열별 개별 필터 헤더 행 (원교사 <-> 보강사유 순서 변경) -->
@@ -1017,6 +1062,9 @@
 
   <script>
     let currentRecords = [];
+    let lastFilteredSortedRecords = []; // 현재 표시 중인 정렬/필터링 데이터 저장
+    let currentSortKey = 'date';       // 기본 정렬 키: 날짜
+    let currentSortDir = 'desc';       // 기본 정렬 방향: 내림차순
     let isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
 
     // 기본 보강 사유 태그 목록 (조퇴, 외출 분리 완료)
@@ -1033,6 +1081,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       initReasonTags();
       updateRoomOptions();
+      updateSortIconsUI();
       setTodayDate();
     });
 
@@ -1310,7 +1359,79 @@
       return rawDateStr;
     }
 
-    // 열별 개별 필터링 (층별 전체 및 교실별 필터 대응)
+    // 열별 정렬 핸들러 (오름차순/내림차순 토글)
+    function handleSort(key) {
+      if (currentSortKey === key) {
+        currentSortDir = (currentSortDir === 'asc' ? 'desc' : 'asc');
+      } else {
+        currentSortKey = key;
+        currentSortDir = 'asc';
+      }
+      updateSortIconsUI();
+      applyColumnFilters();
+    }
+
+    // 정렬 헤더 아이콘 UI 업데이트
+    function updateSortIconsUI() {
+      const keys = ['date', 'period', 'className', 'substituteTeacher', 'originalTeacher', 'reason'];
+      keys.forEach(k => {
+        const icon = document.getElementById('sortIcon_' + k);
+        const th = document.getElementById('th_' + k);
+        if (!icon) return;
+
+        if (k === currentSortKey) {
+          if (th) th.classList.add('active-sort');
+          icon.className = `fa-solid ${currentSortDir === 'asc' ? 'fa-sort-up' : 'fa-sort-down'} sort-icon`;
+        } else {
+          if (th) th.classList.remove('active-sort');
+          icon.className = 'fa-solid fa-sort sort-icon';
+        }
+      });
+    }
+
+    // 데이터 레코드 정렬 함수
+    function sortRecords(records) {
+      if (!records || !records.length) return [];
+      const list = [...records];
+      const mult = (currentSortDir === 'asc' ? 1 : -1);
+
+      list.sort((a, b) => {
+        let valA = a[currentSortKey] || '';
+        let valB = b[currentSortKey] || '';
+
+        if (currentSortKey === 'date') {
+          if (valA !== valB) {
+            return (valA > valB ? 1 : -1) * mult;
+          }
+          // 날짜 동일 시 보조 정렬: 교시 asc
+          const pA = parseInt(a.period) || 0;
+          const pB = parseInt(b.period) || 0;
+          return (pA - pB);
+        }
+
+        if (currentSortKey === 'period') {
+          const pA = parseInt(a.period) || 0;
+          const pB = parseInt(b.period) || 0;
+          if (pA !== pB) return (pA - pB) * mult;
+          return (a.date > b.date ? -1 : 1);
+        }
+
+        if (currentSortKey === 'className') {
+          const comp = String(valA).localeCompare(String(valB), undefined, { numeric: true, sensitivity: 'base' });
+          if (comp !== 0) return comp * mult;
+          return (a.date > b.date ? -1 : 1);
+        }
+
+        // 문자열 사전순 비교 (보강교사, 원교사, 사유)
+        const comp = String(valA).localeCompare(String(valB), 'ko');
+        if (comp !== 0) return comp * mult;
+        return (a.date > b.date ? -1 : 1);
+      });
+
+      return list;
+    }
+
+    // 열별 개별 필터링 (층별 전체 및 교실별 필터 대응 + 정렬 연동)
     function applyColumnFilters() {
       const periodQuery = document.getElementById('filterColPeriod').value.trim();
       const classQuery = document.getElementById('filterColClass').value.trim();
@@ -1343,7 +1464,9 @@
         return true;
       });
 
-      renderTable(filtered);
+      const sorted = sortRecords(filtered);
+      lastFilteredSortedRecords = sorted;
+      renderTable(sorted);
     }
 
     function resetColumnFilters() {
@@ -1352,7 +1475,117 @@
       document.getElementById('filterColSubTeacher').value = '';
       document.getElementById('filterColReason').value = '';
       document.getElementById('filterColOrigTeacher').value = '';
-      renderTable(currentRecords);
+      applyColumnFilters();
+    }
+
+    // A4 Portrait PDF 다운로드 기능
+    function downloadPDF() {
+      const records = lastFilteredSortedRecords;
+      if (!records || records.length === 0) {
+        alert('PDF 파일로 출력할 보강 내역이 없습니다.');
+        return;
+      }
+
+      if (typeof html2pdf === 'undefined') {
+        alert('PDF 생성 라이브러리를 로드하는 중입니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      const btn = document.getElementById('btnPdfDownload');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner" style="border-top-color:#006b67; border-color:rgba(0,107,103,0.3); width:12px; height:12px;"></span> 생성 중...`;
+
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
+      let dateText = '전체 기간';
+      if (startDate && endDate) {
+        dateText = (startDate === endDate ? formatFormattedDate(startDate) : `${formatFormattedDate(startDate)} ~ ${formatFormattedDate(endDate)}`);
+      } else if (startDate) {
+        dateText = formatFormattedDate(startDate);
+      }
+
+      const now = new Date();
+      const printTimeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+      // PDF 전용 A4 Portrait 인쇄 템플릿 생성
+      const container = document.createElement('div');
+      container.style.padding = '15px';
+      container.style.fontFamily = "'Noto Sans KR', sans-serif";
+      container.style.color = '#1f2937';
+      container.style.backgroundColor = '#ffffff';
+
+      let rowsHtml = '';
+      records.forEach((r, idx) => {
+        const formattedDate = formatFormattedDate(r.date);
+        const isConf = Boolean(r.confirmed);
+        const confBadge = isConf 
+          ? '<span style="color:#059669; font-weight:bold;">[확인]</span>' 
+          : '<span style="color:#d97706;">[미확인]</span>';
+
+        rowsHtml += `
+          <tr style="background-color: ${idx % 2 === 1 ? '#f8fafc' : '#ffffff'};">
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:600; font-size:10.5px;">${escapeHtml(formattedDate)}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#0284c7;">${escapeHtml(r.period)}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#475569;">${escapeHtml(r.className)}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:11px; color:#065f46; background-color:#f0fdf4;">${escapeHtml(r.substituteTeacher)} ${confBadge}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-size:10.5px; color:#e11d48;">${escapeHtml(r.originalTeacher || '-')}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-size:10.5px;">${escapeHtml(r.reason || '-')}</td>
+          </tr>
+        `;
+      });
+
+      container.innerHTML = `
+        <div style="text-align:center; margin-bottom:12px; border-bottom:2px solid #006b67; padding-bottom:8px;">
+          <h1 style="font-size:18px; font-weight:bold; color:#006b67; margin:0 0 4px 0;">🏫 보강 내역 보고서</h1>
+          <p style="font-size:10px; color:#64748b; margin:0;">홍익 온라인 교무실 | 보강 알리미</p>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:10.5px; color:#475569;">
+          <div><strong>📅 검색 기간:</strong> <span style="color:#006b67; font-weight:bold;">${dateText}</span></div>
+          <div style="margin-left:auto;"><strong>🖨️ 출력 일시:</strong> ${printTimeStr}</div>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:10.5px;">
+          <thead>
+            <tr style="background-color:#006b67; color:#ffffff;">
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:20%;">날짜(요일)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:10%;">교시</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:12%;">교실</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:26%;">보강 교사 (확인)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:16%;">결강 교사(원교사)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:16%;">보강 사유</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:#64748b; border-top:1px solid #e2e8f0; padding-top:6px;">
+          <div>총 <strong style="color:#006b67;">${records.length}</strong>건의 보강 내역이 조회되었습니다.</div>
+          <div>보강 알리미 자동 생성 문서</div>
+        </div>
+      `;
+
+      const filename = `보강내역_검색결과_${startDate || '전체'}_${endDate || '전체'}.pdf`;
+      const opt = {
+        margin: [8, 8, 8, 8],
+        filename: filename,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      html2pdf().set(opt).from(container).save().then(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }).catch(err => {
+        console.error('PDF 생성 중 오류:', err);
+        alert('PDF 생성 실패: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      });
     }
 
     // 테이블 렌더링 (보강 교사 확인 체크박스 포함)
