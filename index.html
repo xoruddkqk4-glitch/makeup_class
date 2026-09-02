@@ -745,62 +745,27 @@
                 </select>
               </th>
               <th>
-                <!-- 층별 및 교실별 드롭다운 선택 -->
+                <!-- 층별 및 교실별 드롭다운 선택 (4층 -> 3층 -> 2층 -> 1층 -> 지하 순) -->
                 <select class="col-filter-select" id="filterColClass" onchange="applyColumnFilters()">
                   <option value="">전체 교실</option>
-                  <optgroup label="지하(B층)">
-                    <option value="B">지하(B층) 전체</option>
-                    <option value="B01">B01</option>
-                    <option value="B02">B02</option>
-                    <option value="B03">B03</option>
-                    <option value="B04">B04</option>
-                    <option value="B05">B05</option>
-                    <option value="B06">B06</option>
-                    <option value="B07">B07</option>
-                    <option value="B08">B08</option>
-                    <option value="B09">B09</option>
-                    <option value="B10">B10</option>
-                    <option value="B11">B11</option>
-                    <option value="B12">B12</option>
-                    <option value="B13">B13</option>
-                    <option value="B14">B14</option>
-                  </optgroup>
-                  <optgroup label="1층">
-                    <option value="1층">1층 전체</option>
-                    <option value="101">101</option>
-                    <option value="102">102</option>
-                    <option value="103">103</option>
-                    <option value="104">104</option>
-                    <option value="105">105</option>
-                    <option value="106">106</option>
-                    <option value="107">107</option>
-                    <option value="108">108</option>
-                    <option value="109">109</option>
-                    <option value="110">110</option>
-                    <option value="111">111</option>
-                    <option value="112">112</option>
-                    <option value="113">113</option>
-                    <option value="114">114</option>
-                    <option value="115">115</option>
-                  </optgroup>
-                  <optgroup label="2층">
-                    <option value="2층">2층 전체</option>
-                    <option value="201">201</option>
-                    <option value="202">202</option>
-                    <option value="203">203</option>
-                    <option value="204">204</option>
-                    <option value="205">205</option>
-                    <option value="206">206</option>
-                    <option value="207">207</option>
-                    <option value="208">208</option>
-                    <option value="209">209</option>
-                    <option value="210">210</option>
-                    <option value="211">211</option>
-                    <option value="212">212</option>
-                    <option value="213">213</option>
-                    <option value="214">214</option>
-                    <option value="215">215</option>
-                    <option value="216">216</option>
+                  <optgroup label="4층">
+                    <option value="4층">4층 전체</option>
+                    <option value="401">401</option>
+                    <option value="402">402</option>
+                    <option value="403">403</option>
+                    <option value="404">404</option>
+                    <option value="405">405</option>
+                    <option value="406">406</option>
+                    <option value="407">407</option>
+                    <option value="408">408</option>
+                    <option value="409">409</option>
+                    <option value="410">410</option>
+                    <option value="411">411</option>
+                    <option value="412">412</option>
+                    <option value="413">413</option>
+                    <option value="414">414</option>
+                    <option value="415">415</option>
+                    <option value="416">416</option>
                   </optgroup>
                   <optgroup label="3층">
                     <option value="3층">3층 전체</option>
@@ -821,24 +786,59 @@
                     <option value="315">315</option>
                     <option value="316">316</option>
                   </optgroup>
-                  <optgroup label="4층">
-                    <option value="4층">4층 전체</option>
-                    <option value="401">401</option>
-                    <option value="402">402</option>
-                    <option value="403">403</option>
-                    <option value="404">404</option>
-                    <option value="405">405</option>
-                    <option value="406">406</option>
-                    <option value="407">407</option>
-                    <option value="408">408</option>
-                    <option value="409">409</option>
-                    <option value="410">410</option>
-                    <option value="411">411</option>
-                    <option value="412">412</option>
-                    <option value="413">413</option>
-                    <option value="414">414</option>
-                    <option value="415">415</option>
-                    <option value="416">416</option>
+                  <optgroup label="2층">
+                    <option value="2층">2층 전체</option>
+                    <option value="201">201</option>
+                    <option value="202">202</option>
+                    <option value="203">203</option>
+                    <option value="204">204</option>
+                    <option value="205">205</option>
+                    <option value="206">206</option>
+                    <option value="207">207</option>
+                    <option value="208">208</option>
+                    <option value="209">209</option>
+                    <option value="210">210</option>
+                    <option value="211">211</option>
+                    <option value="212">212</option>
+                    <option value="213">213</option>
+                    <option value="214">214</option>
+                    <option value="215">215</option>
+                    <option value="216">216</option>
+                  </optgroup>
+                  <optgroup label="1층">
+                    <option value="1층">1층 전체</option>
+                    <option value="101">101</option>
+                    <option value="102">102</option>
+                    <option value="103">103</option>
+                    <option value="104">104</option>
+                    <option value="105">105</option>
+                    <option value="106">106</option>
+                    <option value="107">107</option>
+                    <option value="108">108</option>
+                    <option value="109">109</option>
+                    <option value="110">110</option>
+                    <option value="111">111</option>
+                    <option value="112">112</option>
+                    <option value="113">113</option>
+                    <option value="114">114</option>
+                    <option value="115">115</option>
+                  </optgroup>
+                  <optgroup label="지하(B층)">
+                    <option value="B">지하(B층) 전체</option>
+                    <option value="B01">B01</option>
+                    <option value="B02">B02</option>
+                    <option value="B03">B03</option>
+                    <option value="B04">B04</option>
+                    <option value="B05">B05</option>
+                    <option value="B06">B06</option>
+                    <option value="B07">B07</option>
+                    <option value="B08">B08</option>
+                    <option value="B09">B09</option>
+                    <option value="B10">B10</option>
+                    <option value="B11">B11</option>
+                    <option value="B12">B12</option>
+                    <option value="B13">B13</option>
+                    <option value="B14">B14</option>
                   </optgroup>
                 </select>
               </th>
@@ -924,11 +924,11 @@
                 </label>
                 <div class="class-select-grid">
                   <select class="form-control" id="inputFloor" onchange="updateRoomOptions()">
-                    <option value="지하(B층)">지하(B층)</option>
-                    <option value="1층">1층</option>
-                    <option value="2층" selected>2층</option>
-                    <option value="3층">3층</option>
                     <option value="4층">4층</option>
+                    <option value="3층">3층</option>
+                    <option value="2층" selected>2층</option>
+                    <option value="1층">1층</option>
+                    <option value="지하(B층)">지하(B층)</option>
                   </select>
                   <select class="form-control" id="inputRoom">
                     <!-- 교실 목록 동적 생성 -->
