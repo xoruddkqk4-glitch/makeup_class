@@ -83,7 +83,7 @@
       border: 1px solid #e2e8f0;
     }
 
-    /* 상단 컨트롤 패널 (기간 검색 지원) */
+    /* 상단 조작 패널 (기간 검색 & 빠른 버튼들) */
     .control-panel {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -98,21 +98,27 @@
       gap: 12px;
     }
 
+    .left-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
     .range-picker-wrap {
       display: flex;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
       background: #f8fafc;
       border: 1px solid #cbd5e1;
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 6px;
     }
 
     .range-picker-wrap input[type="date"] {
       border: none;
       background: transparent;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       font-weight: 600;
       color: var(--text-main);
       outline: none;
@@ -122,6 +128,12 @@
     .date-separator {
       font-weight: 700;
       color: #64748b;
+      font-size: 0.85rem;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 4px;
     }
 
     .btn {
@@ -129,13 +141,14 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      padding: 8px 16px;
+      padding: 7px 14px;
       border-radius: 6px;
-      font-size: 0.9rem;
+      font-size: 0.875rem;
       font-weight: 600;
       cursor: pointer;
       border: none;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
     .btn-primary {
@@ -160,36 +173,14 @@
     }
 
     .btn-sm {
-      padding: 5px 12px;
-      font-size: 0.85rem;
+      padding: 5px 10px;
+      font-size: 0.825rem;
     }
 
-    .search-wrap {
-      position: relative;
-    }
-
-    .search-wrap input {
-      padding: 8px 12px 8px 34px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      font-size: 0.9rem;
-      outline: none;
-      width: 170px;
-      transition: width 0.2s, border-color 0.2s;
-    }
-
-    .search-wrap input:focus {
-      width: 210px;
+    .btn-sm.active {
+      background: var(--primary-light);
       border-color: var(--primary-color);
-    }
-
-    .search-wrap i {
-      position: absolute;
-      left: 11px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #94a3b8;
-      font-size: 0.85rem;
+      color: var(--primary-color);
     }
 
     /* 보강 목록 테이블 컨테이너 */
@@ -229,13 +220,37 @@
       color: #ffffff;
       font-weight: 600;
       font-size: 0.925rem;
-      padding: 13px 10px;
+      padding: 12px 8px;
       border: 1px solid #005753;
       white-space: nowrap;
     }
 
+    /* 각 열별 필터 헤더 행 */
+    .filter-header-row th {
+      background-color: #f8fafc;
+      padding: 6px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .col-filter-input, .col-filter-select {
+      width: 100%;
+      padding: 5px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      font-size: 0.825rem;
+      outline: none;
+      background: #ffffff;
+      color: var(--text-main);
+      transition: border-color 0.2s;
+    }
+
+    .col-filter-input:focus, .col-filter-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(0, 107, 103, 0.15);
+    }
+
     .schedule-table td {
-      padding: 13px 10px;
+      padding: 12px 8px;
       border: 1px solid #e2e8f0;
       font-size: 0.925rem;
       color: var(--text-main);
@@ -293,6 +308,7 @@
       border-radius: 4px;
     }
 
+    /* 깔끔한 아이콘 전용 버튼 (아이콘 전용 - 텍스트 없음) */
     .action-btns {
       display: flex;
       align-items: center;
@@ -300,36 +316,43 @@
       gap: 6px;
     }
 
-    .btn-edit {
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-icon-edit {
       background: #eff6ff;
       color: #2563eb;
-      border: 1px solid #bfdbfe;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      border-color: #bfdbfe;
     }
 
-    .btn-edit:hover {
-      background: #dbeafe;
+    .btn-icon-edit:hover {
+      background: #2563eb;
+      color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);
     }
 
-    .btn-delete {
+    .btn-icon-delete {
       background: #fef2f2;
       color: #ef4444;
-      border: 1px solid #fecaca;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      transition: all 0.2s;
+      border-color: #fecaca;
     }
 
-    .btn-delete:hover {
-      background: #fee2e2;
+    .btn-icon-delete:hover {
+      background: #ef4444;
+      color: #ffffff;
+      border-color: #ef4444;
+      box-shadow: 0 2px 4px rgba(239, 68, 68, 0.2);
     }
 
     /* 빈 상태 */
@@ -546,9 +569,9 @@
     @media (max-width: 768px) {
       .app-title { font-size: 1.6rem; }
       .control-panel { flex-direction: column; align-items: stretch; }
-      .range-picker-wrap { justify-content: space-between; }
+      .left-controls { flex-direction: column; align-items: stretch; }
       .period-chips { grid-template-columns: repeat(4, 1fr); }
-      .schedule-table th, .schedule-table td { padding: 10px 6px; font-size: 0.85rem; }
+      .schedule-table th, .schedule-table td { padding: 10px 4px; font-size: 0.825rem; }
     }
   </style>
 </head>
@@ -566,38 +589,36 @@
       </div>
     </header>
 
-    <!-- 상단 조작 패널 (기간 검색 및 오늘/전체 버튼) -->
+    <!-- 상단 조작 패널 (기간 검색 & 이번주/이번달 버튼) -->
     <section class="control-panel">
-      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px;">
+      <div class="left-controls">
         <div class="range-picker-wrap">
           <i class="fa-regular fa-calendar-days" style="color: var(--primary-color);"></i>
           <input type="date" id="filterStartDate">
           <span class="date-separator">~</span>
           <input type="date" id="filterEndDate">
         </div>
+
         <button class="btn btn-outline btn-sm" onclick="loadRecords()">
           <i class="fa-solid fa-magnifying-glass"></i> 조회
         </button>
-        <button class="btn btn-outline btn-sm" onclick="setTodayDate()">
-          <i class="fa-solid fa-clock"></i> 오늘
-        </button>
-        <button class="btn btn-outline btn-sm" onclick="setAllDate()">
-          <i class="fa-solid fa-list"></i> 전체 보기
-        </button>
+
+        <div class="btn-group">
+          <button class="btn btn-outline btn-sm" id="btnToday" onclick="setTodayDate()">오늘</button>
+          <button class="btn btn-outline btn-sm" id="btnThisWeek" onclick="setThisWeekDate()">이번 주</button>
+          <button class="btn btn-outline btn-sm" id="btnThisMonth" onclick="setThisMonthDate()">이번 달</button>
+          <button class="btn btn-outline btn-sm" id="btnAll" onclick="setAllDate()">전체 보기</button>
+        </div>
       </div>
 
-      <div style="display: flex; gap: 10px; align-items: center; margin-top: 4px;">
-        <div class="search-wrap">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="searchInput" placeholder="교사명 또는 학급 검색" onkeyup="filterTable()">
-        </div>
+      <div>
         <button class="btn btn-primary" onclick="openAddModal()">
           <i class="fa-solid fa-plus"></i> 보강 등록하기
         </button>
       </div>
     </section>
 
-    <!-- 메인 보강 목록 테이블 -->
+    <!-- 메인 보강 목록 테이블 (열별 상세 필터 제공) -->
     <main class="table-card">
       <div class="table-header-title">
         <span><i class="fa-solid fa-table-list" style="color: var(--primary-color);"></i> 보강 목록</span>
@@ -608,13 +629,53 @@
         <table class="schedule-table">
           <thead>
             <tr>
-              <th style="width: 15%;">날짜(요일)</th>
-              <th style="width: 9%;">교시</th>
-              <th style="width: 13%;">학급</th>
-              <th style="width: 17%;">보강 교사</th>
-              <th style="width: 17%;">보강 사유</th>
-              <th style="width: 17%;">결강 교사(원교사)</th>
-              <th style="width: 12%;">작업</th>
+              <th style="width: 16%;">날짜(요일)</th>
+              <th style="width: 10%;">교시</th>
+              <th style="width: 14%;">학급</th>
+              <th style="width: 18%;">보강 교사</th>
+              <th style="width: 18%;">보강 사유</th>
+              <th style="width: 18%;">결강 교사(원교사)</th>
+              <th style="width: 6%;">작업</th>
+            </tr>
+            <!-- 열별 개별 필터 헤더 행 -->
+            <tr class="filter-header-row">
+              <th>
+                <input type="text" class="col-filter-input" id="filterColDate" placeholder="날짜 필터..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <select class="col-filter-select" id="filterColPeriod" onchange="applyColumnFilters()">
+                  <option value="">전체</option>
+                  <option value="1교시">1교시</option>
+                  <option value="2교시">2교시</option>
+                  <option value="3교시">3교시</option>
+                  <option value="4교시">4교시</option>
+                  <option value="5교시">5교시</option>
+                  <option value="6교시">6교시</option>
+                  <option value="7교시">7교시</option>
+                </select>
+              </th>
+              <th>
+                <select class="col-filter-select" id="filterColClass" onchange="applyColumnFilters()">
+                  <option value="">전체</option>
+                  <option value="1학년">1학년 전체</option>
+                  <option value="2학년">2학년 전체</option>
+                  <option value="3학년">3학년 전체</option>
+                </select>
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColSubTeacher" placeholder="보강교사 필터..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColReason" placeholder="사유 필터..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 필터..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
+                <button class="btn btn-outline btn-sm" style="padding: 2px 6px; font-size: 0.75rem;" title="필터 초기화" onclick="resetColumnFilters()">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </th>
             </tr>
           </thead>
           <tbody id="recordTableBody">
@@ -745,25 +806,72 @@
       setTodayDate(); // 자동으로 오늘 날짜 세팅 및 조회 실행
     });
 
-    function getTodayString() {
-      const today = new Date();
-      const year = today.getFullYear();
-      const month = String(today.getMonth() + 1).padStart(2, '0');
-      const day = String(today.getDate()).padStart(2, '0');
+    function getTodayDateObj() {
+      return new Date();
+    }
+
+    function formatDateToString(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
 
+    function setActiveQuickBtn(activeId) {
+      ['btnToday', 'btnThisWeek', 'btnThisMonth', 'btnAll'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          if (id === activeId) btn.classList.add('active');
+          else btn.classList.remove('active');
+        }
+      });
+    }
+
+    // 오늘
     function setTodayDate() {
-      const todayStr = getTodayString();
+      const todayStr = formatDateToString(getTodayDateObj());
       document.getElementById('filterStartDate').value = todayStr;
-      document.getElementById('filterEndDate').value = '';
+      document.getElementById('filterEndDate').value = todayStr;
       document.getElementById('inputDate').value = todayStr;
+      setActiveQuickBtn('btnToday');
       loadRecords();
     }
 
+    // 이번 주 (월요일 ~ 일요일)
+    function setThisWeekDate() {
+      const now = getTodayDateObj();
+      const dayOfWeek = now.getDay(); // 0(일) ~ 6(토)
+      const distanceToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
+      
+      const mon = new Date(now);
+      mon.setDate(now.getDate() + distanceToMon);
+
+      const sun = new Date(mon);
+      sun.setDate(mon.getDate() + 6);
+
+      document.getElementById('filterStartDate').value = formatDateToString(mon);
+      document.getElementById('filterEndDate').value = formatDateToString(sun);
+      setActiveQuickBtn('btnThisWeek');
+      loadRecords();
+    }
+
+    // 이번 달 (1일 ~ 말일)
+    function setThisMonthDate() {
+      const now = getTodayDateObj();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+      document.getElementById('filterStartDate').value = formatDateToString(firstDay);
+      document.getElementById('filterEndDate').value = formatDateToString(lastDay);
+      setActiveQuickBtn('btnThisMonth');
+      loadRecords();
+    }
+
+    // 전체 보기
     function setAllDate() {
       document.getElementById('filterStartDate').value = '';
       document.getElementById('filterEndDate').value = '';
+      setActiveQuickBtn('btnAll');
       loadRecords();
     }
 
@@ -805,7 +913,7 @@
         google.script.run
           .withSuccessHandler(function(records) {
             currentRecords = records;
-            renderTable(currentRecords);
+            applyColumnFilters();
           })
           .withFailureHandler(function(err) {
             alert('데이터를 불러오는데 실패했습니다: ' + err.message);
@@ -813,14 +921,16 @@
           .getSubstitutionRecords(startDate || 'ALL', endDate);
       } else {
         setTimeout(() => {
-          if (!startDate || startDate === 'ALL') {
+          if (!startDate && !endDate) {
             currentRecords = [...mockData];
           } else if (startDate && endDate) {
             currentRecords = mockData.filter(r => r.date >= startDate && r.date <= endDate);
-          } else {
+          } else if (startDate) {
             currentRecords = mockData.filter(r => r.date === startDate);
+          } else {
+            currentRecords = [...mockData];
           }
-          renderTable(currentRecords);
+          applyColumnFilters();
         }, 100);
       }
     }
@@ -830,7 +940,11 @@
       if (!startDate && !endDate) {
         label.textContent = '[ 전체 보강 목록 ]';
       } else if (startDate && endDate) {
-        label.textContent = `[ ${formatFormattedDate(startDate)} ~ ${formatFormattedDate(endDate)} 보강 목록 ]`;
+        if (startDate === endDate) {
+          label.textContent = `[ ${formatFormattedDate(startDate)} 보강 목록 ]`;
+        } else {
+          label.textContent = `[ ${formatFormattedDate(startDate)} ~ ${formatFormattedDate(endDate)} 보강 목록 ]`;
+        }
       } else {
         label.textContent = `[ ${formatFormattedDate(startDate)} 보강 목록 ]`;
       }
@@ -841,7 +955,6 @@
       if (!rawDateStr) return '';
       let dateObj = null;
 
-      // 이미 YYYY-MM-DD 패턴인 경우
       const match = String(rawDateStr).trim().match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
       if (match) {
         const y = match[1];
@@ -853,7 +966,6 @@
         return `${y}-${m}-${d} (${dayStr})`;
       }
 
-      // GMT 문자열 등 기타 구조일 때
       dateObj = new Date(rawDateStr);
       if (!isNaN(dateObj.getTime())) {
         const y = dateObj.getFullYear();
@@ -867,7 +979,40 @@
       return rawDateStr;
     }
 
-    // 테이블 렌더링 (요청된 컬럼 순서 반영)
+    // 열별 개별 필터링 적용
+    function applyColumnFilters() {
+      const dateQuery = document.getElementById('filterColDate').value.toLowerCase().trim();
+      const periodQuery = document.getElementById('filterColPeriod').value.trim();
+      const classQuery = document.getElementById('filterColClass').value.trim();
+      const subTeacherQuery = document.getElementById('filterColSubTeacher').value.toLowerCase().trim();
+      const reasonQuery = document.getElementById('filterColReason').value.toLowerCase().trim();
+      const origTeacherQuery = document.getElementById('filterColOrigTeacher').value.toLowerCase().trim();
+
+      const filtered = currentRecords.filter(r => {
+        const formattedDate = formatFormattedDate(r.date).toLowerCase();
+        if (dateQuery && !formattedDate.includes(dateQuery)) return false;
+        if (periodQuery && r.period !== periodQuery) return false;
+        if (classQuery && !r.className.includes(classQuery)) return false;
+        if (subTeacherQuery && !r.substituteTeacher.toLowerCase().includes(subTeacherQuery)) return false;
+        if (reasonQuery && !r.reason.toLowerCase().includes(reasonQuery)) return false;
+        if (origTeacherQuery && !r.originalTeacher.toLowerCase().includes(origTeacherQuery)) return false;
+        return true;
+      });
+
+      renderTable(filtered);
+    }
+
+    function resetColumnFilters() {
+      document.getElementById('filterColDate').value = '';
+      document.getElementById('filterColPeriod').value = '';
+      document.getElementById('filterColClass').value = '';
+      document.getElementById('filterColSubTeacher').value = '';
+      document.getElementById('filterColReason').value = '';
+      document.getElementById('filterColOrigTeacher').value = '';
+      renderTable(currentRecords);
+    }
+
+    // 테이블 렌더링 (아이콘 전용 수정/삭제 버튼)
     function renderTable(records) {
       const tbody = document.getElementById('recordTableBody');
       const emptyState = document.getElementById('emptyState');
@@ -893,11 +1038,11 @@
           <td><span class="teacher-orig">${escapeHtml(item.originalTeacher)}</span></td>
           <td>
             <div class="action-btns">
-              <button class="btn-edit" title="수정" onclick="openEditModal('${item.id}')">
-                <i class="fa-solid fa-pen-to-square"></i> 수정
+              <button class="btn-icon btn-icon-edit" title="수정" onclick="openEditModal('${item.id}')">
+                <i class="fa-solid fa-pen-to-square"></i>
               </button>
-              <button class="btn-delete" title="삭제" onclick="deleteRecord('${item.id}')">
-                <i class="fa-solid fa-trash-can"></i> 삭제
+              <button class="btn-icon btn-icon-delete" title="삭제" onclick="deleteRecord('${item.id}')">
+                <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
           </td>
@@ -906,24 +1051,7 @@
       });
     }
 
-    function filterTable() {
-      const query = document.getElementById('searchInput').value.toLowerCase().trim();
-      if (!query) {
-        renderTable(currentRecords);
-        return;
-      }
-
-      const filtered = currentRecords.filter(r => {
-        return r.originalTeacher.toLowerCase().includes(query) ||
-               r.substituteTeacher.toLowerCase().includes(query) ||
-               r.className.toLowerCase().includes(query) ||
-               r.reason.toLowerCase().includes(query);
-      });
-
-      renderTable(filtered);
-    }
-
-    // 모달 제어 (신규 등록 및 수정 분기)
+    // 모달 제어
     function openAddModal() {
       document.getElementById('editingRecordId').value = '';
       document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> 보강 내역 등록`;
@@ -940,17 +1068,14 @@
       document.getElementById('modalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> 보강 내역 수정`;
       document.getElementById('btnSubmitText').textContent = '수정 완료';
 
-      // 날짜 값 복원 (YYYY-MM-DD extraction)
       let dateVal = target.date;
       const match = String(target.date).match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
       if (match) dateVal = `${match[1]}-${match[2]}-${match[3]}`;
       document.getElementById('inputDate').value = dateVal;
 
-      // 교시 복원
       const periodNum = parseInt(target.period) || 1;
       selectPeriod(periodNum);
 
-      // 학급 복원
       const classParts = target.className.split(' ');
       if (classParts.length >= 2) {
         document.getElementById('inputGrade').value = classParts[0];
@@ -968,7 +1093,7 @@
       document.getElementById('addModal').classList.remove('active');
     }
 
-    // 폼 제출 (등록 또는 수정)
+    // 폼 제출
     function handleFormSubmit(e) {
       e.preventDefault();
 
@@ -999,7 +1124,6 @@
       setSubmittingState(true, editingId ? '수정 중...' : '저장 중...');
 
       if (editingId) {
-        // 수정 요청
         if (isGasEnvironment) {
           google.script.run
             .withSuccessHandler(function(res) {
@@ -1026,7 +1150,6 @@
           }, 300);
         }
       } else {
-        // 신규 등록 요청
         if (isGasEnvironment) {
           google.script.run
             .withSuccessHandler(function(res) {
@@ -1034,7 +1157,7 @@
               if (res.success) {
                 closeAddModal();
                 document.getElementById('filterStartDate').value = date;
-                document.getElementById('filterEndDate').value = '';
+                document.getElementById('filterEndDate').value = date;
                 loadRecords();
               } else {
                 alert('저장 실패: ' + res.message);
@@ -1052,7 +1175,7 @@
             mockData.unshift({ ...record, id: newId });
             closeAddModal();
             document.getElementById('filterStartDate').value = date;
-            document.getElementById('filterEndDate').value = '';
+            document.getElementById('filterEndDate').value = date;
             loadRecords();
           }, 300);
         }
@@ -1072,7 +1195,7 @@
     }
 
     function resetForm() {
-      const todayStr = getTodayString();
+      const todayStr = formatDateToString(getTodayDateObj());
       document.getElementById('inputDate').value = todayStr;
       document.getElementById('inputSubstituteTeacher').value = '';
       document.getElementById('inputReason').value = '';
