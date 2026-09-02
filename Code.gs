@@ -50,16 +50,20 @@ function getDbSheet() {
     }
   }
 
-  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실')
+  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 9번째 확인여부 열 추가)
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID', '날짜', '교시', '교실', '원교사', '보강교사', '사유', '등록시각']);
-    sheet.getRange(1, 1, 1, 8).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    sheet.appendRow(['ID', '날짜', '교시', '교실', '원교사', '보강교사', '사유', '등록시각', '확인여부']);
+    sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
   } else {
     // 기존 헤더가 '학급'인 경우 '교실'로 자동 갱신
     var col4Header = sheet.getRange(1, 4).getValue();
     if (col4Header === '학급') {
       sheet.getRange(1, 4).setValue('교실');
+    }
+    // 9번째 열 확인여부 헤더 추가 확인
+    if (sheet.getLastColumn() < 9 || sheet.getRange(1, 9).getValue() === '') {
+      sheet.getRange(1, 9).setValue('확인여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
   }
 
@@ -115,6 +119,8 @@ function getSubstitutionRecords(startDate, endDate) {
         }
       }
 
+      var isConf = (row[8] === true || String(row[8]).toLowerCase() === 'true' || String(row[8]) === '확인완료');
+
       records.push({
         id: String(row[0]),
         date: rowDate,
@@ -123,7 +129,8 @@ function getSubstitutionRecords(startDate, endDate) {
         originalTeacher: String(row[4]),
         substituteTeacher: String(row[5]),
         reason: String(row[6]),
-        timestamp: row[7] ? String(row[7]) : ''
+        timestamp: row[7] ? String(row[7]) : '',
+        confirmed: isConf
       });
     }
 
@@ -157,6 +164,7 @@ function addSubstitutionRecord(record) {
     var newId = record.id || ('SUB-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000));
     var nowIso = new Date().toISOString();
     var formattedDate = formatDateString(record.date);
+    var isConf = record.confirmed ? true : false;
 
     sheet.appendRow([
       newId,
@@ -166,7 +174,8 @@ function addSubstitutionRecord(record) {
       record.originalTeacher,
       record.substituteTeacher,
       record.reason || '사유 없음',
-      nowIso
+      nowIso,
+      isConf
     ]);
 
     SpreadsheetApp.flush(); // 저장 즉시 적용
@@ -201,8 +210,10 @@ function updateSubstitutionRecord(record) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(record.id)) {
         var rowNum = i + 1;
-        // 단일 셀 개별 수정 대신 1줄 전체를 1회 네트워크 요청으로 한 번에 업데이트 (속도 7배 향상)
-        sheet.getRange(rowNum, 1, 1, 8).setValues([[
+        var existingConf = (data[i][8] === true || String(data[i][8]).toLowerCase() === 'true');
+        var isConf = record.confirmed !== undefined ? (record.confirmed ? true : false) : existingConf;
+
+        sheet.getRange(rowNum, 1, 1, 9).setValues([[
           String(record.id),
           formattedDate,
           record.period,
@@ -210,7 +221,8 @@ function updateSubstitutionRecord(record) {
           record.originalTeacher,
           record.substituteTeacher,
           record.reason || '사유 없음',
-          new Date().toISOString()
+          new Date().toISOString(),
+          isConf
         ]]);
 
         SpreadsheetApp.flush(); // 수정 즉시 적용
@@ -228,6 +240,28 @@ function updateSubstitutionRecord(record) {
       success: false,
       message: err.message || '수정 중 오류가 발생했습니다.'
     };
+  }
+}
+
+/**
+ * 보강 교사 확인 상태 토글 저장 API
+ */
+function toggleSubstituteConfirm(id, confirmed) {
+  try {
+    var sheet = getDbSheet();
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(id)) {
+        var rowNum = i + 1;
+        sheet.getRange(rowNum, 9).setValue(confirmed ? true : false);
+        SpreadsheetApp.flush();
+        return { success: true, confirmed: confirmed };
+      }
+    }
+    return { success: false, message: '해당 내역을 찾을 수 없습니다.' };
+  } catch (err) {
+    Logger.log('Error in toggleSubstituteConfirm: ' + err.toString());
+    return { success: false, message: err.message };
   }
 }
 

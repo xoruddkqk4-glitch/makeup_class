@@ -307,14 +307,30 @@
       background: #ffffff;
       border: 1.5px solid #059669;
       border-radius: 20px;
-      padding: 5px 12px;
+      padding: 4px 10px;
       box-shadow: 0 2px 5px rgba(5, 150, 105, 0.18);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      user-select: none;
     }
 
     .sub-teacher-card:hover {
       transform: translateY(-1px);
       box-shadow: 0 4px 8px rgba(5, 150, 105, 0.25);
+    }
+
+    .sub-teacher-card.is-confirmed {
+      background: #d1fae5 !important;
+      border-color: #10b981 !important;
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.25);
+    }
+
+    .sub-checkbox {
+      width: 16px;
+      height: 16px;
+      accent-color: #059669;
+      cursor: pointer;
+      margin-right: 1px;
     }
 
     .sub-teacher-card .sub-icon {
@@ -330,13 +346,19 @@
     }
 
     .sub-teacher-card .sub-badge {
-      background: #059669;
-      color: #ffffff;
+      background: #fef08a;
+      color: #854d0e;
       font-size: 0.7rem;
       font-weight: 700;
       padding: 2px 6px;
       border-radius: 10px;
       margin-left: 2px;
+      white-space: nowrap;
+    }
+
+    .sub-teacher-card.is-confirmed .sub-badge {
+      background: #059669 !important;
+      color: #ffffff !important;
     }
 
     .col-filter-highlight {
@@ -1331,7 +1353,7 @@
       renderTable(currentRecords);
     }
 
-    // 테이블 렌더링
+    // 테이블 렌더링 (보강 교사 확인 체크박스 포함)
     function renderTable(records) {
       const tbody = document.getElementById('recordTableBody');
       const emptyState = document.getElementById('emptyState');
@@ -1347,16 +1369,18 @@
       records.forEach(item => {
         const tr = document.createElement('tr');
         const formattedDateText = formatFormattedDate(item.date);
+        const isConf = Boolean(item.confirmed);
         
         tr.innerHTML = `
           <td style="font-weight: 600;">${formattedDateText}</td>
           <td><span class="badge-period">${escapeHtml(item.period)}</span></td>
           <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
           <td class="td-highlight-sub">
-            <div class="sub-teacher-card">
-              <i class="fa-solid fa-user-check sub-icon"></i>
+            <div class="sub-teacher-card ${isConf ? 'is-confirmed' : ''}" title="${isConf ? '클릭 시 미확인으로 변경' : '클릭 시 보강 확인 완료'}" onclick="toggleConfirm(event, '${item.id}')">
+              <input type="checkbox" class="sub-checkbox" ${isConf ? 'checked' : ''} onclick="event.stopPropagation(); toggleConfirm(event, '${item.id}')">
+              <i class="fa-solid ${isConf ? 'fa-circle-check' : 'fa-bell'} sub-icon" style="color: ${isConf ? '#059669' : '#d97706'};"></i>
               <span class="sub-name">${escapeHtml(item.substituteTeacher)}</span>
-              <span class="sub-badge">보강</span>
+              <span class="sub-badge">${isConf ? '✅ 확인완료' : '🔔 미확인'}</span>
             </div>
           </td>
           <td><span class="badge-reason">${escapeHtml(item.reason)}</span></td>
@@ -1374,6 +1398,33 @@
         `;
         tbody.appendChild(tr);
       });
+    }
+
+    // 보강 교사 명단 확인 체크박스 토글 함수 (낙관적 UI 적용)
+    function toggleConfirm(e, id) {
+      if (e) e.stopPropagation();
+
+      const target = currentRecords.find(r => String(r.id) === String(id));
+      if (!target) return;
+
+      const newConfirmedState = !target.confirmed;
+      target.confirmed = newConfirmedState;
+
+      // 1. 화면 0초 즉시 업데이트
+      applyColumnFilters();
+
+      // 2. 백그라운드 구글 스프레드시트 DB 연동
+      if (isGasEnvironment) {
+        google.script.run
+          .withFailureHandler(function(err) {
+            console.error('확인 여부 저장 중 오류: ', err);
+            loadRecords();
+          })
+          .toggleSubstituteConfirm(id, newConfirmedState);
+      } else {
+        const mockIdx = mockData.findIndex(r => String(r.id) === String(id));
+        if (mockIdx !== -1) mockData[mockIdx].confirmed = newConfirmedState;
+      }
     }
 
     // 모달 제어
