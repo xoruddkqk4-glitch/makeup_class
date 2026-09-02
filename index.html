@@ -83,7 +83,7 @@
       border: 1px solid #e2e8f0;
     }
 
-    /* 상단 조작 패널 (기간 검색 & 빠른 버튼들) */
+    /* 상단 조작 패널 */
     .control-panel {
       background: var(--card-bg);
       border-radius: var(--radius);
@@ -225,7 +225,7 @@
       white-space: nowrap;
     }
 
-    /* 각 열별 필터 헤더 행 */
+    /* 열별 개별 필터 헤더 행 */
     .filter-header-row th {
       background-color: #f8fafc;
       padding: 6px;
@@ -287,13 +287,13 @@
     }
 
     .teacher-sub {
-      color: #047857; /* 보강 교사 초록 포인트 */
+      color: #047857;
       font-weight: 700;
       font-size: 1.02rem;
     }
 
     .teacher-orig {
-      color: #e11d48; /* 결강 교사 빨강/장미색 */
+      color: #e11d48;
       font-weight: 600;
     }
 
@@ -308,7 +308,7 @@
       border-radius: 4px;
     }
 
-    /* 깔끔한 아이콘 전용 버튼 (아이콘 전용 - 텍스트 없음) */
+    /* 작업 전용 아이콘 버튼 */
     .action-btns {
       display: flex;
       align-items: center;
@@ -449,11 +449,18 @@
     }
 
     .form-label {
-      display: block;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       font-size: 0.9rem;
       font-weight: 700;
       color: #334155;
       margin-bottom: 6px;
+    }
+
+    .form-label .step-title {
+      display: flex;
+      align-items: center;
     }
 
     .form-label .step-num {
@@ -517,14 +524,19 @@
       gap: 10px;
     }
 
-    .reason-tags {
+    /* 사유 태그 관리 스타일 */
+    .reason-tags-container {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 8px;
     }
 
-    .reason-tag {
+    .reason-chip-tag {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       font-size: 0.8rem;
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
@@ -533,12 +545,46 @@
       border-radius: 14px;
       cursor: pointer;
       transition: all 0.15s ease;
+      user-select: none;
     }
 
-    .reason-tag:hover {
+    .reason-chip-tag:hover {
       background: var(--primary-light);
       border-color: var(--primary-border);
       color: var(--primary-color);
+    }
+
+    .reason-chip-tag .btn-tag-del {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      border-radius: 50%;
+      width: 14px;
+      height: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 2px;
+    }
+
+    .reason-chip-tag .btn-tag-del:hover {
+      color: #ef4444;
+      background: #fee2e2;
+    }
+
+    .btn-add-tag-chip {
+      font-size: 0.8rem;
+      background: #ffffff;
+      border: 1px dashed var(--primary-color);
+      color: var(--primary-color);
+      padding: 4px 10px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+
+    .btn-add-tag-chip:hover {
+      background: var(--primary-light);
     }
 
     .modal-footer {
@@ -589,7 +635,7 @@
       </div>
     </header>
 
-    <!-- 상단 조작 패널 (기간 검색 & 이번주/이번달 버튼) -->
+    <!-- 상단 조작 패널 (기간 검색 및 오늘/이번주/이번달 버튼) -->
     <section class="control-panel">
       <div class="left-controls">
         <div class="range-picker-wrap">
@@ -618,7 +664,7 @@
       </div>
     </section>
 
-    <!-- 메인 보강 목록 테이블 (열별 상세 필터 제공) -->
+    <!-- 메인 보강 목록 테이블 (드롭다운 & 열별 필터 적용) -->
     <main class="table-card">
       <div class="table-header-title">
         <span><i class="fa-solid fa-table-list" style="color: var(--primary-color);"></i> 보강 목록</span>
@@ -631,20 +677,18 @@
             <tr>
               <th style="width: 16%;">날짜(요일)</th>
               <th style="width: 10%;">교시</th>
-              <th style="width: 14%;">학급</th>
-              <th style="width: 18%;">보강 교사</th>
-              <th style="width: 18%;">보강 사유</th>
-              <th style="width: 18%;">결강 교사(원교사)</th>
+              <th style="width: 17%;">학급</th>
+              <th style="width: 17%;">보강 교사</th>
+              <th style="width: 17%;">보강 사유</th>
+              <th style="width: 17%;">결강 교사(원교사)</th>
               <th style="width: 6%;">작업</th>
             </tr>
             <!-- 열별 개별 필터 헤더 행 -->
             <tr class="filter-header-row">
-              <th>
-                <input type="text" class="col-filter-input" id="filterColDate" placeholder="날짜 필터..." onkeyup="applyColumnFilters()">
-              </th>
+              <th><!-- 상단 기간 검색이 존재하므로 날짜 열은 빈칸으로 정돈 --></th>
               <th>
                 <select class="col-filter-select" id="filterColPeriod" onchange="applyColumnFilters()">
-                  <option value="">전체</option>
+                  <option value="">전체 교시</option>
                   <option value="1교시">1교시</option>
                   <option value="2교시">2교시</option>
                   <option value="3교시">3교시</option>
@@ -655,25 +699,64 @@
                 </select>
               </th>
               <th>
+                <!-- 학년별 및 학급별 드롭다운 선택 -->
                 <select class="col-filter-select" id="filterColClass" onchange="applyColumnFilters()">
-                  <option value="">전체</option>
-                  <option value="1학년">1학년 전체</option>
-                  <option value="2학년">2학년 전체</option>
-                  <option value="3학년">3학년 전체</option>
+                  <option value="">전체 학급</option>
+                  <optgroup label="1학년">
+                    <option value="1학년">1학년 전체</option>
+                    <option value="1학년 1반">1학년 1반</option>
+                    <option value="1학년 2반">1학년 2반</option>
+                    <option value="1학년 3반">1학년 3반</option>
+                    <option value="1학년 4반">1학년 4반</option>
+                    <option value="1학년 5반">1학년 5반</option>
+                    <option value="1학년 6반">1학년 6반</option>
+                    <option value="1학년 7반">1학년 7반</option>
+                    <option value="1학년 8반">1학년 8반</option>
+                    <option value="1학년 9반">1학년 9반</option>
+                  </optgroup>
+                  <optgroup label="2학년">
+                    <option value="2학년">2학년 전체</option>
+                    <option value="2학년 1반">2학년 1반</option>
+                    <option value="2학년 2반">2학년 2반</option>
+                    <option value="2학년 3반">2학년 3반</option>
+                    <option value="2학년 4반">2학년 4반</option>
+                    <option value="2학년 5반">2학년 5반</option>
+                    <option value="2학년 6반">2학년 6반</option>
+                    <option value="2학년 7반">2학년 7반</option>
+                    <option value="2학년 8반">2학년 8반</option>
+                    <option value="2학년 9반">2학년 9반</option>
+                  </optgroup>
+                  <optgroup label="3학년">
+                    <option value="3학년">3학년 전체</option>
+                    <option value="3학년 1반">3학년 1반</option>
+                    <option value="3학년 2반">3학년 2반</option>
+                    <option value="3학년 3반">3학년 3반</option>
+                    <option value="3학년 4반">3학년 4반</option>
+                    <option value="3학년 5반">3학년 5반</option>
+                    <option value="3학년 6반">3학년 6반</option>
+                    <option value="3학년 7반">3학년 7반</option>
+                    <option value="3학년 8반">3학년 8반</option>
+                    <option value="3학년 9반">3학년 9반</option>
+                  </optgroup>
                 </select>
               </th>
               <th>
-                <input type="text" class="col-filter-input" id="filterColSubTeacher" placeholder="보강교사 필터..." onkeyup="applyColumnFilters()">
+                <input type="text" class="col-filter-input" id="filterColSubTeacher" placeholder="보강교사 검색..." onkeyup="applyColumnFilters()">
               </th>
               <th>
-                <input type="text" class="col-filter-input" id="filterColReason" placeholder="사유 필터..." onkeyup="applyColumnFilters()">
+                <!-- 사유 드롭다운 선택 -->
+                <select class="col-filter-select" id="filterColReason" onchange="applyColumnFilters()">
+                  <option value="">전체 사유</option>
+                  <!-- JavaScript 동적 생성 -->
+                </select>
               </th>
               <th>
-                <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 필터..." onkeyup="applyColumnFilters()">
+                <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 검색..." onkeyup="applyColumnFilters()">
               </th>
               <th>
-                <button class="btn btn-outline btn-sm" style="padding: 2px 6px; font-size: 0.75rem;" title="필터 초기화" onclick="resetColumnFilters()">
-                  <i class="fa-solid fa-rotate-left"></i>
+                <!-- 필터 초기화 명확한 버튼 -->
+                <button class="btn btn-outline btn-sm" style="padding: 3px 8px; font-size: 0.775rem; white-space: nowrap;" title="모든 열 필터 초기화" onclick="resetColumnFilters()">
+                  <i class="fa-solid fa-rotate-left"></i> 초기화
                 </button>
               </th>
             </tr>
@@ -707,7 +790,7 @@
           <!-- 1. 날짜 지정 -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">1</span> 날짜 지정
+              <span class="step-title"><span class="step-num">1</span> 날짜 지정</span>
             </label>
             <input type="date" class="form-control" id="inputDate" required>
           </div>
@@ -715,7 +798,7 @@
           <!-- 2. 교시 선택 -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">2</span> 교시 선택 (1~7교시)
+              <span class="step-title"><span class="step-num">2</span> 교시 선택 (1~7교시)</span>
             </label>
             <div class="period-chips" id="periodChips">
               <div class="period-chip selected" onclick="selectPeriod(1)">1교시</div>
@@ -732,7 +815,7 @@
           <!-- 3. 학급 선택 -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">3</span> 학급 선택
+              <span class="step-title"><span class="step-num">3</span> 학급 선택</span>
             </label>
             <div class="class-select-grid">
               <select class="form-control" id="inputGrade">
@@ -749,31 +832,26 @@
           <!-- 4. 보강 교사 -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">4</span> 보강 교사 (보강 들어갈 교사 이름 입력)
+              <span class="step-title"><span class="step-num">4</span> 보강 교사 (보강 들어갈 교사 이름 입력)</span>
             </label>
             <input type="text" class="form-control" id="inputSubstituteTeacher" placeholder="예: 김철수" required>
           </div>
 
-          <!-- 5. 보강 사유 -->
+          <!-- 5. 보강 사유 (사용자가 추가/삭제 가능한 퀵 태그) -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">5</span> 보강 유발 사유
+              <span class="step-title"><span class="step-num">5</span> 보강 유발 사유</span>
             </label>
             <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등" required>
-            <div class="reason-tags">
-              <span class="reason-tag" onclick="setReason('출장')">#출장</span>
-              <span class="reason-tag" onclick="setReason('연가')">#연가</span>
-              <span class="reason-tag" onclick="setReason('병가')">#병가</span>
-              <span class="reason-tag" onclick="setReason('공가')">#공가</span>
-              <span class="reason-tag" onclick="setReason('특별휴가')">#특별휴가</span>
-              <span class="reason-tag" onclick="setReason('조퇴/외출')">#조퇴/외출</span>
+            <div class="reason-tags-container" id="reasonTagsContainer">
+              <!-- 동적 태그 칩 생성 -->
             </div>
           </div>
 
           <!-- 6. 결강 교사(원교사) -->
           <div class="form-group">
             <label class="form-label">
-              <span class="step-num">6</span> 결강 교사 (원교사 이름 입력)
+              <span class="step-title"><span class="step-num">6</span> 결강 교사 (원교사 이름 입력)</span>
             </label>
             <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동" required>
           </div>
@@ -794,6 +872,10 @@
     let currentRecords = [];
     let isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
 
+    // 기본 보강 사유 태그 목록 (조퇴, 외출 분리 완료)
+    const DEFAULT_REASON_TAGS = ['출장', '연가', '병가', '공가', '특별휴가', '조퇴', '외출'];
+    let reasonTags = [];
+
     // 모의(Mock) 데이터 (로컬 테스트용)
     const mockData = [
       { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '1학년 3반', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장' },
@@ -802,9 +884,92 @@
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
+      initReasonTags();
       initClassOptions();
-      setTodayDate(); // 자동으로 오늘 날짜 세팅 및 조회 실행
+      setTodayDate();
     });
+
+    // 사유 태그 초기화 및 로컬스토리지 관리
+    function initReasonTags() {
+      const saved = localStorage.getItem('custom_reason_tags');
+      if (saved) {
+        try {
+          reasonTags = JSON.parse(saved);
+        } catch (e) {
+          reasonTags = [...DEFAULT_REASON_TAGS];
+        }
+      } else {
+        reasonTags = [...DEFAULT_REASON_TAGS];
+      }
+      renderReasonTags();
+      populateReasonFilterDropdown();
+    }
+
+    function saveReasonTags() {
+      localStorage.setItem('custom_reason_tags', JSON.stringify(reasonTags));
+      renderReasonTags();
+      populateReasonFilterDropdown();
+    }
+
+    function renderReasonTags() {
+      const container = document.getElementById('reasonTagsContainer');
+      container.innerHTML = '';
+
+      reasonTags.forEach(tag => {
+        const chip = document.createElement('span');
+        chip.className = 'reason-chip-tag';
+        chip.innerHTML = `#${escapeHtml(tag)} <span class="btn-tag-del" title="태그 삭제" onclick="deleteReasonTag(event, '${escapeHtml(tag)}')">&times;</span>`;
+        chip.onclick = function() {
+          setReason(tag);
+        };
+        container.appendChild(chip);
+      });
+
+      // 태그 추가 버튼
+      const addBtn = document.createElement('span');
+      addBtn.className = 'btn-add-tag-chip';
+      addBtn.innerHTML = `<i class="fa-solid fa-plus"></i> 태그 추가`;
+      addBtn.onclick = function(e) {
+        e.stopPropagation();
+        addNewReasonTag();
+      };
+      container.appendChild(addBtn);
+    }
+
+    function addNewReasonTag() {
+      const newTag = prompt('새로 추가할 보강 사유 태그를 입력하세요:');
+      if (newTag && newTag.trim()) {
+        const cleanTag = newTag.trim();
+        if (!reasonTags.includes(cleanTag)) {
+          reasonTags.push(cleanTag);
+          saveReasonTags();
+        }
+      }
+    }
+
+    function deleteReasonTag(e, tagToDelete) {
+      e.stopPropagation();
+      if (confirm(`'#${tagToDelete}' 태그를 삭제하시겠습니까?`)) {
+        reasonTags = reasonTags.filter(t => t !== tagToDelete);
+        saveReasonTags();
+      }
+    }
+
+    // 사유 필터 드롭다운 채우기
+    function populateReasonFilterDropdown() {
+      const select = document.getElementById('filterColReason');
+      const currentVal = select.value;
+      select.innerHTML = '<option value="">전체 사유</option>';
+
+      reasonTags.forEach(tag => {
+        const opt = document.createElement('option');
+        opt.value = tag;
+        opt.textContent = tag;
+        select.appendChild(opt);
+      });
+
+      select.value = currentVal;
+    }
 
     function getTodayDateObj() {
       return new Date();
@@ -827,7 +992,6 @@
       });
     }
 
-    // 오늘
     function setTodayDate() {
       const todayStr = formatDateToString(getTodayDateObj());
       document.getElementById('filterStartDate').value = todayStr;
@@ -837,10 +1001,9 @@
       loadRecords();
     }
 
-    // 이번 주 (월요일 ~ 일요일)
     function setThisWeekDate() {
       const now = getTodayDateObj();
-      const dayOfWeek = now.getDay(); // 0(일) ~ 6(토)
+      const dayOfWeek = now.getDay();
       const distanceToMon = (dayOfWeek === 0 ? -6 : 1 - dayOfWeek);
       
       const mon = new Date(now);
@@ -855,7 +1018,6 @@
       loadRecords();
     }
 
-    // 이번 달 (1일 ~ 말일)
     function setThisMonthDate() {
       const now = getTodayDateObj();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -867,7 +1029,6 @@
       loadRecords();
     }
 
-    // 전체 보기
     function setAllDate() {
       document.getElementById('filterStartDate').value = '';
       document.getElementById('filterEndDate').value = '';
@@ -950,7 +1111,6 @@
       }
     }
 
-    // 날짜를 YYYY-MM-DD (요일) 형식으로 고정 변환하는 헬퍼 함수
     function formatFormattedDate(rawDateStr) {
       if (!rawDateStr) return '';
       let dateObj = null;
@@ -979,9 +1139,8 @@
       return rawDateStr;
     }
 
-    // 열별 개별 필터링 적용
+    // 열별 개별 필터링
     function applyColumnFilters() {
-      const dateQuery = document.getElementById('filterColDate').value.toLowerCase().trim();
       const periodQuery = document.getElementById('filterColPeriod').value.trim();
       const classQuery = document.getElementById('filterColClass').value.trim();
       const subTeacherQuery = document.getElementById('filterColSubTeacher').value.toLowerCase().trim();
@@ -989,8 +1148,6 @@
       const origTeacherQuery = document.getElementById('filterColOrigTeacher').value.toLowerCase().trim();
 
       const filtered = currentRecords.filter(r => {
-        const formattedDate = formatFormattedDate(r.date).toLowerCase();
-        if (dateQuery && !formattedDate.includes(dateQuery)) return false;
         if (periodQuery && r.period !== periodQuery) return false;
         if (classQuery && !r.className.includes(classQuery)) return false;
         if (subTeacherQuery && !r.substituteTeacher.toLowerCase().includes(subTeacherQuery)) return false;
@@ -1003,7 +1160,6 @@
     }
 
     function resetColumnFilters() {
-      document.getElementById('filterColDate').value = '';
       document.getElementById('filterColPeriod').value = '';
       document.getElementById('filterColClass').value = '';
       document.getElementById('filterColSubTeacher').value = '';
@@ -1012,7 +1168,7 @@
       renderTable(currentRecords);
     }
 
-    // 테이블 렌더링 (아이콘 전용 수정/삭제 버튼)
+    // 테이블 렌더링
     function renderTable(records) {
       const tbody = document.getElementById('recordTableBody');
       const emptyState = document.getElementById('emptyState');
