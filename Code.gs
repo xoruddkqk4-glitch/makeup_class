@@ -152,11 +152,11 @@ function getSubstitutionRecords(startDate, endDate) {
 }
 
 /**
- * 신규 보강 내역을 저장합니다.
+ * 신규 보강 내역을 저장합니다. (1~4번 필수, 5~6번 선택)
  */
 function addSubstitutionRecord(record) {
   try {
-    if (!record.date || !record.period || !record.className || !record.substituteTeacher || !record.originalTeacher) {
+    if (!record.date || !record.period || !record.className || !record.substituteTeacher) {
       throw new Error('필수 입력 항목이 누락되었습니다.');
     }
 
@@ -171,9 +171,9 @@ function addSubstitutionRecord(record) {
       formattedDate,
       record.period,
       record.className,
-      record.originalTeacher,
+      record.originalTeacher || '',
       record.substituteTeacher,
-      record.reason || '사유 없음',
+      record.reason || '',
       nowIso,
       isConf
     ]);
@@ -195,11 +195,11 @@ function addSubstitutionRecord(record) {
 }
 
 /**
- * 기존 보강 내역을 수정합니다. (단일 setValues 호출로 속도 극대화)
+ * 기존 보강 내역을 수정합니다. (1~4번 필수, 5~6번 선택)
  */
 function updateSubstitutionRecord(record) {
   try {
-    if (!record.id || !record.date || !record.period || !record.className || !record.substituteTeacher || !record.originalTeacher) {
+    if (!record.id || !record.date || !record.period || !record.className || !record.substituteTeacher) {
       throw new Error('필수 수정 정보가 누락되었습니다.');
     }
 
@@ -218,9 +218,9 @@ function updateSubstitutionRecord(record) {
           formattedDate,
           record.period,
           record.className,
-          record.originalTeacher,
+          record.originalTeacher || '',
           record.substituteTeacher,
-          record.reason || '사유 없음',
+          record.reason || '',
           new Date().toISOString(),
           isConf
         ]]);

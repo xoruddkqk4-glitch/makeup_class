@@ -752,19 +752,21 @@
         <table class="schedule-table">
           <thead>
             <tr>
+          <thead>
+            <tr>
               <th style="width: 16%;">날짜(요일)</th>
               <th style="width: 10%;">교시</th>
               <th style="width: 15%;">교실</th>
               <th class="th-highlight-sub" style="width: 22%;">
                 <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 (알림)
               </th>
-              <th style="width: 15%;">보강 사유</th>
               <th style="width: 15%;">결강 교사(원교사)</th>
+              <th style="width: 15%;">보강 사유</th>
               <th style="width: 7%;">작업</th>
             </tr>
-            <!-- 열별 개별 필터 헤더 행 -->
+            <!-- 열별 개별 필터 헤더 행 (원교사 <-> 보강사유 순서 변경) -->
             <tr class="filter-header-row">
-              <th><!-- 상단 기간 검색이 존재하므로 날짜 열은 빈칸으로 정돈 --></th>
+              <th><!-- 날짜 열 빈칸 --></th>
               <th>
                 <select class="col-filter-select" id="filterColPeriod" onchange="applyColumnFilters()">
                   <option value="">전체 교시</option>
@@ -879,14 +881,14 @@
                 <input type="text" class="col-filter-input col-filter-highlight" id="filterColSubTeacher" placeholder="🔔 보강교사 검색..." onkeyup="applyColumnFilters()">
               </th>
               <th>
+                <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
                 <!-- 사유 드롭다운 선택 -->
                 <select class="col-filter-select" id="filterColReason" onchange="applyColumnFilters()">
                   <option value="">전체 사유</option>
                   <!-- JavaScript 동적 생성 -->
                 </select>
-              </th>
-              <th>
-                <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 검색..." onkeyup="applyColumnFilters()">
               </th>
               <th>
                 <!-- 필터 초기화 명확한 버튼 -->
@@ -923,7 +925,7 @@
         <div class="modal-body">
           <div class="modal-form-grid">
             
-            <!-- 좌측 열 -->
+            <!-- 좌측 열 (1~4번 필수 입력) -->
             <div class="grid-col">
               <!-- 1. 날짜 지정 -->
               <div class="form-group">
@@ -969,7 +971,7 @@
                 </div>
               </div>
 
-              <!-- 4. 보강 교사 (좌측 블루 박스 위치로 이동 및 강조) -->
+              <!-- 4. 보강 교사 (필수) -->
               <div class="form-group">
                 <label class="form-label">
                   <span class="step-title" style="color: #047857;"><span class="step-num" style="background: #ecfdf5; color: #047857;">4</span> 보강 교사 (보강 들어갈 교사)</span>
@@ -978,25 +980,25 @@
               </div>
             </div>
 
-            <!-- 우측 열 -->
+            <!-- 우측 열 (5~6번 선택 입력) -->
             <div class="grid-col">
-              <!-- 5. 보강 사유 (태그가 많아져도 우측 전체 공간 활용) -->
+              <!-- 5. 보강 사유 (선택 입력) -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title"><span class="step-num">5</span> 보강 유발 사유</span>
+                  <span class="step-title"><span class="step-num">5</span> 보강 유발 사유 <span style="font-size:0.775rem; font-weight:400; color:#64748b;">(선택)</span></span>
                 </label>
-                <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등" required>
+                <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등 (선택)">
                 <div class="reason-tags-container" id="reasonTagsContainer">
                   <!-- 동적 태그 칩 생성 -->
                 </div>
               </div>
 
-              <!-- 6. 결강 교사(원교사) -->
+              <!-- 6. 결강 교사(원교사) (선택 입력) -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title"><span class="step-num">6</span> 결강 교사 (원교사 이름)</span>
+                  <span class="step-title"><span class="step-num">6</span> 결강 교사 <span style="font-size:0.775rem; font-weight:400; color:#64748b;">(원교사 이름, 선택)</span></span>
                 </label>
-                <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동" required>
+                <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동 (선택)">
               </div>
             </div>
 
@@ -1376,15 +1378,15 @@
           <td><span class="badge-period">${escapeHtml(item.period)}</span></td>
           <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
           <td class="td-highlight-sub">
-            <div class="sub-teacher-card ${isConf ? 'is-confirmed' : ''}" title="${isConf ? '클릭 시 미확인으로 변경' : '클릭 시 보강 확인 완료'}" onclick="toggleConfirm(event, '${item.id}')">
+            <div class="sub-teacher-card ${isConf ? 'is-confirmed' : ''}" title="${isConf ? '클릭 시 미확인으로 변경' : '클릭 시 본인확인 완료'}" onclick="toggleConfirm(event, '${item.id}')">
               <input type="checkbox" class="sub-checkbox" ${isConf ? 'checked' : ''} onclick="event.stopPropagation(); toggleConfirm(event, '${item.id}')">
               <i class="fa-solid ${isConf ? 'fa-circle-check' : 'fa-bell'} sub-icon" style="color: ${isConf ? '#059669' : '#d97706'};"></i>
               <span class="sub-name">${escapeHtml(item.substituteTeacher)}</span>
-              <span class="sub-badge">${isConf ? '✅ 확인완료' : '🔔 미확인'}</span>
+              <span class="sub-badge">${isConf ? '✅ 본인확인' : '🔔 미확인'}</span>
             </div>
           </td>
-          <td><span class="badge-reason">${escapeHtml(item.reason)}</span></td>
-          <td><span class="teacher-orig">${escapeHtml(item.originalTeacher)}</span></td>
+          <td><span class="teacher-orig">${escapeHtml(item.originalTeacher || '-')}</span></td>
+          <td><span class="badge-reason">${escapeHtml(item.reason || '-')}</span></td>
           <td>
             <div class="action-btns">
               <button class="btn-icon btn-icon-edit" title="수정" onclick="openEditModal('${item.id}')">
@@ -1468,8 +1470,8 @@
       document.getElementById('inputRoom').value = roomVal;
 
       document.getElementById('inputSubstituteTeacher').value = target.substituteTeacher;
-      document.getElementById('inputReason').value = target.reason;
-      document.getElementById('inputOriginalTeacher').value = target.originalTeacher;
+      document.getElementById('inputReason').value = target.reason || '';
+      document.getElementById('inputOriginalTeacher').value = target.originalTeacher || '';
 
       document.getElementById('addModal').classList.add('active');
     }
@@ -1490,8 +1492,9 @@
       const reason = document.getElementById('inputReason').value.trim();
       const originalTeacher = document.getElementById('inputOriginalTeacher').value.trim();
 
-      if (!date || !period || !originalTeacher || !substituteTeacher) {
-        alert('필수 정보를 모두 입력해 주세요.');
+      // 1~4번만 필수 검증 (5~6번 선택 입력)
+      if (!date || !period || !substituteTeacher) {
+        alert('1~4번 필수 정보(날짜, 교시, 교실, 보강 교사)를 모두 입력해 주세요.');
         return;
       }
 
@@ -1502,8 +1505,8 @@
         period: period,
         className: roomVal,
         substituteTeacher: substituteTeacher,
-        reason: reason || '사유 없음',
-        originalTeacher: originalTeacher
+        reason: reason || '',
+        originalTeacher: originalTeacher || ''
       };
 
       // 1. 모달 즉시 닫기 & 로컬 UI 즉시 갱신 (0초 즉시 반응)
