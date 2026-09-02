@@ -47,78 +47,80 @@
       margin: 0 auto;
     }
 
-    /* 상단 대시보드 헤더 */
+    /* 상단 대시보드 헤더 (컴팩트) */
     .app-header {
       text-align: center;
-      margin-bottom: 20px;
-      padding-bottom: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 0;
     }
 
     .app-title {
-      font-size: 2.1rem;
+      font-size: 1.8rem;
       font-weight: 700;
       color: var(--primary-color);
       letter-spacing: -0.5px;
-      margin-bottom: 6px;
+      margin-bottom: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
     }
 
-    .app-subtitle {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 8px;
-    }
-
-    .notice-banner {
-      display: inline-block;
-      font-size: 0.875rem;
-      color: #475569;
-      background: #f1f5f9;
-      padding: 5px 16px;
-      border-radius: 20px;
-      border: 1px solid #e2e8f0;
-    }
-
-    /* 상단 조작 패널 */
-    .control-panel {
+    /* 보강 목록 테이블 컨테이너 및 통합 툴바 */
+    .table-card {
       background: var(--card-bg);
       border-radius: var(--radius);
-      padding: 16px 20px;
       box-shadow: var(--shadow-sm);
       border: 1px solid #cbd5e1;
-      margin-bottom: 20px;
+      overflow: hidden;
+    }
+
+    .table-header-title {
+      background: #f1f5f9;
+      padding: 10px 16px;
+      border-bottom: 1px solid #e2e8f0;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .left-controls {
+    .header-controls-left {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       gap: 8px;
     }
 
+    .header-controls-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-title-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+
     .range-picker-wrap {
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #f8fafc;
+      background: #ffffff;
       border: 1px solid #cbd5e1;
-      padding: 5px 10px;
+      padding: 4px 8px;
       border-radius: 6px;
     }
 
     .range-picker-wrap input[type="date"] {
       border: none;
       background: transparent;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       font-weight: 600;
       color: var(--text-main);
       outline: none;
@@ -140,10 +142,10 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      padding: 7px 14px;
+      gap: 5px;
+      padding: 6px 12px;
       border-radius: 6px;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
       border: none;
@@ -173,35 +175,14 @@
     }
 
     .btn-sm {
-      padding: 5px 10px;
-      font-size: 0.825rem;
+      padding: 4px 8px;
+      font-size: 0.8rem;
     }
 
     .btn-sm.active {
       background: var(--primary-light);
       border-color: var(--primary-color);
       color: var(--primary-color);
-    }
-
-    /* 보강 목록 테이블 컨테이너 */
-    .table-card {
-      background: var(--card-bg);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid #cbd5e1;
-      overflow: hidden;
-    }
-
-    .table-header-title {
-      background: #f1f5f9;
-      padding: 14px 20px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #1e293b;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
     }
 
     .table-responsive {
@@ -685,51 +666,44 @@
 <body>
 
   <div class="container">
-    <!-- 헤더 영역 -->
+    <!-- 헤더 영역 (제목만 컴팩트하게 남김) -->
     <header class="app-header">
       <h1 class="app-title">
         <i class="fa-solid fa-clipboard-user"></i> 보강 알리미
       </h1>
-      <div class="app-subtitle">온라인 교무실 보강 현황판</div>
-      <div class="notice-banner">
-        <i class="fa-solid fa-circle-info"></i> ※ 보강 정보 등록, 수정, 삭제는 모든 선생님께서 자유롭게 하실 수 있습니다.
-      </div>
     </header>
 
-    <!-- 상단 조작 패널 (기간 검색 및 오늘/이번주/이번달 버튼) -->
-    <section class="control-panel">
-      <div class="left-controls">
-        <div class="range-picker-wrap">
-          <i class="fa-regular fa-calendar-days" style="color: var(--primary-color);"></i>
-          <input type="date" id="filterStartDate">
-          <span class="date-separator">~</span>
-          <input type="date" id="filterEndDate">
-        </div>
-
-        <button class="btn btn-outline btn-sm" onclick="loadRecords()">
-          <i class="fa-solid fa-magnifying-glass"></i> 조회
-        </button>
-
-        <div class="btn-group">
-          <button class="btn btn-outline btn-sm" id="btnToday" onclick="setTodayDate()">오늘</button>
-          <button class="btn btn-outline btn-sm" id="btnThisWeek" onclick="setThisWeekDate()">이번 주</button>
-          <button class="btn btn-outline btn-sm" id="btnThisMonth" onclick="setThisMonthDate()">이번 달</button>
-          <button class="btn btn-outline btn-sm" id="btnAll" onclick="setAllDate()">전체 보기</button>
-        </div>
-      </div>
-
-      <div>
-        <button class="btn btn-primary" onclick="openAddModal()">
-          <i class="fa-solid fa-plus"></i> 보강 등록하기
-        </button>
-      </div>
-    </section>
-
-    <!-- 메인 보강 목록 테이블 (드롭다운 & 열별 필터 적용) -->
+    <!-- 메인 보강 목록 테이블 (통합 툴바 적용) -->
     <main class="table-card">
       <div class="table-header-title">
-        <span><i class="fa-solid fa-table-list" style="color: var(--primary-color);"></i> 보강 목록</span>
-        <span id="currentDateLabel" style="font-size: 0.9rem; font-weight: 500; color: #64748b;"></span>
+        <div class="header-controls-left">
+          <span class="header-title-text"><i class="fa-solid fa-table-list" style="color: var(--primary-color);"></i> 보강 목록</span>
+          
+          <div class="range-picker-wrap">
+            <i class="fa-regular fa-calendar-days" style="color: var(--primary-color);"></i>
+            <input type="date" id="filterStartDate">
+            <span class="date-separator">~</span>
+            <input type="date" id="filterEndDate">
+          </div>
+
+          <button class="btn btn-outline btn-sm" onclick="loadRecords()">
+            <i class="fa-solid fa-magnifying-glass"></i> 조회
+          </button>
+
+          <div class="btn-group">
+            <button class="btn btn-outline btn-sm" id="btnToday" onclick="setTodayDate()">오늘</button>
+            <button class="btn btn-outline btn-sm" id="btnThisWeek" onclick="setThisWeekDate()">이번 주</button>
+            <button class="btn btn-outline btn-sm" id="btnThisMonth" onclick="setThisMonthDate()">이번 달</button>
+            <button class="btn btn-outline btn-sm" id="btnAll" onclick="setAllDate()">전체 보기</button>
+          </div>
+        </div>
+
+        <div class="header-controls-right">
+          <span id="currentDateLabel" style="font-size: 0.85rem; font-weight: 500; color: #64748b;"></span>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+            <i class="fa-solid fa-plus"></i> 보강 등록하기
+          </button>
+        </div>
       </div>
 
       <div class="table-responsive">
