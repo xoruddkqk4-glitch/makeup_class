@@ -50,10 +50,10 @@ function getDbSheet() {
     }
   }
 
-  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 9번째 확인여부 열 추가)
+  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 5번째 '보강교과' 열 추가, 10번째 확인여부 열 추가)
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID', '날짜', '교시', '교실', '원교사', '보강교사', '사유', '등록시각', '확인여부']);
-    sheet.getRange(1, 1, 1, 9).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부']);
+    sheet.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
   } else {
     // 기존 헤더가 '학급'인 경우 '교실'로 자동 갱신
@@ -61,9 +61,15 @@ function getDbSheet() {
     if (col4Header === '학급') {
       sheet.getRange(1, 4).setValue('교실');
     }
-    // 9번째 열 확인여부 헤더 추가 확인
-    if (sheet.getLastColumn() < 9 || sheet.getRange(1, 9).getValue() === '') {
-      sheet.getRange(1, 9).setValue('확인여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    // 기존 DB 마이그레이션: 5번째 열이 '원교사'인 경우 '보강교과' 열 자동 삽입
+    var col5Header = sheet.getRange(1, 5).getValue();
+    if (col5Header === '원교사') {
+      sheet.insertColumnBefore(5);
+      sheet.getRange(1, 5).setValue('보강교과').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    }
+    // 10번째 열 확인여부 헤더 추가 확인
+    if (sheet.getLastColumn() < 10 || sheet.getRange(1, 10).getValue() === '') {
+      sheet.getRange(1, 10).setValue('확인여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
   }
 
@@ -119,17 +125,18 @@ function getSubstitutionRecords(startDate, endDate) {
         }
       }
 
-      var isConf = (row[8] === true || String(row[8]).toLowerCase() === 'true' || String(row[8]) === '확인완료');
+      var isConf = (row[9] === true || String(row[9]).toLowerCase() === 'true' || String(row[9]) === '확인완료');
 
       records.push({
         id: String(row[0]),
         date: rowDate,
         period: String(row[2]),
         className: String(row[3]),
-        originalTeacher: String(row[4]),
-        substituteTeacher: String(row[5]),
-        reason: String(row[6]),
-        timestamp: row[7] ? String(row[7]) : '',
+        subject: String(row[4] || ''),
+        originalTeacher: String(row[5] || ''),
+        substituteTeacher: String(row[6] || ''),
+        reason: String(row[7] || ''),
+        timestamp: row[8] ? String(row[8]) : '',
         confirmed: isConf
       });
     }
@@ -152,11 +159,11 @@ function getSubstitutionRecords(startDate, endDate) {
 }
 
 /**
- * 신규 보강 내역을 저장합니다. (1~4번 필수, 5~6번 선택)
+ * 신규 보강 내역을 저장합니다. (날짜, 교시, 교실, 보강교과, 보강교사 필수)
  */
 function addSubstitutionRecord(record) {
   try {
-    if (!record.date || !record.period || !record.className || !record.substituteTeacher) {
+    if (!record.date || !record.period || !record.className || !record.subject || !record.substituteTeacher) {
       throw new Error('필수 입력 항목이 누락되었습니다.');
     }
 
@@ -171,6 +178,7 @@ function addSubstitutionRecord(record) {
       formattedDate,
       record.period,
       record.className,
+      record.subject,
       record.originalTeacher || '',
       record.substituteTeacher,
       record.reason || '',
@@ -195,11 +203,11 @@ function addSubstitutionRecord(record) {
 }
 
 /**
- * 기존 보강 내역을 수정합니다. (1~4번 필수, 5~6번 선택)
+ * 기존 보강 내역을 수정합니다. (날짜, 교시, 교실, 보강교과, 보강교사 필수)
  */
 function updateSubstitutionRecord(record) {
   try {
-    if (!record.id || !record.date || !record.period || !record.className || !record.substituteTeacher) {
+    if (!record.id || !record.date || !record.period || !record.className || !record.subject || !record.substituteTeacher) {
       throw new Error('필수 수정 정보가 누락되었습니다.');
     }
 
@@ -210,14 +218,15 @@ function updateSubstitutionRecord(record) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(record.id)) {
         var rowNum = i + 1;
-        var existingConf = (data[i][8] === true || String(data[i][8]).toLowerCase() === 'true');
+        var existingConf = (data[i][9] === true || String(data[i][9]).toLowerCase() === 'true');
         var isConf = record.confirmed !== undefined ? (record.confirmed ? true : false) : existingConf;
 
-        sheet.getRange(rowNum, 1, 1, 9).setValues([[
+        sheet.getRange(rowNum, 1, 1, 10).setValues([[
           String(record.id),
           formattedDate,
           record.period,
           record.className,
+          record.subject,
           record.originalTeacher || '',
           record.substituteTeacher,
           record.reason || '',
@@ -253,7 +262,7 @@ function toggleSubstituteConfirm(id, confirmed) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(id)) {
         var rowNum = i + 1;
-        sheet.getRange(rowNum, 9).setValue(confirmed ? true : false);
+        sheet.getRange(rowNum, 10).setValue(confirmed ? true : false);
         SpreadsheetApp.flush();
         return { success: true, confirmed: confirmed };
       }
