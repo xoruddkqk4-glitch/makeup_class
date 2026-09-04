@@ -50,10 +50,10 @@ function getDbSheet() {
     }
   }
 
-  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 5번째 '보강교과' 열 추가, 10번째 확인여부 열 추가)
+  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 5번째 '보강교과' 열 추가, 10번째 확인여부, 11번째 긴급여부 열 추가)
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부']);
-    sheet.getRange(1, 1, 1, 10).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부', '긴급여부']);
+    sheet.getRange(1, 1, 1, 11).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
   } else {
     // 기존 헤더가 '학급'인 경우 '교실'로 자동 갱신
@@ -70,6 +70,10 @@ function getDbSheet() {
     // 10번째 열 확인여부 헤더 추가 확인
     if (sheet.getLastColumn() < 10 || sheet.getRange(1, 10).getValue() === '') {
       sheet.getRange(1, 10).setValue('확인여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    }
+    // 11번째 열 긴급여부 헤더 추가 확인
+    if (sheet.getLastColumn() < 11 || sheet.getRange(1, 11).getValue() === '') {
+      sheet.getRange(1, 11).setValue('긴급여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
   }
 
@@ -126,6 +130,7 @@ function getSubstitutionRecords(startDate, endDate) {
       }
 
       var isConf = (row[9] === true || String(row[9]).toLowerCase() === 'true' || String(row[9]) === '확인완료');
+      var isUrgent = (row[10] === true || String(row[10]).toLowerCase() === 'true' || String(row[10]) === '긴급');
 
       records.push({
         id: String(row[0]),
@@ -137,7 +142,8 @@ function getSubstitutionRecords(startDate, endDate) {
         substituteTeacher: String(row[6] || ''),
         reason: String(row[7] || ''),
         timestamp: row[8] ? String(row[8]) : '',
-        confirmed: isConf
+        confirmed: isConf,
+        urgent: isUrgent
       });
     }
 
@@ -172,6 +178,7 @@ function addSubstitutionRecord(record) {
     var nowIso = new Date().toISOString();
     var formattedDate = formatDateString(record.date);
     var isConf = record.confirmed ? true : false;
+    var isUrgent = record.urgent ? true : false;
 
     sheet.appendRow([
       newId,
@@ -183,7 +190,8 @@ function addSubstitutionRecord(record) {
       record.substituteTeacher,
       record.reason || '',
       nowIso,
-      isConf
+      isConf,
+      isUrgent
     ]);
 
     SpreadsheetApp.flush(); // 저장 즉시 적용
@@ -221,7 +229,10 @@ function updateSubstitutionRecord(record) {
         var existingConf = (data[i][9] === true || String(data[i][9]).toLowerCase() === 'true');
         var isConf = record.confirmed !== undefined ? (record.confirmed ? true : false) : existingConf;
 
-        sheet.getRange(rowNum, 1, 1, 10).setValues([[
+        var existingUrgent = (data[i][10] === true || String(data[i][10]).toLowerCase() === 'true');
+        var isUrgent = record.urgent !== undefined ? (record.urgent ? true : false) : existingUrgent;
+
+        sheet.getRange(rowNum, 1, 1, 11).setValues([[
           String(record.id),
           formattedDate,
           record.period,
@@ -231,7 +242,8 @@ function updateSubstitutionRecord(record) {
           record.substituteTeacher,
           record.reason || '',
           new Date().toISOString(),
-          isConf
+          isConf,
+          isUrgent
         ]]);
 
         SpreadsheetApp.flush(); // 수정 즉시 적용

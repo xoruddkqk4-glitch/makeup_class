@@ -447,6 +447,188 @@
       border-radius: 4px;
     }
 
+    /* 긴급 보강 행 전체 시각적 강조 (배경색 + 좌측 강렬한 레더 테두리 포인트) */
+    .schedule-table tr.tr-urgent {
+      background-color: #fff5f5 !important;
+      border-left: 5px solid #dc2626 !important;
+      box-shadow: inset 0 0 0 1px #fca5a5;
+    }
+
+    .schedule-table tr.tr-urgent:hover {
+      background-color: #fee2e2 !important;
+    }
+
+    .schedule-table tr.tr-urgent td {
+      border-top: 1px solid #fca5a5 !important;
+      border-bottom: 1px solid #fca5a5 !important;
+    }
+
+    @keyframes pulse-urgent {
+      0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+      70% { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+
+    /* 긴급 헤더 필터 세그먼트 버튼 그룹 ('전체', '일반', '🚨긴급') */
+    .col-filter-segmented {
+      display: inline-flex;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 2px;
+      gap: 2px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .btn-filter-pill {
+      flex: 1;
+      padding: 4px 0;
+      border: none;
+      background: transparent;
+      color: #475569;
+      font-size: 0.775rem;
+      font-weight: 700;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .btn-filter-pill:hover {
+      background: #e2e8f0;
+      color: #1e293b;
+    }
+
+    .btn-filter-pill.active {
+      background: var(--primary-color);
+      color: #ffffff;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-filter-pill.btn-pill-urgent:hover {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .btn-filter-pill.btn-pill-urgent.active {
+      background: #dc2626 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 5px rgba(220, 38, 38, 0.35);
+    }
+
+    /* 모달 긴급 스위치 배너 (ON / OFF 극명한 시각적 대비) */
+    .urgent-toggle-banner {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+
+    .urgent-toggle-banner.active-urgent {
+      background: #fef2f2 !important;
+      border: 2px solid #ef4444 !important;
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.22);
+    }
+
+    .urgent-banner-icon {
+      font-size: 1.35rem;
+      color: #64748b;
+      transition: color 0.2s ease;
+    }
+
+    .urgent-banner-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #334155;
+      transition: color 0.2s ease;
+    }
+
+    .urgent-banner-desc {
+      font-size: 0.775rem;
+      color: #64748b;
+      margin-top: 2px;
+      transition: color 0.2s ease;
+    }
+
+    .urgent-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .urgent-status-badge.is-off {
+      background: #e2e8f0;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+    }
+
+    .urgent-status-badge.is-on {
+      background: #dc2626;
+      color: #ffffff;
+      border: 1px solid #b91c1c;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+      animation: pulse-urgent 2s infinite;
+    }
+
+    .urgent-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      margin: 0;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .urgent-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .urgent-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .25s ease;
+      border-radius: 26px;
+    }
+
+    .urgent-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s ease;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .urgent-switch input:checked + .urgent-slider {
+      background-color: #dc2626;
+    }
+
+    .urgent-switch input:checked + .urgent-slider:before {
+      transform: translateX(22px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    }
+
     /* 작업 전용 아이콘 버튼 */
     .action-btns {
       display: flex;
@@ -847,7 +1029,15 @@
             </tr>
             <!-- 열별 개별 필터 헤더 행 -->
             <tr class="filter-header-row">
-              <th><!-- 날짜 열 빈칸 --></th>
+              <th>
+                <!-- 긴급 보강 여부 복수 선택 버튼 그룹 ('전체', '일반', '🚨긴급' - 빨간색 박스 위치) -->
+                <div class="col-filter-segmented" id="filterUrgentPillGroup">
+                  <button type="button" class="btn-filter-pill active" onclick="selectUrgentFilter('', this)">전체</button>
+                  <button type="button" class="btn-filter-pill" onclick="selectUrgentFilter('normal', this)">일반</button>
+                  <button type="button" class="btn-filter-pill btn-pill-urgent" onclick="selectUrgentFilter('urgent', this)">🚨긴급</button>
+                </div>
+                <input type="hidden" id="filterColUrgent" value="">
+              </th>
               <th>
                 <select class="col-filter-select" id="filterColPeriod" onchange="applyColumnFilters()">
                   <option value="">전체 교시</option>
@@ -1011,6 +1201,27 @@
       <form id="addForm" onsubmit="handleFormSubmit(event)">
         <input type="hidden" id="editingRecordId" value="">
         <div class="modal-body">
+          <!-- 당일 긴급 변경 여부 선택 토글 (오늘 목록 중 당일 변경 전용) -->
+          <div class="urgent-toggle-banner" id="urgentToggleBanner">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="urgent-banner-icon" id="urgentBannerIcon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+              <div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                  <span class="urgent-banner-title" id="urgentBannerTitle">당일 긴급 보강 설정</span>
+                  <span class="urgent-status-badge is-off" id="urgentStatusBadge">OFF</span>
+                </div>
+                <div class="urgent-banner-desc" id="urgentBannerDesc">
+                  오늘 목록 중 당일 변경이 생긴 건인 경우 체크하세요. (행 강조 및 🚨긴급 알림)
+                  <div style="font-size: 0.75rem; opacity: 0.9; margin-top: 3px; font-weight: 500;"><i class="fa-regular fa-clock"></i> 당일이 지나면 자동으로 긴급이 해제됩니다.</div>
+                </div>
+              </div>
+            </div>
+            <label class="urgent-switch">
+              <input type="checkbox" id="inputUrgent" onchange="updateUrgentBannerUI()">
+              <span class="urgent-slider"></span>
+            </label>
+          </div>
+
           <div class="modal-form-grid">
             
             <!-- 좌측 열 (1~4번 필수 입력) -->
@@ -1131,9 +1342,9 @@
 
     // 모의(Mock) 데이터 (로컬 테스트용)
     const mockData = [
-      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', subject: '수학', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장' },
-      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', subject: '영어', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가' },
-      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', subject: '국어', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가' }
+      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', subject: '수학', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장', urgent: true },
+      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', subject: '영어', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가', urgent: false },
+      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', subject: '국어', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가', urgent: false }
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -1328,6 +1539,61 @@
       return `${year}-${month}-${day}`;
     }
 
+    // 당일 긴급 보강 여부 판별 (해당일 지나면 컴퓨터 local 시각 기준 자동 해제)
+    function isUrgentActive(r) {
+      if (!r || !r.urgent) return false;
+      const todayStr = formatDateToString(getTodayDateObj());
+      let recordDate = r.date;
+      if (recordDate) {
+        const match = String(recordDate).trim().match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
+        if (match) {
+          recordDate = `${match[1]}-${match[2]}-${match[3]}`;
+        }
+      }
+      return recordDate >= todayStr;
+    }
+
+    // 모달 내 긴급 토글 스위치 시각적 효과 (ON / OFF 극명한 대비)
+    function updateUrgentBannerUI() {
+      const checkbox = document.getElementById('inputUrgent');
+      const banner = document.getElementById('urgentToggleBanner');
+      const badge = document.getElementById('urgentStatusBadge');
+      const icon = document.getElementById('urgentBannerIcon');
+      const title = document.getElementById('urgentBannerTitle');
+      const desc = document.getElementById('urgentBannerDesc');
+
+      if (!checkbox || !banner) return;
+
+      if (checkbox.checked) {
+        banner.classList.add('active-urgent');
+        if (badge) {
+          badge.className = 'urgent-status-badge is-on';
+          badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> 🚨 ON`;
+        }
+        if (icon) icon.style.color = '#dc2626';
+        if (title) title.style.color = '#991b1b';
+        if (desc) desc.style.color = '#b91c1c';
+      } else {
+        banner.classList.remove('active-urgent');
+        if (badge) {
+          badge.className = 'urgent-status-badge is-off';
+          badge.innerHTML = `OFF`;
+        }
+        if (icon) icon.style.color = '#64748b';
+        if (title) title.style.color = '#334155';
+        if (desc) desc.style.color = '#64748b';
+      }
+    }
+
+    // 헤더 필터 세그먼트 버튼 선택 ('전체', '일반', '🚨긴급')
+    function selectUrgentFilter(val, btn) {
+      document.getElementById('filterColUrgent').value = val;
+      const pills = document.querySelectorAll('#filterUrgentPillGroup .btn-filter-pill');
+      pills.forEach(p => p.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      applyColumnFilters();
+    }
+
     function setActiveQuickBtn(activeId) {
       ['btnToday', 'btnThisWeek', 'btnThisMonth', 'btnAll'].forEach(id => {
         const btn = document.getElementById(id);
@@ -1487,6 +1753,7 @@
     }
 
     // 검색 결과 개조식 텍스트 복사 기능 (교내 메신저 전달용)
+    // 검색 결과 개조식 텍스트 복사 기능 (교내 메신저 전달용: 시각적 대형 카드 포맷)
     function copyResultsToText() {
       const records = lastFilteredSortedRecords;
       if (!records || records.length === 0) {
@@ -1511,38 +1778,98 @@
         isSingleDate = true;
       }
 
+      // 1. 일반 텍스트 (Plain Text: 대형 괄호 [ 1교시 ] & 2줄 카드 포맷으로 가독성 극대화)
       let textLines = [];
       textLines.push(`📢 [보강 알리미] 보강 현황 안내`);
       textLines.push(`📅 기간: ${dateText}`);
-      textLines.push(`────────────────────────────`);
+      textLines.push(`========================================`);
 
-      records.forEach((r) => {
-        const datePrefix = isSingleDate ? '' : `${formatFormattedDate(r.date)} | `;
-        const periodStr = r.period || '-';
-        const roomStr = r.className || '-';
-        const subjectStr = r.subject || '-';
+      records.forEach((r, idx) => {
+        const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)}   |   `;
+        const periodStr = r.period ? `[ ${r.period} ]` : '[ -교시 ]';
+        const roomStr = r.className ? `${r.className}호` : '-';
+        const subjectStr = r.subject ? `[교과] ${r.subject}` : '[교과] -';
         const subTeacherStr = r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -';
         const origTeacherStr = r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -';
-        const reasonStr = r.reason ? `[사유] ${r.reason}` : '[사유] -';
-        const confBadge = r.confirmed ? ` (✅본인확인)` : '';
+        const reasonStr = r.reason ? `(사유: ${r.reason})` : '(사유: -)';
+        const confBadge = r.confirmed ? ` [✅본인확인]` : '';
+        const urgentState = isUrgentActive(r);
+        const urgentTag = urgentState ? '🚨[긴급] ' : '';
 
-        textLines.push(`• ${datePrefix}${periodStr} | ${roomStr} | ${subjectStr} | ${subTeacherStr} ⬅️ ${origTeacherStr} | ${reasonStr}${confBadge}`);
+        textLines.push(`📌 ${urgentTag}${dateStr}${periodStr}   ${roomStr}   |   ${subjectStr}`);
+        textLines.push(`   👉 ${subTeacherStr}  ⬅️  ${origTeacherStr}   ${reasonStr}${confBadge}`);
+
+        if (idx < records.length - 1) {
+          textLines.push(`----------------------------------------`);
+        }
       });
 
-      textLines.push(`────────────────────────────`);
+      textLines.push(`========================================`);
       textLines.push(`(총 ${records.length}건)`);
 
-      const fullText = textLines.join('\n');
+      const plainText = textLines.join('\n');
 
-      // 클립보드 복사
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(fullText).then(() => {
+      // 2. 서식 텍스트 (HTML: 18px 대형 폰트, bold, 강조 카드 스타일)
+      let htmlRows = '';
+      records.forEach((r) => {
+        const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)} &nbsp;&nbsp;|&nbsp;&nbsp; `;
+        const periodStr = escapeHtml(r.period || '-');
+        const roomStr = escapeHtml(r.className || '-');
+        const subjectStr = escapeHtml(r.subject || '-');
+        const subTeacherStr = escapeHtml(r.substituteTeacher || '-');
+        const origTeacherStr = escapeHtml(r.originalTeacher || '-');
+        const reasonStr = escapeHtml(r.reason || '-');
+        const confBadge = r.confirmed ? ' <span style="color:#059669; font-weight:bold;">[✅본인확인]</span>' : '';
+        const urgentState = isUrgentActive(r);
+        const urgentBadgeHtml = urgentState ? '<span style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:14px; font-weight:bold; padding:2px 6px; border-radius:4px; margin-right:6px;">🚨 긴급</span>' : '';
+
+        htmlRows += `
+          <div style="margin-bottom: 14px; padding: 10px 14px; background-color: #f8fafc; border-left: 5px solid ${urgentState ? '#dc2626' : '#006b67'}; border-radius: 6px;">
+            <div style="font-size: 18px; font-weight: bold; color: #0284c7; margin-bottom: 6px;">
+              📌 ${urgentBadgeHtml}${dateStr}[ ${periodStr} ] &nbsp;&nbsp; ${roomStr}호 &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color: #0369a1;">[교과] ${subjectStr}</span>
+            </div>
+            <div style="font-size: 17px; color: #1f2937; margin-left: 12px; line-height: 1.6;">
+              👉 <strong style="color: #065f46; font-size: 18px;">[보강] ${subTeacherStr}</strong> &nbsp;<span style="font-size: 18px;">⬅️</span>&nbsp; 
+              <span style="color: #e11d48; font-weight: bold;">[원교사] ${origTeacherStr}</span> &nbsp;&nbsp; 
+              <span style="color: #92400e;">(사유: ${reasonStr})</span>${confBadge}
+            </div>
+          </div>
+        `;
+      });
+
+      const htmlContent = `
+        <div style="font-family: 'Noto Sans KR', sans-serif; font-size: 16px; color: #1f2937; line-height: 1.6; padding: 6px;">
+          <h2 style="font-size: 20px; color: #006b67; margin: 0 0 6px 0;">📢 [보강 알리미] 보강 현황 안내</h2>
+          <p style="font-size: 15px; color: #475569; margin: 0 0 12px 0;"><strong>📅 기간:</strong> ${escapeHtml(dateText)}</p>
+          <hr style="border: none; border-top: 2px solid #006b67; margin: 10px 0 16px 0;" />
+          ${htmlRows}
+          <hr style="border: none; border-top: 1px solid #cbd5e1; margin: 16px 0 8px 0;" />
+          <p style="font-size: 14px; color: #64748b; margin: 0;">(총 ${records.length}건)</p>
+        </div>
+      `;
+
+      // 3. 클립보드 복사 실행 (HTML + Text 동시 클립보드 저장)
+      if (navigator.clipboard && window.ClipboardItem && window.isSecureContext) {
+        const textBlob = new Blob([plainText], { type: 'text/plain' });
+        const htmlBlob = new Blob([htmlContent], { type: 'text/html' });
+        const item = new ClipboardItem({
+          'text/plain': textBlob,
+          'text/html': htmlBlob
+        });
+
+        navigator.clipboard.write([item]).then(() => {
           showCopySuccessUI();
         }).catch(() => {
-          fallbackCopyTextToClipboard(fullText);
+          fallbackCopyTextToClipboard(plainText);
+        });
+      } else if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(plainText).then(() => {
+          showCopySuccessUI();
+        }).catch(() => {
+          fallbackCopyTextToClipboard(plainText);
         });
       } else {
-        fallbackCopyTextToClipboard(fullText);
+        fallbackCopyTextToClipboard(plainText);
       }
     }
 
@@ -1686,8 +2013,9 @@
       return list;
     }
 
-    // 열별 개별 필터링 (층별 전체 및 교실별 필터 대응 + 정렬 연동)
+    // 열별 개별 필터링 (층별 전체 및 교실별 필터 대응 + 긴급 필터 + 정렬 연동)
     function applyColumnFilters() {
+      const urgentQuery = document.getElementById('filterColUrgent').value;
       const periodQuery = document.getElementById('filterColPeriod').value.trim();
       const classQuery = document.getElementById('filterColClass').value.trim();
       const subjectQuery = document.getElementById('filterColSubject').value.toLowerCase().trim();
@@ -1696,6 +2024,9 @@
       const origTeacherQuery = document.getElementById('filterColOrigTeacher').value.toLowerCase().trim();
 
       const filtered = currentRecords.filter(r => {
+        const urgentState = isUrgentActive(r);
+        if (urgentQuery === 'urgent' && !urgentState) return false;
+        if (urgentQuery === 'normal' && urgentState) return false;
         if (periodQuery && r.period !== periodQuery) return false;
         
         if (classQuery) {
@@ -1727,6 +2058,7 @@
     }
 
     function resetColumnFilters() {
+      selectUrgentFilter('', document.querySelectorAll('#filterUrgentPillGroup .btn-filter-pill')[0]);
       document.getElementById('filterColPeriod').value = '';
       document.getElementById('filterColClass').value = '';
       document.getElementById('filterColSubject').value = '';
@@ -1783,10 +2115,12 @@
         const confBadge = isConf 
           ? '<span style="color:#059669; font-weight:bold;">[확인]</span>' 
           : '<span style="color:#d97706;">[미확인]</span>';
+        const urgentState = isUrgentActive(r);
+        const urgentPdfBadge = urgentState ? '<span style="color:#dc2626; font-weight:bold; margin-left:2px;">🚨[긴급]</span>' : '';
 
         rowsHtml += `
-          <tr style="background-color: ${idx % 2 === 1 ? '#f8fafc' : '#ffffff'};">
-            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:600; font-size:10.5px;">${escapeHtml(formattedDate)}</td>
+          <tr style="background-color: ${urgentState ? '#fff5f5' : (idx % 2 === 1 ? '#f8fafc' : '#ffffff')};">
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:600; font-size:10.5px;">${escapeHtml(formattedDate)}${urgentPdfBadge}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#0284c7;">${escapeHtml(r.period)}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#475569;">${escapeHtml(r.className)}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#0369a1;">${escapeHtml(r.subject || '-')}</td>
@@ -1858,7 +2192,7 @@
       });
     }
 
-    // 테이블 렌더링 (보강 교사 확인 체크박스 및 보강 교과 포함)
+    // 테이블 렌더링 (보강 교사 확인 체크박스 및 긴급 행 배경/테두리 강조 포함)
     function renderTable(records) {
       const tbody = document.getElementById('recordTableBody');
       const emptyState = document.getElementById('emptyState');
@@ -1875,6 +2209,11 @@
         const tr = document.createElement('tr');
         const formattedDateText = formatFormattedDate(item.date);
         const isConf = Boolean(item.confirmed);
+        const urgentState = isUrgentActive(item);
+        
+        if (urgentState) {
+          tr.classList.add('tr-urgent');
+        }
         
         tr.innerHTML = `
           <td style="font-weight: 600;">${formattedDateText}</td>
@@ -1977,6 +2316,8 @@
       document.getElementById('inputSubstituteTeacher').value = target.substituteTeacher;
       document.getElementById('inputReason').value = target.reason || '';
       document.getElementById('inputOriginalTeacher').value = target.originalTeacher || '';
+      document.getElementById('inputUrgent').checked = Boolean(target.urgent);
+      updateUrgentBannerUI();
 
       document.getElementById('addModal').classList.add('active');
     }
@@ -1997,6 +2338,7 @@
       const substituteTeacher = document.getElementById('inputSubstituteTeacher').value.trim();
       const reason = document.getElementById('inputReason').value.trim();
       const originalTeacher = document.getElementById('inputOriginalTeacher').value.trim();
+      const urgent = document.getElementById('inputUrgent').checked;
 
       // 필수 항목 검증 (날짜, 교시, 교실, 보강 교과, 보강 교사)
       if (!date || !period || !roomVal || !subject || !substituteTeacher) {
@@ -2013,7 +2355,8 @@
         subject: subject,
         substituteTeacher: substituteTeacher,
         reason: reason || '',
-        originalTeacher: originalTeacher || ''
+        originalTeacher: originalTeacher || '',
+        urgent: urgent
       };
 
       // 1. 모달 즉시 닫기 & 로컬 UI 즉시 갱신 (0초 즉시 반응)
@@ -2079,6 +2422,8 @@
       document.getElementById('inputSubstituteTeacher').value = '';
       document.getElementById('inputReason').value = '';
       document.getElementById('inputOriginalTeacher').value = '';
+      document.getElementById('inputUrgent').checked = false;
+      updateUrgentBannerUI();
       selectPeriod(1);
     }
 
