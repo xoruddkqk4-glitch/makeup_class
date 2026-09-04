@@ -1801,29 +1801,26 @@
         isSingleDate = true;
       }
 
-      // 1. 일반 텍스트 (Plain Text: 대형 괄호 [ 1교시 ] & 2줄 카드 포맷으로 가독성 극대화)
+      // 1. 일반 텍스트 (Plain Text: 1항목 1줄 개조식 포맷)
       let textLines = [];
       textLines.push(`📢 [보강 알리미] 보강 현황 안내`);
       textLines.push(`📅 기간: ${dateText}`);
       textLines.push(`========================================`);
 
       records.forEach((r, idx) => {
+        const urgentTag = isUrgentActive(r) ? '🚨[긴급] ' : '';
         const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)}   |   `;
-        const periodStr = r.period ? `[ ${r.period} ]` : '[ -교시 ]';
-        const roomStr = r.className ? `${r.className}호` : '-';
-        const subjectStr = r.subject ? `[교과] ${r.subject}` : '[교과] -';
+        const periodStr = r.period || '-교시';
+        const roomStr = r.className || '-';
+        const subjectStr = r.subject || '-';
         const subTeacherStr = r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -';
         const origTeacherStr = r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -';
-        const reasonStr = r.reason ? `(사유: ${r.reason})` : '(사유: -)';
-        const confBadge = r.confirmed ? ` [✅본인확인]` : '';
-        const urgentState = isUrgentActive(r);
-        const urgentTag = urgentState ? '🚨[긴급] ' : '';
+        const reasonStr = r.reason ? `[사유] ${r.reason}` : '[사유] -';
+        const confBadge = r.confirmed ? ` (✅본인확인)` : '';
 
-        textLines.push(`📌 ${urgentTag}${dateStr}${periodStr}   ${roomStr}   |   ${subjectStr}`);
-        textLines.push(`   👉 ${subTeacherStr}  ⬅️  ${origTeacherStr}   ${reasonStr}${confBadge}`);
-
+        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}   |   ${reasonStr}${confBadge}`);
         if (idx < records.length - 1) {
-          textLines.push(`----------------------------------------`);
+          textLines.push(``);
         }
       });
 
@@ -1832,7 +1829,7 @@
 
       const plainText = textLines.join('\n');
 
-      // 2. 서식 텍스트 (HTML: 18px 대형 폰트, bold, 강조 카드 스타일)
+      // 2. 서식 텍스트 (HTML: 18px 대형 폰트, bold, 1항목 1줄 포맷)
       let htmlRows = '';
       records.forEach((r) => {
         const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)} &nbsp;&nbsp;|&nbsp;&nbsp; `;
@@ -1842,20 +1839,18 @@
         const subTeacherStr = escapeHtml(r.substituteTeacher || '-');
         const origTeacherStr = escapeHtml(r.originalTeacher || '-');
         const reasonStr = escapeHtml(r.reason || '-');
-        const confBadge = r.confirmed ? ' <span style="color:#059669; font-weight:bold;">[✅본인확인]</span>' : '';
+        const confBadge = r.confirmed ? ' <span style="color:#059669; font-weight:bold;">(✅본인확인)</span>' : '';
         const urgentState = isUrgentActive(r);
-        const urgentBadgeHtml = urgentState ? '<span style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:14px; font-weight:bold; padding:2px 6px; border-radius:4px; margin-right:6px;">🚨 긴급</span>' : '';
+        const urgentBadgeHtml = urgentState ? '<span style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:15px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-right:6px;">🚨 긴급</span>' : '';
 
         htmlRows += `
-          <div style="margin-bottom: 14px; padding: 10px 14px; background-color: #f8fafc; border-left: 5px solid ${urgentState ? '#dc2626' : '#006b67'}; border-radius: 6px;">
-            <div style="font-size: 18px; font-weight: bold; color: #0284c7; margin-bottom: 6px;">
-              📌 ${urgentBadgeHtml}${dateStr}[ ${periodStr} ] &nbsp;&nbsp; ${roomStr}호 &nbsp;&nbsp;|&nbsp;&nbsp; <span style="color: #0369a1;">[교과] ${subjectStr}</span>
-            </div>
-            <div style="font-size: 17px; color: #1f2937; margin-left: 12px; line-height: 1.6;">
-              👉 <strong style="color: #065f46; font-size: 18px;">[보강] ${subTeacherStr}</strong> &nbsp;<span style="font-size: 18px;">⬅️</span>&nbsp; 
-              <span style="color: #e11d48; font-weight: bold;">[원교사] ${origTeacherStr}</span> &nbsp;&nbsp; 
-              <span style="color: #92400e;">(사유: ${reasonStr})</span>${confBadge}
-            </div>
+          <div style="margin-bottom: 12px; font-size: 18px; line-height: 1.7; color: #1f2937;">
+            &nbsp;&nbsp;• ${urgentBadgeHtml}${dateStr}<strong style="color:#0284c7;">${periodStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <strong style="color:#475569;">${roomStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <span style="color:#0369a1; font-weight:bold;">${subjectStr}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <strong style="color:#065f46; font-size:19px;">[보강] ${subTeacherStr}</strong> &nbsp;<span style="font-size:18px;">⬅️</span>&nbsp; 
+            <span style="color:#e11d48; font-weight:bold;">[원교사] ${origTeacherStr}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <span style="color:#92400e;">[사유] ${reasonStr}</span>${confBadge}
           </div>
         `;
       });
