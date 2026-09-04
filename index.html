@@ -970,12 +970,12 @@
           
           <div class="range-picker-wrap">
             <i class="fa-regular fa-calendar-days" style="color: var(--primary-color);"></i>
-            <input type="date" id="filterStartDate">
+            <input type="date" id="filterStartDate" onchange="loadRecords()">
             <span class="date-separator">~</span>
-            <input type="date" id="filterEndDate">
+            <input type="date" id="filterEndDate" onchange="loadRecords()">
           </div>
 
-          <button class="btn btn-outline btn-sm" onclick="loadRecords()">
+          <button class="btn btn-outline btn-sm" onclick="loadRecords(true)">
             <i class="fa-solid fa-magnifying-glass"></i> 조회
           </button>
 
@@ -1326,7 +1326,9 @@
   </div>
 
   <script>
+    let allFetchedRecords = [];         // 전체 원본 데이터 메모리 캐시 (0초 즉시 반응용)
     let currentRecords = [];
+    let isDataLoaded = false;           // 초기 전체 데이터 로딩 완료 여부
     let lastFilteredSortedRecords = []; // 현재 표시 중인 정렬/필터링 데이터 저장
     let currentSortKey = 'date';       // 기본 정렬 키: 날짜
     let currentSortDir = 'desc';       // 기본 정렬 방향: 내림차순
@@ -1699,37 +1701,58 @@
       document.getElementById('inputReason').value = reasonText;
     }
 
-    // 보강 내역 불러오기
-    function loadRecords() {
+    // 보강 내역 불러오기 (메모리 캐싱 및 0초 즉시 반응 날짜 필터링 적용)
+    function loadRecords(forceRefresh = false) {
       const startDate = document.getElementById('filterStartDate').value;
       const endDate = document.getElementById('filterEndDate').value;
       
       updateDateLabel(startDate, endDate);
 
+      // 이미 전체 데이터를 로드했거나 강제 새로고침이 아닌 경우 0초 즉시 메모리 필터링
+      if (isDataLoaded && !forceRefresh) {
+        filterRecordsInMemory(startDate, endDate);
+        return;
+      }
+
       if (isGasEnvironment) {
         google.script.run
           .withSuccessHandler(function(records) {
-            currentRecords = records;
-            applyColumnFilters();
+            allFetchedRecords = records || [];
+            isDataLoaded = true;
+            filterRecordsInMemory(startDate, endDate);
           })
           .withFailureHandler(function(err) {
             alert('데이터를 불러오는데 실패했습니다: ' + err.message);
           })
-          .getSubstitutionRecords(startDate || 'ALL', endDate);
+          .getSubstitutionRecords('ALL', '');
       } else {
         setTimeout(() => {
-          if (!startDate && !endDate) {
-            currentRecords = [...mockData];
-          } else if (startDate && endDate) {
-            currentRecords = mockData.filter(r => r.date >= startDate && r.date <= endDate);
-          } else if (startDate) {
-            currentRecords = mockData.filter(r => r.date === startDate);
-          } else {
-            currentRecords = [...mockData];
-          }
-          applyColumnFilters();
-        }, 100);
+          allFetchedRecords = [...mockData];
+          isDataLoaded = true;
+          filterRecordsInMemory(startDate, endDate);
+        }, 50);
       }
+    }
+
+    // 메모리 0초 즉시 날짜 범위 필터링
+    function filterRecordsInMemory(startDate, endDate) {
+      if (!startDate && !endDate) {
+        currentRecords = [...allFetchedRecords];
+      } else {
+        currentRecords = allFetchedRecords.filter(r => {
+          const rDate = r.date;
+          if (!rDate) return false;
+          if (startDate && endDate) {
+            return rDate >= startDate && rDate <= endDate;
+          } else if (startDate) {
+            return rDate >= startDate;
+          } else if (endDate) {
+            return rDate <= endDate;
+          }
+          return true;
+        });
+      }
+      applyColumnFilters();
     }
 
     function updateDateLabel(startDate, endDate) {
@@ -2255,6 +2278,9 @@
       const newConfirmedState = !target.confirmed;
       target.confirmed = newConfirmedState;
 
+      const targetAll = allFetchedRecords.find(r => String(r.id) === String(id));
+      if (targetAll) targetAll.confirmed = newConfirmedState;
+
       // 1. 화면 0초 즉시 업데이트
       applyColumnFilters();
 
@@ -2365,10 +2391,15 @@
       if (editingId) {
         const idx = currentRecords.findIndex(r => String(r.id) === String(editingId));
         if (idx !== -1) currentRecords[idx] = { ...record };
+
+        const idxAll = allFetchedRecords.findIndex(r => String(r.id) === String(editingId));
+        if (idxAll !== -1) allFetchedRecords[idxAll] = { ...record };
       } else {
         document.getElementById('filterStartDate').value = date;
         document.getElementById('filterEndDate').value = date;
-        currentRecords.unshift({ ...record });
+        allFetchedRecords.unshift({ ...record });
+        filterRecordsInMemory(date, date);
+        return;
       }
 
       // 화면 즉시 리렌더링
@@ -2431,6 +2462,7 @@
       if (!confirm('해당 보강 내역을 삭제하시겠습니까?')) return;
 
       // 1. 화면에서 즉시 제거 (0초 즉시 반응)
+      allFetchedRecords = allFetchedRecords.filter(r => String(r.id) !== String(id));
       currentRecords = currentRecords.filter(r => String(r.id) !== String(id));
       applyColumnFilters();
 
