@@ -1413,6 +1413,7 @@
       updateSortIconsUI();
       setTodayDate();
       fetchTagsFromBackend();
+      initRealtimeSync();
       window.addEventListener('resize', adjustDateLabelFontSize);
 
       window.addEventListener('storage', function(e) {
@@ -1420,9 +1421,75 @@
           initReasonTags();
         } else if (e.key === 'custom_subject_tags') {
           initSubjectTags();
+        } else if (e.key === 'hogik_sync_trigger') {
+          silentFetchLatestData();
         }
       });
     });
+
+    // 실시간 비동기 동기화 및 탭간 BroadcastChannel 연동
+    let syncChannel = null;
+
+    function initRealtimeSync() {
+      if (typeof BroadcastChannel !== 'undefined') {
+        try {
+          syncChannel = new BroadcastChannel('hogik_class_sync');
+          syncChannel.onmessage = function(event) {
+            if (event && event.data && event.data.type === 'DATA_UPDATED') {
+              silentFetchLatestData();
+              fetchTagsFromBackend();
+            }
+          };
+        } catch (e) {}
+      }
+
+      // 10초 주기 스마트 무음 백그라운드 폴링 (새로고침 없이 갱신)
+      setInterval(function() {
+        const activeModal = document.querySelector('.modal-overlay.active');
+        if (!activeModal && document.visibilityState === 'visible') {
+          silentFetchLatestData();
+        }
+      }, 10000);
+
+      // 탭 포커스 복귀 시 즉시 갱신
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+          silentFetchLatestData();
+          fetchTagsFromBackend();
+        }
+      });
+      window.addEventListener('focus', function() {
+        silentFetchLatestData();
+        fetchTagsFromBackend();
+      });
+    }
+
+    function notifyDataChanged() {
+      if (syncChannel) {
+        try {
+          syncChannel.postMessage({ type: 'DATA_UPDATED', timestamp: Date.now() });
+        } catch (e) {}
+      }
+      try {
+        localStorage.setItem('hogik_sync_trigger', String(Date.now()));
+      } catch (e) {}
+    }
+
+    function silentFetchLatestData() {
+      if (isGasEnvironment) {
+        google.script.run
+          .withSuccessHandler(function(records) {
+            if (records && Array.isArray(records)) {
+              allFetchedRecords = records;
+              isDataLoaded = true;
+              const startDate = document.getElementById('filterStartDate') ? document.getElementById('filterStartDate').value : '';
+              const endDate = document.getElementById('filterEndDate') ? document.getElementById('filterEndDate').value : '';
+              filterRecordsInMemory(startDate, endDate);
+            }
+          })
+          .getSubstitutionRecords('ALL', '');
+      }
+    }
 
     // 구글 스프레드시트 '태그관리' 시트 태그 불러오기 및 병합
     function fetchTagsFromBackend() {
@@ -2434,6 +2501,7 @@
 
       // 1. 화면 0초 즉시 업데이트
       applyColumnFilters();
+      notifyDataChanged();
 
       // 2. 백그라운드 구글 스프레드시트 DB 연동
       if (isGasEnvironment) {
@@ -2550,11 +2618,13 @@
         document.getElementById('filterEndDate').value = date;
         allFetchedRecords.unshift({ ...record });
         filterRecordsInMemory(date, date);
+        notifyDataChanged();
         return;
       }
 
       // 화면 즉시 리렌더링
       applyColumnFilters();
+      notifyDataChanged();
 
       // 2. 백그라운드 구글 스프레드시트 DB 동기화
       if (isGasEnvironment) {
@@ -2616,6 +2686,7 @@
       allFetchedRecords = allFetchedRecords.filter(r => String(r.id) !== String(id));
       currentRecords = currentRecords.filter(r => String(r.id) !== String(id));
       applyColumnFilters();
+      notifyDataChanged();
 
       // 2. 백그라운드 DB 삭제 처리
       if (isGasEnvironment) {
