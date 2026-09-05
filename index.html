@@ -1392,11 +1392,11 @@
     let isGasEnvironment = typeof google !== 'undefined' && google.script && google.script.run;
 
     // 기본 보강 사유 태그 목록 (조퇴, 외출 분리 완료)
-    const DEFAULT_REASON_TAGS = ['출장', '연가', '병가', '공가', '특별휴가', '조퇴', '외출'];
+    const DEFAULT_REASON_TAGS = ['출장', '연가', '병가', '공가', '특별휴가', '조퇴', '외출', '지참'];
     let reasonTags = [];
 
     // 기본 보강 교과 태그 목록
-    const DEFAULT_SUBJECT_TAGS = ['국어', '수학', '영어', '사회', '과학', '체육', '음악', '미술', '정보'];
+    const DEFAULT_SUBJECT_TAGS = ['국어', '수학', '영어', '사회', '과학', '체육', '음악', '미술', '정보', '세계 문화와 영어A'];
     let subjectTags = [];
 
     // 모의(Mock) 데이터 (로컬 테스트용)
@@ -1412,8 +1412,56 @@
       updateRoomOptions();
       updateSortIconsUI();
       setTodayDate();
+      fetchTagsFromBackend();
       window.addEventListener('resize', adjustDateLabelFontSize);
+
+      window.addEventListener('storage', function(e) {
+        if (e.key === 'custom_reason_tags') {
+          initReasonTags();
+        } else if (e.key === 'custom_subject_tags') {
+          initSubjectTags();
+        }
+      });
     });
+
+    // 구글 스프레드시트 '태그관리' 시트 태그 불러오기 및 병합
+    function fetchTagsFromBackend() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res && res.success) {
+            const sheetReasons = Array.isArray(res.reasonTags) ? res.reasonTags : [];
+            const sheetSubjects = Array.isArray(res.subjectTags) ? res.subjectTags : [];
+
+            let mergedReasons = [...sheetReasons];
+            reasonTags.forEach(function(t) {
+              if (t && !mergedReasons.includes(t)) mergedReasons.push(t);
+            });
+
+            let mergedSubjects = [...sheetSubjects];
+            subjectTags.forEach(function(t) {
+              if (t && !mergedSubjects.includes(t)) mergedSubjects.push(t);
+            });
+
+            const sheetNeedsUpdate = mergedReasons.length > sheetReasons.length || mergedSubjects.length > sheetSubjects.length;
+
+            reasonTags = mergedReasons;
+            subjectTags = mergedSubjects;
+
+            localStorage.setItem('custom_reason_tags', JSON.stringify(reasonTags));
+            localStorage.setItem('custom_subject_tags', JSON.stringify(subjectTags));
+
+            renderReasonTags();
+            renderSubjectTags();
+            populateReasonFilterDropdown();
+            populateSubjectFilterDropdown();
+
+            if (sheetNeedsUpdate) {
+              google.script.run.saveTagsToSheet(subjectTags, reasonTags);
+            }
+          }
+        }).getTagsFromSheet();
+      }
+    }
 
     // 사유 태그 초기화 및 로컬스토리지 관리
     function initReasonTags() {
@@ -1435,6 +1483,9 @@
       localStorage.setItem('custom_reason_tags', JSON.stringify(reasonTags));
       renderReasonTags();
       populateReasonFilterDropdown();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.saveTagsToSheet(subjectTags, reasonTags);
+      }
     }
 
     function renderReasonTags() {
@@ -1519,6 +1570,9 @@
       localStorage.setItem('custom_subject_tags', JSON.stringify(subjectTags));
       renderSubjectTags();
       populateSubjectFilterDropdown();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.saveTagsToSheet(subjectTags, reasonTags);
+      }
     }
 
     function renderSubjectTags() {
