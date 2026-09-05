@@ -1037,6 +1037,8 @@
             <button class="btn btn-outline btn-sm btn-preset" id="btnLastMonth" onclick="setLastMonthDate()">지난달</button>
             <button class="btn btn-outline btn-sm btn-preset" id="btnLastWeek" onclick="setLastWeekDate()">지난주</button>
             <button class="btn btn-outline btn-sm btn-preset" id="btnToday" onclick="setTodayDate()">오늘</button>
+            <button class="btn btn-outline btn-sm btn-preset" id="btnTomorrow" onclick="setTomorrowDate()">내일</button>
+            <button class="btn btn-outline btn-sm btn-preset" id="btnDayAfterTomorrow" onclick="setDayAfterTomorrowDate()">모레</button>
             <button class="btn btn-outline btn-sm btn-preset" id="btnThisWeek" onclick="setThisWeekDate()">이번주</button>
             <button class="btn btn-outline btn-sm btn-preset" id="btnNextWeek" onclick="setNextWeekDate()">다음주</button>
             <button class="btn btn-outline btn-sm btn-preset" id="btnThisMonth" onclick="setThisMonthDate()">이번달</button>
@@ -1775,7 +1777,7 @@
     }
 
     function setActiveQuickBtn(activeId) {
-      ['btnLastMonth', 'btnLastWeek', 'btnToday', 'btnNextWeek', 'btnThisMonth', 'btnAll', 'btnThisWeek'].forEach(id => {
+      ['btnLastMonth', 'btnLastWeek', 'btnToday', 'btnTomorrow', 'btnDayAfterTomorrow', 'btnThisWeek', 'btnNextWeek', 'btnThisMonth', 'btnAll'].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
           if (id === activeId) btn.classList.add('active');
@@ -1818,6 +1820,28 @@
       document.getElementById('filterEndDate').value = todayStr;
       document.getElementById('inputDate').value = todayStr;
       setActiveQuickBtn('btnToday');
+      loadRecords();
+    }
+
+    function setTomorrowDate() {
+      const now = getTodayDateObj();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      const tomorrowStr = formatDateToString(tomorrow);
+      document.getElementById('filterStartDate').value = tomorrowStr;
+      document.getElementById('filterEndDate').value = tomorrowStr;
+      setActiveQuickBtn('btnTomorrow');
+      loadRecords();
+    }
+
+    function setDayAfterTomorrowDate() {
+      const now = getTodayDateObj();
+      const dat = new Date(now);
+      dat.setDate(now.getDate() + 2);
+      const datStr = formatDateToString(dat);
+      document.getElementById('filterStartDate').value = datStr;
+      document.getElementById('filterEndDate').value = datStr;
+      setActiveQuickBtn('btnDayAfterTomorrow');
       loadRecords();
     }
 
