@@ -53,10 +53,10 @@ function getDbSheet() {
     }
   }
 
-  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 5번째 '보강교과' 열 추가, 10번째 확인여부, 11번째 긴급여부 열 추가)
+  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 5번째 '보강교과' 열 추가, 10번째 확인여부, 11번째 긴급여부, 12번째 삭제여부 열 추가)
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부', '긴급여부']);
-    sheet.getRange(1, 1, 1, 11).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부', '긴급여부', '삭제여부']);
+    sheet.getRange(1, 1, 1, 12).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
   } else {
     // 기존 헤더가 '학급'인 경우 '교실'로 자동 갱신
@@ -77,6 +77,10 @@ function getDbSheet() {
     // 11번째 열 긴급여부 헤더 추가 확인
     if (sheet.getLastColumn() < 11 || sheet.getRange(1, 11).getValue() === '') {
       sheet.getRange(1, 11).setValue('긴급여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    }
+    // 12번째 열 삭제여부 헤더 추가 확인
+    if (sheet.getLastColumn() < 12 || sheet.getRange(1, 12).getValue() === '') {
+      sheet.getRange(1, 12).setValue('삭제여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
   }
 
@@ -131,6 +135,10 @@ function getSubstitutionRecords(startDate, endDate) {
           if (rowDate !== startDate) continue;
         }
       }
+
+      // 삭제 처리된 행은 웹 화면 조회에서 제외 (Soft Delete)
+      var isDeleted = (row[11] === true || String(row[11]).toLowerCase() === 'true' || String(row[11]) === 'y');
+      if (isDeleted) continue;
 
       var isConf = (row[9] === true || String(row[9]).toLowerCase() === 'true' || String(row[9]) === '확인완료');
       var isUrgent = (row[10] === true || String(row[10]).toLowerCase() === 'true' || String(row[10]) === '긴급');
@@ -194,7 +202,8 @@ function addSubstitutionRecord(record) {
       record.reason || '',
       nowIso,
       isConf,
-      isUrgent
+      isUrgent,
+      false // 삭제여부 (기본 false)
     ]);
 
     SpreadsheetApp.flush(); // 저장 즉시 적용
@@ -235,7 +244,9 @@ function updateSubstitutionRecord(record) {
         var existingUrgent = (data[i][10] === true || String(data[i][10]).toLowerCase() === 'true');
         var isUrgent = record.urgent !== undefined ? (record.urgent ? true : false) : existingUrgent;
 
-        sheet.getRange(rowNum, 1, 1, 11).setValues([[
+        var existingDeleted = (data[i][11] === true || String(data[i][11]).toLowerCase() === 'true');
+
+        sheet.getRange(rowNum, 1, 1, 12).setValues([[
           String(record.id),
           formattedDate,
           record.period,
@@ -246,7 +257,8 @@ function updateSubstitutionRecord(record) {
           record.reason || '',
           new Date().toISOString(),
           isConf,
-          isUrgent
+          isUrgent,
+          existingDeleted
         ]]);
 
         SpreadsheetApp.flush(); // 수정 즉시 적용
@@ -290,7 +302,8 @@ function toggleSubstituteConfirm(id, confirmed) {
 }
 
 /**
- * 보강 내역을 삭제합니다.
+ * 보강 내역을 삭제 처리(Soft Delete)합니다.
+ * - 실제 구글 시트의 행을 deleteRow 하지 않고 12번째 열 '삭제여부'를 true로 설정하여 웹 화면에서만 제외합니다.
  */
 function deleteSubstitutionRecord(id) {
   try {
@@ -299,9 +312,10 @@ function deleteSubstitutionRecord(id) {
 
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(id)) {
-        sheet.deleteRow(i + 1);
+        var rowNum = i + 1;
+        sheet.getRange(rowNum, 12).setValue(true);
         SpreadsheetApp.flush(); // 삭제 즉시 적용
-        return { success: true, message: '보강 내역이 삭제되었습니다.' };
+        return { success: true, message: '보강 내역이 삭제되었습니다. (시트 데이터는 영구 보존됩니다)' };
       }
     }
     return { success: false, message: '해당 보강 내역을 찾을 수 없습니다.' };
