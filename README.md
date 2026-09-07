@@ -59,6 +59,7 @@
 
 ## 📋 최근 수정 사항 (Latest Updates)
 
+- **`21-홍익_보강 지원` 공유 구글 시트 연동 및 분석 완료**: 동일한 중앙 구글 시트(`1LsST_QqLkRIDQNvbeXw5EeCncJCEEOqAsC2duSngOcM`)를 공유하여 사전 지원 등록 ➔ 수업계 승인 ➔ `보강내역` 시트 자동 이관 및 알리미 실시간 반영 워크플로우 분석 및 문서화
 - **구글 시트 데이터 보존을 위한 논리적 삭제(Soft Delete) 도입**: 웹 화면에서 보강 내역 삭제 시 구글 시트 행을 직접 지우지 않고 12번째 열 `삭제여부`를 `true`로 저장하여 데이터 영구 보존 및 백엔드 필터링 적용
 - **`git-commit` 스킬 하드코딩 경로 동적 전환**: `.agents/skills/git-commit/SKILL.md` 내 하드코딩되어 있던 `README.md` 경로를 대상 프로젝트 루트의 `README.md`를 가리키도록 동적 참조로 수정
 - **공유 구글 시트 '태그관리' 연동 및 실시간 양방향 동기화**: `1LsST_QqLkRIDQNvbeXw5EeCncJCEEOqAsC2duSngOcM` 시트의 `'태그관리'` 시트를 사용해 `홍익_보강 지원` 앱과 보강 교과 및 보강 유발 사유 태그 공유 및 자동 병합 동기화 적용
