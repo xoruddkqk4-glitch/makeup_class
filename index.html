@@ -112,12 +112,17 @@
       white-space: nowrap;
       flex-shrink: 1;
       min-width: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .header-controls-left::-webkit-scrollbar {
+      display: none;
     }
 
     .header-controls-right {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 2px;
       white-space: nowrap;
       flex-shrink: 0;
     }
@@ -247,6 +252,14 @@
     .btn-sm {
       padding: 4px 8px;
       font-size: 0.8rem;
+    }
+
+    .btn-action-sm {
+      padding: 3px 5px !important;
+      font-size: 0.68rem !important;
+      letter-spacing: -0.3px;
+      gap: 2px !important;
+      font-weight: 600;
     }
 
     .btn-sm.active {
@@ -1049,16 +1062,16 @@
         </div>
 
         <div class="header-controls-right">
-          <button class="btn btn-outline btn-sm" id="btnCopyText" onclick="copyResultsToText()" title="검색 결과 개조식 텍스트 복사 (교내 메신저용)">
+          <button class="btn btn-outline btn-sm btn-action-sm" id="btnCopyText" onclick="copyResultsToText()" title="검색 결과 개조식 텍스트 복사 (교내 메신저용)">
             <i class="fa-regular fa-copy" style="color: #0284c7;"></i> 텍스트 복사
           </button>
-          <button class="btn btn-outline btn-sm" id="btnExcelDownload" onclick="downloadExcel()" title="검색 결과 Excel 파일 다운로드">
+          <button class="btn btn-outline btn-sm btn-action-sm" id="btnExcelDownload" onclick="downloadExcel()" title="검색 결과 Excel 파일 다운로드">
             <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i> EXCEL 다운로드
           </button>
-          <button class="btn btn-outline btn-sm" id="btnPdfDownload" onclick="downloadPDF()" title="A4 Portrait PDF 다운로드">
+          <button class="btn btn-outline btn-sm btn-action-sm" id="btnPdfDownload" onclick="downloadPDF()" title="A4 Portrait PDF 다운로드">
             <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF 다운로드
           </button>
-          <button class="btn btn-primary btn-sm" onclick="openAddModal()">
+          <button class="btn btn-primary btn-sm btn-action-sm" onclick="openAddModal()">
             <i class="fa-solid fa-plus"></i> 보강 등록하기
           </button>
         </div>
