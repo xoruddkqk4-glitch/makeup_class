@@ -1063,28 +1063,25 @@
         <table class="schedule-table">
           <thead>
             <tr>
-              <th id="th_date" class="sortable-th" style="width: 15%;" onclick="handleSort('date')" title="날짜 정렬">
+              <th id="th_date" class="sortable-th" style="width: 18%;" onclick="handleSort('date')" title="날짜 정렬">
                 날짜(요일) <i class="fa-solid fa-sort sort-icon" id="sortIcon_date"></i>
               </th>
               <th id="th_period" class="sortable-th" style="width: 9%;" onclick="handleSort('period')" title="교시 정렬">
                 교시 <i class="fa-solid fa-sort sort-icon" id="sortIcon_period"></i>
               </th>
-              <th id="th_className" class="sortable-th" style="width: 11%;" onclick="handleSort('className')" title="교실 정렬">
+              <th id="th_className" class="sortable-th" style="width: 12%;" onclick="handleSort('className')" title="교실 정렬">
                 교실 <i class="fa-solid fa-sort sort-icon" id="sortIcon_className"></i>
               </th>
-              <th id="th_subject" class="sortable-th" style="width: 13%;" onclick="handleSort('subject')" title="보강 교과 정렬">
+              <th id="th_subject" class="sortable-th" style="width: 14%;" onclick="handleSort('subject')" title="보강 교과 정렬">
                 보강 교과 <i class="fa-solid fa-sort sort-icon" id="sortIcon_subject"></i>
               </th>
-              <th id="th_substituteTeacher" class="th-highlight-sub sortable-th" style="width: 22%;" onclick="handleSort('substituteTeacher')" title="보강 교사 정렬">
+              <th id="th_substituteTeacher" class="th-highlight-sub sortable-th" style="width: 24%;" onclick="handleSort('substituteTeacher')" title="보강 교사 정렬">
                 <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 <i class="fa-solid fa-sort sort-icon" id="sortIcon_substituteTeacher"></i>
               </th>
-              <th id="th_originalTeacher" class="sortable-th" style="width: 12%;" onclick="handleSort('originalTeacher')" title="결강 교사 정렬">
+              <th id="th_originalTeacher" class="sortable-th" style="width: 16%;" onclick="handleSort('originalTeacher')" title="결강 교사 정렬">
                 결강 교사(원교사) <i class="fa-solid fa-sort sort-icon" id="sortIcon_originalTeacher"></i>
               </th>
-              <th id="th_reason" class="sortable-th" style="width: 12%;" onclick="handleSort('reason')" title="보강 사유 정렬">
-                보강 사유 <i class="fa-solid fa-sort sort-icon" id="sortIcon_reason"></i>
-              </th>
-              <th style="width: 6%;">작업</th>
+              <th style="width: 7%;">작업</th>
             </tr>
             <!-- 열별 개별 필터 헤더 행 -->
             <tr class="filter-header-row">
@@ -1219,13 +1216,6 @@
               </th>
               <th>
                 <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 검색..." onkeyup="applyColumnFilters()">
-              </th>
-              <th>
-                <!-- 사유 드롭다운 선택 -->
-                <select class="col-filter-select" id="filterColReason" onchange="applyColumnFilters()">
-                  <option value="">전체 사유</option>
-                  <!-- JavaScript 동적 생성 -->
-                </select>
               </th>
               <th>
                 <!-- 필터 초기화 명확한 버튼 -->
@@ -2065,7 +2055,7 @@
         const reasonStr = r.reason ? `[사유] ${r.reason}` : '[사유] -';
         const confBadge = r.confirmed ? ` (✅본인확인)` : '';
 
-        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}   |   ${reasonStr}${confBadge}`);
+        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}${confBadge}`);
         if (idx < records.length - 1) {
           textLines.push(``);
         }
@@ -2085,7 +2075,6 @@
         const subjectStr = escapeHtml(r.subject || '-');
         const subTeacherStr = escapeHtml(r.substituteTeacher || '-');
         const origTeacherStr = escapeHtml(r.originalTeacher || '-');
-        const reasonStr = escapeHtml(r.reason || '-');
         const confBadge = r.confirmed ? ' <span style="color:#059669; font-weight:bold;">(✅본인확인)</span>' : '';
         const urgentState = isUrgentActive(r);
         const urgentBadgeHtml = urgentState ? '<span style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:15px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-right:6px;">🚨 긴급</span>' : '';
@@ -2096,8 +2085,7 @@
             <strong style="color:#475569;">${roomStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <span style="color:#0369a1; font-weight:bold;">${subjectStr}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <strong style="color:#065f46; font-size:19px;">[보강] ${subTeacherStr}</strong> &nbsp;<span style="font-size:18px;">⬅️</span>&nbsp; 
-            <span style="color:#e11d48; font-weight:bold;">[원교사] ${origTeacherStr}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
-            <span style="color:#92400e;">[사유] ${reasonStr}</span>${confBadge}
+            <span style="color:#e11d48; font-weight:bold;">[원교사] ${origTeacherStr}</span>${confBadge}
           </div>
         `;
       });
@@ -2285,7 +2273,8 @@
       const classQuery = document.getElementById('filterColClass').value.trim();
       const subjectQuery = document.getElementById('filterColSubject').value.toLowerCase().trim();
       const subTeacherQuery = document.getElementById('filterColSubTeacher').value.toLowerCase().trim();
-      const reasonQuery = document.getElementById('filterColReason').value.toLowerCase().trim();
+      const reasonElem = document.getElementById('filterColReason');
+      const reasonQuery = reasonElem ? reasonElem.value.toLowerCase().trim() : '';
       const origTeacherQuery = document.getElementById('filterColOrigTeacher').value.toLowerCase().trim();
 
       const filtered = currentRecords.filter(r => {
@@ -2328,7 +2317,7 @@
       document.getElementById('filterColClass').value = '';
       document.getElementById('filterColSubject').value = '';
       document.getElementById('filterColSubTeacher').value = '';
-      document.getElementById('filterColReason').value = '';
+      if (document.getElementById('filterColReason')) document.getElementById('filterColReason').value = '';
       document.getElementById('filterColOrigTeacher').value = '';
       applyColumnFilters();
     }
@@ -2391,7 +2380,6 @@
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#0369a1;">${escapeHtml(r.subject || '-')}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:11px; color:#065f46; background-color:#f0fdf4;">${escapeHtml(r.substituteTeacher)} ${confBadge}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-size:10.5px; color:#e11d48;">${escapeHtml(r.originalTeacher || '-')}</td>
-            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-size:10.5px;">${escapeHtml(r.reason || '-')}</td>
           </tr>
         `;
       });
@@ -2410,13 +2398,12 @@
         <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:10.5px;">
           <thead>
             <tr style="background-color:#006b67; color:#ffffff;">
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:16%;">날짜(요일)</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:9%;">교시</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:11%;">교실</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:13%;">보강 교과</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:23%;">보강 교사 (확인)</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:14%;">결강 교사(원교사)</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:14%;">보강 사유</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:18%;">날짜(요일)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:10%;">교시</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:12%;">교실</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:15%;">보강 교과</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:27%;">보강 교사 (확인)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:18%;">결강 교사(원교사)</th>
             </tr>
           </thead>
           <tbody>
@@ -2494,7 +2481,6 @@
             </div>
           </td>
           <td><span class="teacher-orig">${escapeHtml(item.originalTeacher || '-')}</span></td>
-          <td><span class="badge-reason">${escapeHtml(item.reason || '-')}</span></td>
           <td>
             <div class="action-btns">
               <button class="btn-icon btn-icon-edit" title="수정" onclick="openEditModal('${item.id}')">
