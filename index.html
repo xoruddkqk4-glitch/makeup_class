@@ -12,6 +12,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- html2pdf.js for A4 Portrait PDF Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- SheetJS (xlsx) for Excel Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   
   <style>
     :root {
@@ -1049,6 +1051,9 @@
         <div class="header-controls-right">
           <button class="btn btn-outline btn-sm" id="btnCopyText" onclick="copyResultsToText()" title="검색 결과 개조식 텍스트 복사 (교내 메신저용)">
             <i class="fa-regular fa-copy" style="color: #0284c7;"></i> 텍스트 복사
+          </button>
+          <button class="btn btn-outline btn-sm" id="btnExcelDownload" onclick="downloadExcel()" title="검색 결과 Excel 파일 다운로드">
+            <i class="fa-solid fa-file-excel" style="color: #16a34a;"></i> EXCEL 다운로드
           </button>
           <button class="btn btn-outline btn-sm" id="btnPdfDownload" onclick="downloadPDF()" title="A4 Portrait PDF 다운로드">
             <i class="fa-solid fa-file-pdf" style="color: #ef4444;"></i> PDF 다운로드
@@ -2320,6 +2325,83 @@
       if (document.getElementById('filterColReason')) document.getElementById('filterColReason').value = '';
       document.getElementById('filterColOrigTeacher').value = '';
       applyColumnFilters();
+    }
+
+    // 엑셀(Excel) 다운로드 기능
+    function downloadExcel() {
+      const records = lastFilteredSortedRecords;
+      if (!records || records.length === 0) {
+        alert('엑셀 파일로 저장할 보강 내역이 없습니다.');
+        return;
+      }
+
+      const startDate = document.getElementById('filterStartDate').value;
+      const endDate = document.getElementById('filterEndDate').value;
+      const now = new Date();
+      const timestamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}`;
+
+      let periodTag = '전체';
+      if (startDate && endDate) {
+        periodTag = (startDate === endDate ? startDate : `${startDate}~${endDate}`);
+      } else if (startDate) {
+        periodTag = startDate;
+      }
+
+      const filename = `보강내역_검색결과_${periodTag}_${timestamp}.xlsx`;
+
+      // 엑셀 표 데이터 매핑
+      const excelData = records.map(r => {
+        const formattedDate = formatFormattedDate(r.date);
+        const urgentState = isUrgentActive(r);
+        return {
+          '날짜(요일)': formattedDate,
+          '구분': urgentState ? '🚨 긴급' : '일반',
+          '교시': r.period || '',
+          '교실': r.className || '',
+          '보강 교과': r.subject || '',
+          '보강 교사': r.substituteTeacher || '',
+          '확인 여부': r.confirmed ? '✅ 확인' : '🔔 미확인',
+          '결강 교사(원교사)': r.originalTeacher || ''
+        };
+      });
+
+      if (typeof XLSX !== 'undefined') {
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+        // 열 너비 자동 설정 (가독성 확보)
+        worksheet['!cols'] = [
+          { wch: 18 }, // 날짜(요일)
+          { wch: 10 }, // 구분
+          { wch: 10 }, // 교시
+          { wch: 12 }, // 교실
+          { wch: 16 }, // 보강 교과
+          { wch: 16 }, // 보강 교사
+          { wch: 14 }, // 확인 여부
+          { wch: 18 }  // 결강 교사(원교사)
+        ];
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "보강내역");
+        XLSX.writeFile(workbook, filename);
+      } else {
+        // Fallback: UTF-8 BOM CSV 파일 다운로드
+        let csv = '\uFEFF';
+        const headers = ['날짜(요일)', '구분', '교시', '교실', '보강 교과', '보강 교사', '확인 여부', '결강 교사(원교사)'];
+        csv += headers.join(',') + '\r\n';
+
+        excelData.forEach(row => {
+          const values = headers.map(h => `"${String(row[h] || '').replace(/"/g, '""')}"`);
+          csv += values.join(',') + '\r\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename.replace('.xlsx', '.csv');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     }
 
     // A4 Portrait PDF 다운로드 기능
