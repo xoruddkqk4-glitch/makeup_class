@@ -107,3 +107,8 @@
 - **수정 내용**: 에이전트 실행 규칙(`.agents/rules/rules.md`) 및 커스텀 스킬(`.agents/skills/git-commit/SKILL.md`)에 README 변경 이력 하단 누적 기록 규칙 추가 및 프로젝트 적용
 - **검증 결과**: Git diff 검증 및 README.md 하단 누적 이력 기록 완료
 
+## [2026-09-08] 업데이트 이력 (Commit ID: auto)
+- **수정 내용**:
+  1. 신규 보강 등록 시 구글 스프레드시트 미저장 버그 수정 (`handleFormSubmit` 내 early return 제거 및 `google.script.run.addSubstitutionRecord` 백그라운드 연동 복구, RPC 성공/실패 응답 처리 핸들러 보완)
+  2. 게시판 보강 교사 확인 뱃지 및 툴팁 텍스트 수정 ('미확인' ➔ '본인 미확인', Excel 및 PDF 내보내기 라벨 동기화)
+- **검증 결과**: 구문 검사 및 파일 수정 확인 완료 (구글 스프레드시트 저장 연동 및 UI 텍스트 변경 적용)

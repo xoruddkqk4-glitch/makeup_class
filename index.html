@@ -2373,7 +2373,7 @@
           '교실': r.className || '',
           '보강 교과': r.subject || '',
           '보강 교사': r.substituteTeacher || '',
-          '확인 여부': r.confirmed ? '✅ 확인' : '🔔 미확인',
+          '확인 여부': r.confirmed ? '✅ 본인확인' : '🔔 본인 미확인',
           '결강 교사(원교사)': r.originalTeacher || ''
         };
       });
@@ -2462,8 +2462,8 @@
         const formattedDate = formatFormattedDate(r.date);
         const isConf = Boolean(r.confirmed);
         const confBadge = isConf 
-          ? '<span style="color:#059669; font-weight:bold;">[확인]</span>' 
-          : '<span style="color:#d97706;">[미확인]</span>';
+          ? '<span style="color:#059669; font-weight:bold;">[본인확인]</span>' 
+          : '<span style="color:#d97706;">[본인 미확인]</span>';
         const urgentState = isUrgentActive(r);
         const urgentPdfBadge = urgentState ? '<span style="color:#dc2626; font-weight:bold; margin-left:2px;">🚨[긴급]</span>' : '';
 
@@ -2568,11 +2568,11 @@
           <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
           <td><span class="badge-subject">${escapeHtml(item.subject || '-')}</span></td>
           <td class="td-highlight-sub">
-            <div class="sub-teacher-card ${isConf ? 'is-confirmed' : ''}" title="${isConf ? '클릭 시 미확인으로 변경' : '클릭 시 본인확인 완료'}" onclick="toggleConfirm(event, '${item.id}')">
+            <div class="sub-teacher-card ${isConf ? 'is-confirmed' : ''}" title="${isConf ? '클릭 시 본인 미확인으로 변경' : '클릭 시 본인확인 완료'}" onclick="toggleConfirm(event, '${item.id}')">
               <input type="checkbox" class="sub-checkbox" ${isConf ? 'checked' : ''} onclick="event.stopPropagation(); toggleConfirm(event, '${item.id}')">
               <i class="fa-solid ${isConf ? 'fa-circle-check' : 'fa-bell'} sub-icon" style="color: ${isConf ? '#059669' : '#d97706'};"></i>
               <span class="sub-name">${escapeHtml(item.substituteTeacher)}</span>
-              <span class="sub-badge">${isConf ? '✅ 본인확인' : '🔔 미확인'}</span>
+              <span class="sub-badge">${isConf ? '✅ 본인확인' : '🔔 본인 미확인'}</span>
             </div>
           </td>
           <td><span class="teacher-orig">${escapeHtml(item.originalTeacher || '-')}</span></td>
@@ -2723,8 +2723,6 @@
         document.getElementById('filterEndDate').value = date;
         allFetchedRecords.unshift({ ...record });
         filterRecordsInMemory(date, date);
-        notifyDataChanged();
-        return;
       }
 
       // 화면 즉시 리렌더링
@@ -2735,16 +2733,28 @@
       if (isGasEnvironment) {
         if (editingId) {
           google.script.run
+            .withSuccessHandler(function(res) {
+              if (res && !res.success) {
+                alert('수정 동기화 실패: ' + (res.message || '알 수 없는 오류'));
+                loadRecords(true);
+              }
+            })
             .withFailureHandler(function(err) {
               alert('수정 동기화 중 오류가 발생했습니다. 데이터를 재로드합니다: ' + err.message);
-              loadRecords();
+              loadRecords(true);
             })
             .updateSubstitutionRecord(record);
         } else {
           google.script.run
+            .withSuccessHandler(function(res) {
+              if (res && !res.success) {
+                alert('저장 동기화 실패: ' + (res.message || '알 수 없는 오류'));
+                loadRecords(true);
+              }
+            })
             .withFailureHandler(function(err) {
               alert('저장 동기화 중 오류가 발생했습니다. 데이터를 재로드합니다: ' + err.message);
-              loadRecords();
+              loadRecords(true);
             })
             .addSubstitutionRecord(record);
         }
@@ -2796,9 +2806,15 @@
       // 2. 백그라운드 DB 삭제 처리
       if (isGasEnvironment) {
         google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && !res.success) {
+              alert('삭제 동기화 실패: ' + (res.message || '알 수 없는 오류'));
+              loadRecords(true);
+            }
+          })
           .withFailureHandler(function(err) {
             alert('삭제 동기화 중 오류가 발생했습니다. 데이터를 재로드합니다: ' + err.message);
-            loadRecords();
+            loadRecords(true);
           })
           .deleteSubstitutionRecord(id);
       } else {
