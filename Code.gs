@@ -88,6 +88,53 @@ function getDbSheet() {
 }
 
 /**
+ * 구글 시트에 직접 수동 입력 시(날짜, 교시, 교실, 보강교과, 원교사, 보강교사, 사유)
+ * 동적으로 ID, 등록시각, 확인여부, 긴급여부, 삭제여부 기본값을 자동으로 채워주는 트리거 함수
+ */
+function onEdit(e) {
+  try {
+    if (!e || !e.range) return;
+    var sheet = e.range.getSheet();
+    if (sheet.getName() !== '보강내역') return;
+
+    var startRow = e.range.getRow();
+    var numRows = e.range.getNumRows();
+
+    // 헤더 행 제외
+    if (startRow <= 1) return;
+
+    for (var r = startRow; r < startRow + numRows; r++) {
+      var rowValues = sheet.getRange(r, 1, 1, 12).getValues()[0];
+      var hasContent = rowValues[1] || rowValues[2] || rowValues[3] || rowValues[4] || rowValues[5] || rowValues[6] || rowValues[7];
+      if (!hasContent) continue;
+
+      // 1열 ID 자동 입력
+      if (!rowValues[0]) {
+        sheet.getRange(r, 1).setValue('SUB-MANUAL-' + new Date().getTime() + '-' + r);
+      }
+      // 9열 등록시각 자동 입력
+      if (!rowValues[8]) {
+        sheet.getRange(r, 9).setValue(new Date().toISOString());
+      }
+      // 10열 확인여부 기본값 (false)
+      if (rowValues[9] === undefined || rowValues[9] === '') {
+        sheet.getRange(r, 10).setValue(false);
+      }
+      // 11열 긴급여부 기본값 (false)
+      if (rowValues[10] === undefined || rowValues[10] === '') {
+        sheet.getRange(r, 11).setValue(false);
+      }
+      // 12열 삭제여부 기본값 (false)
+      if (rowValues[11] === undefined || rowValues[11] === '') {
+        sheet.getRange(r, 12).setValue(false);
+      }
+    }
+  } catch (err) {
+    Logger.log('Error in onEdit: ' + err.toString());
+  }
+}
+
+/**
  * 날짜 객체 또는 문자열을 YYYY-MM-DD 포맷으로 변환하는 헬퍼 함수
  */
 function formatDateString(val) {
@@ -102,15 +149,23 @@ function formatDateString(val) {
       return Utilities.formatDate(d, Session.getScriptTimeZone() || 'GMT+9', 'yyyy-MM-dd');
     }
   }
-  var match = str.match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
+  var match = str.match(/^(\d{4})[-.\/\s]+(\d{1,2})[-.\/\s]+(\d{1,2})/);
   if (match) {
-    return match[1] + '-' + match[2] + '-' + match[3];
+    var y = match[1];
+    var m = match[2].length === 1 ? '0' + match[2] : match[2];
+    var d = match[3].length === 1 ? '0' + match[3] : match[3];
+    return y + '-' + m + '-' + d;
+  }
+  var match2 = str.match(/^(\d{4})[-.\/]?(\d{2})[-.\/]?(\d{2})/);
+  if (match2) {
+    return match2[1] + '-' + match2[2] + '-' + match2[3];
   }
   return str;
 }
 
 /**
  * 보강 내역을 조회합니다. (단일 날짜 또는 시작일~종료일 기간 검색 지원)
+ * 수동 작성된 행(ID 미부여 행) 자동 보정 및 세팅 지원
  * @param {string} startDate 시작 날짜 (YYYY-MM-DD 또는 'ALL')
  * @param {string} endDate 종료 날짜 (YYYY-MM-DD, 옵션)
  */
@@ -121,9 +176,47 @@ function getSubstitutionRecords(startDate, endDate) {
     if (data.length <= 1) return [];
 
     var records = [];
+    var needsFlush = false;
+
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      if (!row[0]) continue; // ID가 없는 행 스킵
+      var hasData = row[1] || row[2] || row[3] || row[4] || row[5] || row[6] || row[7];
+      if (!hasData) continue; // 완전히 비어있는 행 스킵
+
+      // ID가 없는 수동 입력 행 자동 보정
+      var rowId = row[0] ? String(row[0]).trim() : '';
+      if (!rowId) {
+        rowId = 'SUB-MANUAL-' + new Date().getTime() + '-' + (i + 1);
+        sheet.getRange(i + 1, 1).setValue(rowId);
+        row[0] = rowId;
+        needsFlush = true;
+      }
+
+      // 등록시각 (9열) 보정
+      if (!row[8]) {
+        var nowIso = new Date().toISOString();
+        sheet.getRange(i + 1, 9).setValue(nowIso);
+        row[8] = nowIso;
+        needsFlush = true;
+      }
+      // 확인여부 (10열) 기본값 보정
+      if (row[9] === undefined || row[9] === '') {
+        sheet.getRange(i + 1, 10).setValue(false);
+        row[9] = false;
+        needsFlush = true;
+      }
+      // 긴급여부 (11열) 기본값 보정
+      if (row[10] === undefined || row[10] === '') {
+        sheet.getRange(i + 1, 11).setValue(false);
+        row[10] = false;
+        needsFlush = true;
+      }
+      // 삭제여부 (12열) 기본값 보정
+      if (row[11] === undefined || row[11] === '') {
+        sheet.getRange(i + 1, 12).setValue(false);
+        row[11] = false;
+        needsFlush = true;
+      }
 
       var rowDate = formatDateString(row[1]);
 
@@ -146,8 +239,8 @@ function getSubstitutionRecords(startDate, endDate) {
       records.push({
         id: String(row[0]),
         date: rowDate,
-        period: String(row[2]),
-        className: String(row[3]),
+        period: String(row[2] || ''),
+        className: String(row[3] || ''),
         subject: String(row[4] || ''),
         originalTeacher: String(row[5] || ''),
         substituteTeacher: String(row[6] || ''),
@@ -156,6 +249,10 @@ function getSubstitutionRecords(startDate, endDate) {
         confirmed: isConf,
         urgent: isUrgent
       });
+    }
+
+    if (needsFlush) {
+      SpreadsheetApp.flush();
     }
 
     // 날짜 desc, 교시 asc 순으로 정렬
