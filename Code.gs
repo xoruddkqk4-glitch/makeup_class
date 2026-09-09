@@ -88,6 +88,20 @@ function getDbSheet() {
 }
 
 /**
+ * 보강내역 행의 삭제여부(12열) 값에 따라 시트 행 전체(1~12열)에 취소선(line-through)을 적용하거나 해제(none)합니다.
+ * @param {Sheet} sheet 구글 시트 개체
+ * @param {number} rowNum 1-indexed 행 번호
+ * @param {boolean} isDeleted 삭제 여부
+ */
+function applyRowStrikethrough(sheet, rowNum, isDeleted) {
+  try {
+    sheet.getRange(rowNum, 1, 1, 12).setFontLine(isDeleted ? 'line-through' : 'none');
+  } catch (e) {
+    Logger.log('Error in applyRowStrikethrough for row ' + rowNum + ': ' + e.toString());
+  }
+}
+
+/**
  * 구글 시트에 직접 수동 입력 시(날짜, 교시, 교실, 보강교과, 원교사, 보강교사, 사유)
  * 동적으로 ID, 등록시각, 확인여부, 긴급여부, 삭제여부 기본값을 자동으로 채워주는 트리거 함수
  */
@@ -127,7 +141,12 @@ function onEdit(e) {
       // 12열 삭제여부 기본값 (false)
       if (rowValues[11] === undefined || rowValues[11] === '') {
         sheet.getRange(r, 12).setValue(false);
+        rowValues[11] = false;
       }
+
+      // 삭제여부 (12열) 값에 따른 취소선 적용/해제
+      var isDeleted = (rowValues[11] === true || String(rowValues[11]).toLowerCase() === 'true' || String(rowValues[11]) === 'y');
+      applyRowStrikethrough(sheet, r, isDeleted);
     }
   } catch (err) {
     Logger.log('Error in onEdit: ' + err.toString());
@@ -218,6 +237,11 @@ function getSubstitutionRecords(startDate, endDate) {
         needsFlush = true;
       }
 
+      var isDeleted = (row[11] === true || String(row[11]).toLowerCase() === 'true' || String(row[11]) === 'y');
+      
+      // 시트 행 취소선 적용/해제 동기화
+      applyRowStrikethrough(sheet, i + 1, isDeleted);
+
       var rowDate = formatDateString(row[1]);
 
       // 날짜 필터링 (전체, 단일 날짜, 또는 기간 검색)
@@ -230,7 +254,6 @@ function getSubstitutionRecords(startDate, endDate) {
       }
 
       // 삭제 처리된 행은 웹 화면 조회에서 제외 (Soft Delete)
-      var isDeleted = (row[11] === true || String(row[11]).toLowerCase() === 'true' || String(row[11]) === 'y');
       if (isDeleted) continue;
 
       var isConf = (row[9] === true || String(row[9]).toLowerCase() === 'true' || String(row[9]) === '확인완료');
@@ -303,6 +326,9 @@ function addSubstitutionRecord(record) {
       false // 삭제여부 (기본 false)
     ]);
 
+    var lastRow = sheet.getLastRow();
+    applyRowStrikethrough(sheet, lastRow, false);
+
     SpreadsheetApp.flush(); // 저장 즉시 적용
 
     return {
@@ -358,6 +384,8 @@ function updateSubstitutionRecord(record) {
           existingDeleted
         ]]);
 
+        applyRowStrikethrough(sheet, rowNum, existingDeleted);
+
         SpreadsheetApp.flush(); // 수정 즉시 적용
 
         return {
@@ -411,6 +439,7 @@ function deleteSubstitutionRecord(id) {
       if (String(data[i][0]) === String(id)) {
         var rowNum = i + 1;
         sheet.getRange(rowNum, 12).setValue(true);
+        applyRowStrikethrough(sheet, rowNum, true);
         SpreadsheetApp.flush(); // 삭제 즉시 적용
         return { success: true, message: '보강 내역이 삭제되었습니다. (시트 데이터는 영구 보존됩니다)' };
       }

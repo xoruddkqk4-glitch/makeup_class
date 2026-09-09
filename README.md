@@ -124,7 +124,14 @@
 - **검증 결과**: 시트 수동 작성 행 ID/시스템 필드 자동 부여, 다양한 날짜 형식(2026. 9. 9, 2026-9-9) yyyy-MM-dd 자동 변환 및 웹 알리미 표출 연동 검증 완료
 
 
-## [2026-09-09] 업데이트 이력 (Commit ID: 27fe5e5)
+## [2026-09-09] 업데이트 이력 (Commit ID: 6d59d14)
 - **수정 내용**: 프로젝트 에이전트 실행 규칙 및 스킬(`@[.agents]`) 적용, README.md 최신 누적 변경 이력 동기화 및 문서화 완료
 - **검증 결과**: Git 커밋 메시지 규격 검증 및 GitHub origin main 브랜치 자동 푸시 완료
+
+
+## [2026-09-09] 업데이트 이력 (Commit ID: d15005a)
+- **수정 내용**: 구글 시트 '보강내역' 시트 12번째 열('삭제여부') 값이 True인 경우 행 전체 텍스트에 취소선(`setFontLine('line-through')`) 자동 적용 및 False인 경우 취소선 해제(`setFontLine('none')`) 로직 연동 (`onEdit`, `getSubstitutionRecords`, `deleteSubstitutionRecord`, `addSubstitutionRecord`, `updateSubstitutionRecord`) ([Code.gs](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/Code.gs))
+- **검증 결과**: 구글 시트 직접 편집 및 웹 앱 삭제/수정 동작 시 삭제여부 값에 따른 취소선 스타일 자동 동기화 구문 검사 및 적용 완료
+
+
 
