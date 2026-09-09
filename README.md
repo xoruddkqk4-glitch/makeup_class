@@ -65,6 +65,7 @@
 
 ## 📋 최근 수정 사항 (Latest Updates)
 
+- **코드 수정 없는 질의응답 및 계획서 전용 스킬 (`/ask`) 도입**: `.agents/skills/ask/SKILL.md` 신규 스킬 및 `.agents/rules/rules.md` 5번 정책 추가로 `/ask` 요청 시 코드 변경 없이 답변만 수행하거나 `implementation_plan.md` 작성 후 자동 실행을 완벽 차단하는 규칙 반영 완료
 - **상단 툴바 액션 버튼 텍스트 라벨 & 패딩 초콤팩트 개편 (겹침 현상 완전 해결)**: 임베드 창 및 좁은 해상도에서 프리셋 버튼 박스와의 overlap 현상을 완벽 차단하기 위해 버튼 라벨을 `📋 복사`, `📊 EXCEL`, `📄 PDF`, `+ 보강 등록`으로 간결화하고, 폰트(`0.65rem`), 패딩(`2px 5px`), 자간(`-0.4px`) 초콤팩트 디자인 적용 (마우스 오버 시 전체 설명 툴팁 지원)
 - **검색 결과 엑셀(EXCEL) 다운로드 기능 추가**: `📋 텍스트 복사`, `📄 PDF 다운로드`와 함께 상단 툴바 우측에 `📊 EXCEL 다운로드` 버튼 추가 및 SheetJS 기반 `.xlsx` 데이터 표 자동 추출 기능 구현
 - **프로젝트 에이전트 커스텀 규칙 및 스킬 (`.agents`) 적용 및 체계화**: 프로젝트 전용 에이전트 실행 규칙(`.agents/rules/rules.md`) 및 README 문서화·자동 Git 커밋 스킬(`.agents/skills/git-commit/SKILL.md`)을 프로젝트에 반영하고 체계화 완료
@@ -137,6 +138,11 @@
 ## [2026-09-09 13:43] 업데이트 이력 (Commit ID: cc36dfe)
 - **수정 내용**: `.agents` 에이전트 실행 규칙(`rules.md`) 및 커밋 스킬(`SKILL.md`) 내 `README.md` 변경 이력 누적 양식을 서울 기준 시간(KST: YYYY-MM-DD HH:mm)이 함께 기록되도록 개선 ([rules.md](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/.agents/rules/rules.md), [SKILL.md](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/.agents/skills/git-commit/SKILL.md))
 - **검증 결과**: `.agents` 규칙 및 스킬 문서 최신화, README.md 누적 이력 시각 정보 적용 완료
+
+
+## [2026-09-09 14:10] 업데이트 이력
+- **수정 내용**: 프로젝트 커스텀 `.agents`에 `/ask` 스킬 및 5번 전용 규칙(코드 수정 없는 질의응답 및 계획서 자동 실행 차단) 적용 완료 ([rules.md](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/.agents/rules/rules.md), [SKILL.md](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/.agents/skills/ask/SKILL.md))
+- **검증 결과**: `.agents` 스킬/규칙 정상 적용 및 README 이력 갱신 완료
 
 
 
