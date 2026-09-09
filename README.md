@@ -112,3 +112,8 @@
   1. 신규 보강 등록 시 구글 스프레드시트 미저장 버그 수정 (`handleFormSubmit` 내 early return 제거 및 `google.script.run.addSubstitutionRecord` 백그라운드 연동 복구, RPC 성공/실패 응답 처리 핸들러 보완)
   2. 게시판 보강 교사 확인 뱃지 및 툴팁 텍스트 수정 ('미확인' ➔ '본인 미확인', Excel 및 PDF 내보내기 라벨 동기화)
 - **검증 결과**: 구문 검사 및 파일 수정 확인 완료 (구글 스프레드시트 저장 연동 및 UI 텍스트 변경 적용)
+
+
+## [2026-09-09] 업데이트 이력 (Commit ID: 40c1de9)
+- **수정 내용**: 상단 타이틀 헤더 영역('보강 알리미' 제목 및 날짜 뱃지 우측 위치)에 실시간 새로 고침 버튼 추가 및 클릭 시 동적 회전 스핀 애니메이션(spin-animation)과 데이터 갱신 피드백 구현 (refreshHeaderData) ([index.html](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/index.html))
+- **검증 결과**: 새로 고침 버튼 클릭 시 0.8초 회전 스핀 애니메이션 동작, '새로 고침 중...' 비활성화 피드백 및 최신 데이터 갱신 검증 완료

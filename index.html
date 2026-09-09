@@ -83,6 +83,53 @@
       align-items: center;
     }
 
+    /* 상단 헤더 새로 고침 버튼 및 동적 회전 애니메이션 */
+    .btn-refresh-header {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      background: #ffffff;
+      border: 1.5px solid var(--primary-border);
+      padding: 3px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 107, 103, 0.12);
+      outline: none;
+    }
+
+    .btn-refresh-header:hover:not(:disabled) {
+      background: var(--primary-light);
+      border-color: var(--primary-color);
+      box-shadow: 0 2px 6px rgba(0, 107, 103, 0.25);
+      transform: translateY(-1px);
+    }
+
+    .btn-refresh-header:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-refresh-header:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+      background: #f1f5f9;
+      color: #64748b;
+      border-color: #cbd5e1;
+    }
+
+    .spin-animation {
+      animation: spin-icon 0.8s linear infinite;
+    }
+
+    @keyframes spin-icon {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+
     /* 보강 목록 테이블 컨테이너 및 통합 툴바 */
     .table-card {
       background: var(--card-bg);
@@ -1023,11 +1070,15 @@
 <body>
 
   <div class="container">
-    <!-- 헤더 영역 (제목 옆 검색 날짜 표기) -->
+    <!-- 헤더 영역 (제목 옆 검색 날짜 표기 및 새로 고침 버튼) -->
     <header class="app-header">
       <h1 class="app-title">
         <i class="fa-solid fa-clipboard-user"></i> 보강 알리미
         <span id="currentDateLabel" class="header-date-badge"></span>
+        <button type="button" class="btn-refresh-header" id="btnRefreshHeader" onclick="refreshHeaderData()" title="구글 시트 데이터 실시간 새로 고침">
+          <i class="fa-solid fa-rotate" id="headerRefreshIcon"></i>
+          <span id="headerRefreshText">새로 고침</span>
+        </button>
       </h1>
     </header>
 
@@ -1498,6 +1549,54 @@
             }
           })
           .getSubstitutionRecords('ALL', '');
+      }
+    }
+
+    // 상단 헤더 새로 고침 버튼 클릭 핸들러 (동적 스핀 애니메이션 & 최신 데이터 갱신)
+    function refreshHeaderData() {
+      const btn = document.getElementById('btnRefreshHeader');
+      const icon = document.getElementById('headerRefreshIcon');
+      const text = document.getElementById('headerRefreshText');
+
+      if (btn) btn.disabled = true;
+      if (icon) icon.classList.add('spin-animation');
+      if (text) text.textContent = '새로 고침 중...';
+
+      if (isGasEnvironment) {
+        google.script.run
+          .withSuccessHandler(function(records) {
+            allFetchedRecords = records || [];
+            isDataLoaded = true;
+            const startDate = document.getElementById('filterStartDate') ? document.getElementById('filterStartDate').value : '';
+            const endDate = document.getElementById('filterEndDate') ? document.getElementById('filterEndDate').value : '';
+            filterRecordsInMemory(startDate, endDate);
+            fetchTagsFromBackend();
+
+            setTimeout(function() {
+              if (icon) icon.classList.remove('spin-animation');
+              if (text) text.textContent = '새로 고침';
+              if (btn) btn.disabled = false;
+            }, 400);
+          })
+          .withFailureHandler(function(err) {
+            alert('새로 고침 중 오류가 발생했습니다: ' + err.message);
+            if (icon) icon.classList.remove('spin-animation');
+            if (text) text.textContent = '새로 고침';
+            if (btn) btn.disabled = false;
+          })
+          .getSubstitutionRecords('ALL', '');
+      } else {
+        setTimeout(function() {
+          allFetchedRecords = [...mockData];
+          isDataLoaded = true;
+          const startDate = document.getElementById('filterStartDate') ? document.getElementById('filterStartDate').value : '';
+          const endDate = document.getElementById('filterEndDate') ? document.getElementById('filterEndDate').value : '';
+          filterRecordsInMemory(startDate, endDate);
+
+          if (icon) icon.classList.remove('spin-animation');
+          if (text) text.textContent = '새로 고침';
+          if (btn) btn.disabled = false;
+        }, 500);
       }
     }
 
