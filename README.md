@@ -134,4 +134,11 @@
 - **검증 결과**: 구글 시트 직접 편집 및 웹 앱 삭제/수정 동작 시 삭제여부 값에 따른 취소선 스타일 자동 동기화 구문 검사 및 적용 완료
 
 
+## [2026-09-09 13:43] 업데이트 이력 (Commit ID: cc36dfe)
+- **수정 내용**: `.agents` 에이전트 실행 규칙(`rules.md`) 및 커밋 스킬(`SKILL.md`) 내 `README.md` 변경 이력 누적 양식을 서울 기준 시간(KST: YYYY-MM-DD HH:mm)이 함께 기록되도록 개선 ([rules.md](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/.agents/rules/rules.md), [SKILL.md](file:///c:/Users/user/Desktop/appsscript/20-홍익-보강%20알리미/.agents/skills/git-commit/SKILL.md))
+- **검증 결과**: `.agents` 규칙 및 스킬 문서 최신화, README.md 누적 이력 시각 정보 적용 완료
+
+
+
+
 
