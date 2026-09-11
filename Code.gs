@@ -53,10 +53,10 @@ function getDbSheet() {
     }
   }
 
-  // 헤더 생성 또는 기존 헤더 갱신 ('학급' -> '교실', 5번째 '보강교과' 열 추가, 10번째 확인여부, 11번째 긴급여부, 12번째 삭제여부 열 추가)
+  // 헤더 생성 또는 기존 헤더 갱신 (5번째 '보강학급' 열 추가 마이그레이션 포함, 총 13개 열)
   if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부', '긴급여부', '삭제여부']);
-    sheet.getRange(1, 1, 1, 12).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    sheet.appendRow(['ID', '날짜', '교시', '교실', '보강학급', '보강교과', '원교사', '보강교사', '사유', '등록시각', '확인여부', '긴급여부', '삭제여부']);
+    sheet.getRange(1, 1, 1, 13).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     sheet.setFrozenRows(1);
   } else {
     // 기존 헤더가 '학급'인 경우 '교실'로 자동 갱신
@@ -64,23 +64,29 @@ function getDbSheet() {
     if (col4Header === '학급') {
       sheet.getRange(1, 4).setValue('교실');
     }
-    // 기존 DB 마이그레이션: 5번째 열이 '원교사'인 경우 '보강교과' 열 자동 삽입
-    var col5Header = sheet.getRange(1, 5).getValue();
+    // 기존 DB 마이그레이션: 5번째 열이 '원교사'인 경우 '보강교과' 열 삽입
+    var col5Header = String(sheet.getRange(1, 5).getValue() || '').trim();
     if (col5Header === '원교사') {
       sheet.insertColumnBefore(5);
       sheet.getRange(1, 5).setValue('보강교과').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+      col5Header = '보강교과';
     }
-    // 10번째 열 확인여부 헤더 추가 확인
-    if (sheet.getLastColumn() < 10 || sheet.getRange(1, 10).getValue() === '') {
-      sheet.getRange(1, 10).setValue('확인여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    // 기존 DB 마이그레이션: 5번째 열이 '보강교과'인 경우 '보강학급' 열 자동 삽입
+    if (col5Header === '보강교과') {
+      sheet.insertColumnBefore(5);
+      sheet.getRange(1, 5).setValue('보강학급').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
-    // 11번째 열 긴급여부 헤더 추가 확인
+    // 11번째 열 확인여부 헤더 추가 확인
     if (sheet.getLastColumn() < 11 || sheet.getRange(1, 11).getValue() === '') {
-      sheet.getRange(1, 11).setValue('긴급여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+      sheet.getRange(1, 11).setValue('확인여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
-    // 12번째 열 삭제여부 헤더 추가 확인
+    // 12번째 열 긴급여부 헤더 추가 확인
     if (sheet.getLastColumn() < 12 || sheet.getRange(1, 12).getValue() === '') {
-      sheet.getRange(1, 12).setValue('삭제여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+      sheet.getRange(1, 12).setValue('긴급여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    }
+    // 13번째 열 삭제여부 헤더 추가 확인
+    if (sheet.getLastColumn() < 13 || sheet.getRange(1, 13).getValue() === '') {
+      sheet.getRange(1, 13).setValue('삭제여부').setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
     }
   }
 
@@ -95,7 +101,7 @@ function getDbSheet() {
  */
 function applyRowStrikethrough(sheet, rowNum, isDeleted) {
   try {
-    sheet.getRange(rowNum, 1, 1, 12).setFontLine(isDeleted ? 'line-through' : 'none');
+    sheet.getRange(rowNum, 1, 1, 13).setFontLine(isDeleted ? 'line-through' : 'none');
   } catch (e) {
     Logger.log('Error in applyRowStrikethrough for row ' + rowNum + ': ' + e.toString());
   }
@@ -118,34 +124,34 @@ function onEdit(e) {
     if (startRow <= 1) return;
 
     for (var r = startRow; r < startRow + numRows; r++) {
-      var rowValues = sheet.getRange(r, 1, 1, 12).getValues()[0];
-      var hasContent = rowValues[1] || rowValues[2] || rowValues[3] || rowValues[4] || rowValues[5] || rowValues[6] || rowValues[7];
+      var rowValues = sheet.getRange(r, 1, 1, 13).getValues()[0];
+      var hasContent = rowValues[1] || rowValues[2] || rowValues[3] || rowValues[4] || rowValues[5] || rowValues[6] || rowValues[7] || rowValues[8];
       if (!hasContent) continue;
 
       // 1열 ID 자동 입력
       if (!rowValues[0]) {
         sheet.getRange(r, 1).setValue('SUB-MANUAL-' + new Date().getTime() + '-' + r);
       }
-      // 9열 등록시각 자동 입력
-      if (!rowValues[8]) {
-        sheet.getRange(r, 9).setValue(new Date().toISOString());
+      // 10열 등록시각 자동 입력
+      if (!rowValues[9]) {
+        sheet.getRange(r, 10).setValue(new Date().toISOString());
       }
-      // 10열 확인여부 기본값 (true)
-      if (rowValues[9] === undefined || rowValues[9] === '') {
-        sheet.getRange(r, 10).setValue(true);
-      }
-      // 11열 긴급여부 기본값 (false)
+      // 11열 확인여부 기본값 (true)
       if (rowValues[10] === undefined || rowValues[10] === '') {
-        sheet.getRange(r, 11).setValue(false);
+        sheet.getRange(r, 11).setValue(true);
       }
-      // 12열 삭제여부 기본값 (false)
+      // 12열 긴급여부 기본값 (false)
       if (rowValues[11] === undefined || rowValues[11] === '') {
         sheet.getRange(r, 12).setValue(false);
-        rowValues[11] = false;
+      }
+      // 13열 삭제여부 기본값 (false)
+      if (rowValues[12] === undefined || rowValues[12] === '') {
+        sheet.getRange(r, 13).setValue(false);
+        rowValues[12] = false;
       }
 
-      // 삭제여부 (12열) 값에 따른 취소선 적용/해제
-      var isDeleted = (rowValues[11] === true || String(rowValues[11]).toLowerCase() === 'true' || String(rowValues[11]) === 'y');
+      // 삭제여부 (13열) 값에 따른 취소선 적용/해제
+      var isDeleted = (rowValues[12] === true || String(rowValues[12]).toLowerCase() === 'true' || String(rowValues[12]) === 'y');
       applyRowStrikethrough(sheet, r, isDeleted);
     }
   } catch (err) {
@@ -199,7 +205,7 @@ function getSubstitutionRecords(startDate, endDate) {
 
     for (var i = 1; i < data.length; i++) {
       var row = data[i];
-      var hasData = row[1] || row[2] || row[3] || row[4] || row[5] || row[6] || row[7];
+      var hasData = row[1] || row[2] || row[3] || row[4] || row[5] || row[6] || row[7] || row[8];
       if (!hasData) continue; // 완전히 비어있는 행 스킵
 
       // ID가 없는 수동 입력 행 자동 보정
@@ -211,33 +217,33 @@ function getSubstitutionRecords(startDate, endDate) {
         needsFlush = true;
       }
 
-      // 등록시각 (9열) 보정
-      if (!row[8]) {
+      // 등록시각 (10열) 보정
+      if (!row[9]) {
         var nowIso = new Date().toISOString();
-        sheet.getRange(i + 1, 9).setValue(nowIso);
-        row[8] = nowIso;
+        sheet.getRange(i + 1, 10).setValue(nowIso);
+        row[9] = nowIso;
         needsFlush = true;
       }
-      // 확인여부 (10열) 기본값 보정 (true)
-      if (row[9] === undefined || row[9] === '') {
-        sheet.getRange(i + 1, 10).setValue(true);
-        row[9] = true;
-        needsFlush = true;
-      }
-      // 긴급여부 (11열) 기본값 보정
+      // 확인여부 (11열) 기본값 보정 (true)
       if (row[10] === undefined || row[10] === '') {
-        sheet.getRange(i + 1, 11).setValue(false);
-        row[10] = false;
+        sheet.getRange(i + 1, 11).setValue(true);
+        row[10] = true;
         needsFlush = true;
       }
-      // 삭제여부 (12열) 기본값 보정
+      // 긴급여부 (12열) 기본값 보정
       if (row[11] === undefined || row[11] === '') {
         sheet.getRange(i + 1, 12).setValue(false);
         row[11] = false;
         needsFlush = true;
       }
+      // 삭제여부 (13열) 기본값 보정
+      if (row[12] === undefined || row[12] === '') {
+        sheet.getRange(i + 1, 13).setValue(false);
+        row[12] = false;
+        needsFlush = true;
+      }
 
-      var isDeleted = (row[11] === true || String(row[11]).toLowerCase() === 'true' || String(row[11]) === 'y');
+      var isDeleted = (row[12] === true || String(row[12]).toLowerCase() === 'true' || String(row[12]) === 'y');
       
       // 시트 행 취소선 적용/해제 동기화
       applyRowStrikethrough(sheet, i + 1, isDeleted);
@@ -256,19 +262,20 @@ function getSubstitutionRecords(startDate, endDate) {
       // 삭제 처리된 행은 웹 화면 조회에서 제외 (Soft Delete)
       if (isDeleted) continue;
 
-      var isConf = (row[9] === true || String(row[9]).toLowerCase() === 'true' || String(row[9]) === '확인완료');
-      var isUrgent = (row[10] === true || String(row[10]).toLowerCase() === 'true' || String(row[10]) === '긴급');
+      var isConf = (row[10] === true || String(row[10]).toLowerCase() === 'true' || String(row[10]) === '확인완료');
+      var isUrgent = (row[11] === true || String(row[11]).toLowerCase() === 'true' || String(row[11]) === '긴급');
 
       records.push({
         id: String(row[0]),
         date: rowDate,
         period: String(row[2] || ''),
         className: String(row[3] || ''),
-        subject: String(row[4] || ''),
-        originalTeacher: String(row[5] || ''),
-        substituteTeacher: String(row[6] || ''),
-        reason: String(row[7] || ''),
-        timestamp: row[8] ? String(row[8]) : '',
+        subClass: String(row[4] || '-'),
+        subject: String(row[5] || ''),
+        originalTeacher: String(row[6] || ''),
+        substituteTeacher: String(row[7] || ''),
+        reason: String(row[8] || ''),
+        timestamp: row[9] ? String(row[9]) : '',
         confirmed: isConf,
         urgent: isUrgent
       });
@@ -316,6 +323,7 @@ function addSubstitutionRecord(record) {
       formattedDate,
       record.period,
       record.className,
+      record.subClass || '-',
       record.subject,
       record.originalTeacher || '',
       record.substituteTeacher,
@@ -361,19 +369,20 @@ function updateSubstitutionRecord(record) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(record.id)) {
         var rowNum = i + 1;
-        var existingConf = (data[i][9] === true || String(data[i][9]).toLowerCase() === 'true');
+        var existingConf = (data[i][10] === true || String(data[i][10]).toLowerCase() === 'true');
         var isConf = record.confirmed !== undefined ? (record.confirmed ? true : false) : existingConf;
 
-        var existingUrgent = (data[i][10] === true || String(data[i][10]).toLowerCase() === 'true');
+        var existingUrgent = (data[i][11] === true || String(data[i][11]).toLowerCase() === 'true');
         var isUrgent = record.urgent !== undefined ? (record.urgent ? true : false) : existingUrgent;
 
-        var existingDeleted = (data[i][11] === true || String(data[i][11]).toLowerCase() === 'true');
+        var existingDeleted = (data[i][12] === true || String(data[i][12]).toLowerCase() === 'true');
 
-        sheet.getRange(rowNum, 1, 1, 12).setValues([[
+        sheet.getRange(rowNum, 1, 1, 13).setValues([[
           String(record.id),
           formattedDate,
           record.period,
           record.className,
+          record.subClass || '-',
           record.subject,
           record.originalTeacher || '',
           record.substituteTeacher,
@@ -414,7 +423,7 @@ function toggleSubstituteConfirm(id, confirmed) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(id)) {
         var rowNum = i + 1;
-        sheet.getRange(rowNum, 10).setValue(confirmed ? true : false);
+        sheet.getRange(rowNum, 11).setValue(confirmed ? true : false);
         SpreadsheetApp.flush();
         return { success: true, confirmed: confirmed };
       }
@@ -438,7 +447,7 @@ function deleteSubstitutionRecord(id) {
     for (var i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(id)) {
         var rowNum = i + 1;
-        sheet.getRange(rowNum, 12).setValue(true);
+        sheet.getRange(rowNum, 13).setValue(true);
         applyRowStrikethrough(sheet, rowNum, true);
         SpreadsheetApp.flush(); // 삭제 즉시 적용
         return { success: true, message: '보강 내역이 삭제되었습니다. (시트 데이터는 영구 보존됩니다)' };

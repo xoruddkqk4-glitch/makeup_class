@@ -545,6 +545,17 @@
       border-radius: 4px;
     }
 
+    .badge-sub-class {
+      display: inline-block;
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #c7d2fe;
+      font-size: 0.825rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
     /* 긴급 보강 행 전체 시각적 강조 (배경색 + 좌측 강렬한 레더 테두리 포인트) */
     .schedule-table tr.tr-urgent {
       background-color: #fff5f5 !important;
@@ -1132,25 +1143,28 @@
         <table class="schedule-table">
           <thead>
             <tr>
-              <th id="th_date" class="sortable-th" style="width: 18%;" onclick="handleSort('date')" title="날짜 정렬">
+              <th id="th_date" class="sortable-th" style="width: 15%;" onclick="handleSort('date')" title="날짜 정렬">
                 날짜(요일) <i class="fa-solid fa-sort sort-icon" id="sortIcon_date"></i>
               </th>
-              <th id="th_period" class="sortable-th" style="width: 9%;" onclick="handleSort('period')" title="교시 정렬">
+              <th id="th_period" class="sortable-th" style="width: 7%;" onclick="handleSort('period')" title="교시 정렬">
                 교시 <i class="fa-solid fa-sort sort-icon" id="sortIcon_period"></i>
               </th>
-              <th id="th_className" class="sortable-th" style="width: 12%;" onclick="handleSort('className')" title="교실 정렬">
+              <th id="th_className" class="sortable-th" style="width: 8%;" onclick="handleSort('className')" title="교실 정렬">
                 교실 <i class="fa-solid fa-sort sort-icon" id="sortIcon_className"></i>
               </th>
-              <th id="th_subject" class="sortable-th" style="width: 14%;" onclick="handleSort('subject')" title="보강 교과 정렬">
+              <th id="th_subClass" class="sortable-th" style="width: 13%;" onclick="handleSort('subClass')" title="보강 학급 정렬">
+                보강 학급 <i class="fa-solid fa-sort sort-icon" id="sortIcon_subClass"></i>
+              </th>
+              <th id="th_subject" class="sortable-th" style="width: 12%;" onclick="handleSort('subject')" title="보강 교과 정렬">
                 보강 교과 <i class="fa-solid fa-sort sort-icon" id="sortIcon_subject"></i>
               </th>
-              <th id="th_substituteTeacher" class="th-highlight-sub sortable-th" style="width: 24%;" onclick="handleSort('substituteTeacher')" title="보강 교사 정렬">
+              <th id="th_substituteTeacher" class="th-highlight-sub sortable-th" style="width: 13%;" onclick="handleSort('substituteTeacher')" title="보강 교사 정렬">
                 <i class="fa-solid fa-bell-concierge" style="color: #fde047; margin-right: 4px;"></i> 보강 교사 <i class="fa-solid fa-sort sort-icon" id="sortIcon_substituteTeacher"></i>
               </th>
-              <th id="th_originalTeacher" class="sortable-th" style="width: 16%;" onclick="handleSort('originalTeacher')" title="결강 교사 정렬">
+              <th id="th_originalTeacher" class="sortable-th" style="width: 12%;" onclick="handleSort('originalTeacher')" title="결강 교사 정렬">
                 결강 교사(원교사) <i class="fa-solid fa-sort sort-icon" id="sortIcon_originalTeacher"></i>
               </th>
-              <th style="width: 7%;">작업</th>
+              <th style="width: 10%;">작업</th>
             </tr>
             <!-- 열별 개별 필터 헤더 행 -->
             <tr class="filter-header-row">
@@ -1274,6 +1288,9 @@
                 </select>
               </th>
               <th>
+                <input type="text" class="col-filter-input" id="filterColSubClass" placeholder="학급 검색..." onkeyup="applyColumnFilters()">
+              </th>
+              <th>
                 <!-- 교과 드롭다운 선택 -->
                 <select class="col-filter-select" id="filterColSubject" onchange="applyColumnFilters()">
                   <option value="">전체 교과</option>
@@ -1388,40 +1405,89 @@
                 </div>
               </div>
 
-              <!-- 4. 보강 교과 (필수) -->
+              <!-- 4. 보강 학급 (필수) -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title" style="color: #0369a1;"><span class="step-num" style="background: #e0f2fe; color: #0369a1;">4</span> 보강 교과 <span style="font-size:0.775rem; font-weight:700; color:#ef4444;">(필수)</span></span>
+                  <span class="step-title" style="color: #4338ca;"><span class="step-num" style="background: #eef2ff; color: #4338ca;">4</span> 보강 학급 <span style="font-size:0.775rem; font-weight:700; color:#ef4444;">(필수)</span></span>
+                </label>
+                <div style="display: flex; gap: 12px; margin-bottom: 6px; align-items: center;">
+                  <label style="font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #374151;">
+                    <input type="radio" name="subClassType" value="common" checked onchange="toggleSubClassTypeUI()"> 공통 과목
+                  </label>
+                  <label style="font-size: 0.85rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #374151;">
+                    <input type="radio" name="subClassType" value="elective" onchange="toggleSubClassTypeUI()"> 선택 과목
+                  </label>
+                </div>
+                <div id="subClassCommonWrapper">
+                  <select class="form-control" id="inputSubClassSelect" style="border-color: #6366f1; font-weight: 600;">
+                    <option value="1-1">1학년 1반 (1-1)</option>
+                    <option value="1-2">1학년 2반 (1-2)</option>
+                    <option value="1-3">1학년 3반 (1-3)</option>
+                    <option value="1-4">1학년 4반 (1-4)</option>
+                    <option value="1-5">1학년 5반 (1-5)</option>
+                    <option value="1-6">1학년 6반 (1-6)</option>
+                    <option value="1-7">1학년 7반 (1-7)</option>
+                    <option value="1-8">1학년 8반 (1-8)</option>
+                    <option value="1-9">1학년 9반 (1-9)</option>
+                    <option value="2-1">2학년 1반 (2-1)</option>
+                    <option value="2-2">2학년 2반 (2-2)</option>
+                    <option value="2-3">2학년 3반 (2-3)</option>
+                    <option value="2-4">2학년 4반 (2-4)</option>
+                    <option value="2-5">2학년 5반 (2-5)</option>
+                    <option value="2-6">2학년 6반 (2-6)</option>
+                    <option value="2-7">2학년 7반 (2-7)</option>
+                    <option value="2-8">2학년 8반 (2-8)</option>
+                    <option value="2-9">2학년 9반 (2-9)</option>
+                    <option value="3-1">3학년 1반 (3-1)</option>
+                    <option value="3-2">3학년 2반 (3-2)</option>
+                    <option value="3-3">3학년 3반 (3-3)</option>
+                    <option value="3-4">3학년 4반 (3-4)</option>
+                    <option value="3-5">3학년 5반 (3-5)</option>
+                    <option value="3-6">3학년 6반 (3-6)</option>
+                    <option value="3-7">3학년 7반 (3-7)</option>
+                    <option value="3-8">3학년 8반 (3-8)</option>
+                    <option value="3-9">3학년 9반 (3-9)</option>
+                  </select>
+                </div>
+                <div id="subClassElectiveWrapper" style="display: none;">
+                  <input type="text" class="form-control" id="inputSubClassText" placeholder="예: 2학년 선택과목, 3학년 인문사회 등" style="border-color: #6366f1; font-weight: 600;">
+                </div>
+              </div>
+            </div>
+
+            <!-- 우측 열 (5~6번 필수, 7~8번 선택 입력) -->
+            <div class="grid-col">
+              <!-- 5. 보강 교과 (필수) -->
+              <div class="form-group">
+                <label class="form-label">
+                  <span class="step-title" style="color: #0369a1;"><span class="step-num" style="background: #e0f2fe; color: #0369a1;">5</span> 보강 교과 <span style="font-size:0.775rem; font-weight:700; color:#ef4444;">(필수)</span></span>
                 </label>
                 <input type="text" class="form-control" id="inputSubject" placeholder="예: 국어, 수학, 영어 등 (필수)" style="border-color: #0284c7; font-weight: 600;" required>
                 <div class="subject-tags-container" id="subjectTagsContainer">
                   <!-- 동적 태그 칩 생성 -->
                 </div>
               </div>
-            </div>
 
-            <!-- 우측 열 (5번 필수, 6~7번 선택 입력) -->
-            <div class="grid-col">
-              <!-- 5. 보강 교사 (필수) -->
+              <!-- 6. 보강 교사 (필수) -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title" style="color: #047857;"><span class="step-num" style="background: #ecfdf5; color: #047857;">5</span> 보강 교사 (보강 들어갈 교사) <span style="font-size:0.775rem; font-weight:700; color:#ef4444;">(필수)</span></span>
+                  <span class="step-title" style="color: #047857;"><span class="step-num" style="background: #ecfdf5; color: #047857;">6</span> 보강 교사 (보강 들어갈 교사) <span style="font-size:0.775rem; font-weight:700; color:#ef4444;">(필수)</span></span>
                 </label>
                 <input type="text" class="form-control" id="inputSubstituteTeacher" placeholder="예: 김철수" style="border-color: #059669; font-weight: 600;" required>
               </div>
 
-              <!-- 6. 결강 교사(원교사) (선택 입력) -->
+              <!-- 7. 결강 교사(원교사) (선택 입력) -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title"><span class="step-num">6</span> 결강 교사 <span style="font-size:0.775rem; font-weight:400; color:#64748b;">(원교사 이름, 선택)</span></span>
+                  <span class="step-title"><span class="step-num">7</span> 결강 교사 <span style="font-size:0.775rem; font-weight:400; color:#64748b;">(원교사 이름, 선택)</span></span>
                 </label>
                 <input type="text" class="form-control" id="inputOriginalTeacher" placeholder="예: 홍길동 (선택)">
               </div>
 
-              <!-- 7. 보강 유발 사유 (선택 입력) -->
+              <!-- 8. 보강 유발 사유 (선택 입력) -->
               <div class="form-group">
                 <label class="form-label">
-                  <span class="step-title"><span class="step-num">7</span> 보강 유발 사유 <span style="font-size:0.775rem; font-weight:400; color:#64748b;">(선택)</span></span>
+                  <span class="step-title"><span class="step-num">8</span> 보강 유발 사유 <span style="font-size:0.775rem; font-weight:400; color:#64748b;">(선택)</span></span>
                 </label>
                 <input type="text" class="form-control" id="inputReason" placeholder="예: 관외 출장, 연가 등 (선택)">
                 <div class="reason-tags-container" id="reasonTagsContainer">
@@ -1462,9 +1528,9 @@
 
     // 모의(Mock) 데이터 (로컬 테스트용)
     const mockData = [
-      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', subject: '수학', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장', confirmed: true, urgent: true },
-      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', subject: '영어', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가', confirmed: true, urgent: false },
-      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', subject: '국어', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가', confirmed: true, urgent: false }
+      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', subClass: '2-3', subject: '수학', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장', confirmed: true, urgent: true },
+      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', subClass: '1-5', subject: '영어', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가', confirmed: true, urgent: false },
+      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', subClass: '3-2', subject: '국어', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가', confirmed: true, urgent: false }
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -2129,7 +2195,6 @@
       // 상단 앱 헤더 영역 배치로 인한 유연한 표시 지원
     }
 
-    // 검색 결과 개조식 텍스트 복사 기능 (교내 메신저 전달용)
     // 검색 결과 개조식 텍스트 복사 기능 (교내 메신저 전달용: 시각적 대형 카드 포맷)
     function copyResultsToText() {
       const records = lastFilteredSortedRecords;
@@ -2166,11 +2231,12 @@
         const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)}   |   `;
         const periodStr = r.period || '-교시';
         const roomStr = r.className || '-';
+        const subClassStr = r.subClass || '-';
         const subjectStr = r.subject || '-';
         const subTeacherStr = r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -';
         const origTeacherStr = r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -';
         const reasonStr = r.reason ? `[사유] ${r.reason}` : '[사유] -';
-        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}`);
+        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subClassStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}`);
         if (idx < records.length - 1) {
           textLines.push(``);
         }
@@ -2187,6 +2253,7 @@
         const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)} &nbsp;&nbsp;|&nbsp;&nbsp; `;
         const periodStr = escapeHtml(r.period || '-');
         const roomStr = escapeHtml(r.className || '-');
+        const subClassStr = escapeHtml(r.subClass || '-');
         const subjectStr = escapeHtml(r.subject || '-');
         const subTeacherStr = escapeHtml(r.substituteTeacher || '-');
         const origTeacherStr = escapeHtml(r.originalTeacher || '-');
@@ -2197,6 +2264,7 @@
           <div style="margin-bottom: 12px; font-size: 18px; line-height: 1.7; color: #1f2937;">
             &nbsp;&nbsp;• ${urgentBadgeHtml}${dateStr}<strong style="color:#0284c7;">${periodStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <strong style="color:#475569;">${roomStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
+            <strong style="color:#4338ca;">${subClassStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <span style="color:#0369a1; font-weight:bold;">${subjectStr}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <strong style="color:#065f46; font-size:19px;">[보강] ${subTeacherStr}</strong> &nbsp;<span style="font-size:18px;">⬅️</span>&nbsp; 
             <span style="color:#e11d48; font-weight:bold;">[원교사] ${origTeacherStr}</span>
@@ -2316,7 +2384,7 @@
 
     // 정렬 헤더 아이콘 UI 업데이트
     function updateSortIconsUI() {
-      const keys = ['date', 'period', 'className', 'subject', 'substituteTeacher', 'originalTeacher', 'reason'];
+      const keys = ['date', 'period', 'className', 'subClass', 'subject', 'substituteTeacher', 'originalTeacher', 'reason'];
       keys.forEach(k => {
         const icon = document.getElementById('sortIcon_' + k);
         const th = document.getElementById('th_' + k);
@@ -2365,6 +2433,12 @@
           return (a.date > b.date ? -1 : 1);
         }
 
+        if (currentSortKey === 'subClass') {
+          const comp = String(valA).localeCompare(String(valB), 'ko', { numeric: true });
+          if (comp !== 0) return comp * mult;
+          return (a.date > b.date ? -1 : 1);
+        }
+
         if (currentSortKey === 'subject') {
           const comp = String(valA).localeCompare(String(valB), 'ko');
           if (comp !== 0) return comp * mult;
@@ -2385,6 +2459,8 @@
       const urgentQuery = document.getElementById('filterColUrgent').value;
       const periodQuery = document.getElementById('filterColPeriod').value.trim();
       const classQuery = document.getElementById('filterColClass').value.trim();
+      const subClassElem = document.getElementById('filterColSubClass');
+      const subClassQuery = subClassElem ? subClassElem.value.toLowerCase().trim() : '';
       const subjectQuery = document.getElementById('filterColSubject').value.toLowerCase().trim();
       const subTeacherQuery = document.getElementById('filterColSubTeacher').value.toLowerCase().trim();
       const reasonElem = document.getElementById('filterColReason');
@@ -2413,6 +2489,7 @@
           }
         }
 
+        if (subClassQuery && !(r.subClass || '').toLowerCase().includes(subClassQuery)) return false;
         if (subjectQuery && !(r.subject || '').toLowerCase().includes(subjectQuery)) return false;
         if (subTeacherQuery && !r.substituteTeacher.toLowerCase().includes(subTeacherQuery)) return false;
         if (reasonQuery && !r.reason.toLowerCase().includes(reasonQuery)) return false;
@@ -2429,6 +2506,7 @@
       selectUrgentFilter('', document.querySelectorAll('#filterUrgentPillGroup .btn-filter-pill')[0]);
       document.getElementById('filterColPeriod').value = '';
       document.getElementById('filterColClass').value = '';
+      if (document.getElementById('filterColSubClass')) document.getElementById('filterColSubClass').value = '';
       document.getElementById('filterColSubject').value = '';
       document.getElementById('filterColSubTeacher').value = '';
       if (document.getElementById('filterColReason')) document.getElementById('filterColReason').value = '';
@@ -2467,6 +2545,7 @@
           '구분': urgentState ? '🚨 긴급' : '일반',
           '교시': r.period || '',
           '교실': r.className || '',
+          '보강 학급': r.subClass || '-',
           '보강 교과': r.subject || '',
           '보강 교사': r.substituteTeacher || '',
           '확인 여부': r.confirmed ? '✅ 본인확인' : '🔔 본인 미확인',
@@ -2483,6 +2562,7 @@
           { wch: 10 }, // 구분
           { wch: 10 }, // 교시
           { wch: 12 }, // 교실
+          { wch: 14 }, // 보강 학급
           { wch: 16 }, // 보강 교과
           { wch: 16 }, // 보강 교사
           { wch: 14 }, // 확인 여부
@@ -2495,7 +2575,7 @@
       } else {
         // Fallback: UTF-8 BOM CSV 파일 다운로드
         let csv = '\uFEFF';
-        const headers = ['날짜(요일)', '구분', '교시', '교실', '보강 교과', '보강 교사', '확인 여부', '결강 교사(원교사)'];
+        const headers = ['날짜(요일)', '구분', '교시', '교실', '보강 학급', '보강 교과', '보강 교사', '확인 여부', '결강 교사(원교사)'];
         csv += headers.join(',') + '\r\n';
 
         excelData.forEach(row => {
@@ -2661,6 +2741,7 @@
           <td style="font-weight: 600;">${formattedDateText}</td>
           <td><span class="badge-period">${escapeHtml(item.period)}</span></td>
           <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
+          <td><span class="badge-sub-class">${escapeHtml(item.subClass || '-')}</span></td>
           <td><span class="badge-subject">${escapeHtml(item.subject || '-')}</span></td>
           <td class="td-highlight-sub">
             <span class="teacher-sub">${escapeHtml(item.substituteTeacher)}</span>
@@ -2752,6 +2833,8 @@
       updateRoomOptions();
       document.getElementById('inputRoom').value = roomVal;
 
+      setSelectedSubClassValue(target.subClass || '-');
+
       document.getElementById('inputSubject').value = target.subject || '';
       document.getElementById('inputSubstituteTeacher').value = target.substituteTeacher;
       document.getElementById('inputReason').value = target.reason || '';
@@ -2774,15 +2857,16 @@
       const date = document.getElementById('inputDate').value;
       const period = document.getElementById('inputPeriod').value;
       const roomVal = document.getElementById('inputRoom').value;
+      const subClass = getSelectedSubClassValue();
       const subject = document.getElementById('inputSubject').value.trim();
       const substituteTeacher = document.getElementById('inputSubstituteTeacher').value.trim();
       const reason = document.getElementById('inputReason').value.trim();
       const originalTeacher = document.getElementById('inputOriginalTeacher').value.trim();
       const urgent = document.getElementById('inputUrgent').checked;
 
-      // 필수 항목 검증 (날짜, 교시, 교실, 보강 교과, 보강 교사)
-      if (!date || !period || !roomVal || !subject || !substituteTeacher) {
-        alert('필수 정보(날짜, 교시, 교실, 보강 교과, 보강 교사)를 모두 입력해 주세요.');
+      // 필수 항목 검증 (날짜, 교시, 교실, 보강 학급, 보강 교과, 보강 교사)
+      if (!date || !period || !roomVal || !subClass || !subject || !substituteTeacher) {
+        alert('필수 정보(날짜, 교시, 교실, 보강 학급, 보강 교과, 보강 교사)를 모두 입력해 주세요.');
         return;
       }
 
@@ -2793,6 +2877,7 @@
         date: date,
         period: period,
         className: roomVal,
+        subClass: subClass,
         subject: subject,
         substituteTeacher: substituteTeacher,
         reason: reason || '',
@@ -2877,6 +2962,7 @@
       document.getElementById('inputDate').value = todayStr;
       document.getElementById('inputFloor').value = '2층';
       updateRoomOptions();
+      setSelectedSubClassValue('1-1');
       document.getElementById('inputSubject').value = '';
       document.getElementById('inputSubstituteTeacher').value = '';
       document.getElementById('inputReason').value = '';
@@ -2884,6 +2970,52 @@
       document.getElementById('inputUrgent').checked = false;
       updateUrgentBannerUI();
       selectPeriod(1);
+    }
+
+    function toggleSubClassTypeUI() {
+      const isCommon = document.querySelector('input[name="subClassType"]:checked')?.value === 'common';
+      document.getElementById('subClassCommonWrapper').style.display = isCommon ? 'block' : 'none';
+      document.getElementById('subClassElectiveWrapper').style.display = isCommon ? 'none' : 'block';
+    }
+
+    function getSelectedSubClassValue() {
+      const isCommon = document.querySelector('input[name="subClassType"]:checked')?.value === 'common';
+      if (isCommon) {
+        return document.getElementById('inputSubClassSelect').value || '1-1';
+      } else {
+        const txt = document.getElementById('inputSubClassText').value.trim();
+        return txt !== '' ? txt : '-';
+      }
+    }
+
+    function setSelectedSubClassValue(val) {
+      if (!val || val === '-') {
+        const commonRadio = document.querySelector('input[name="subClassType"][value="common"]');
+        if (commonRadio) commonRadio.checked = true;
+        document.getElementById('inputSubClassSelect').value = '1-1';
+        document.getElementById('inputSubClassText').value = '';
+        toggleSubClassTypeUI();
+        return;
+      }
+      
+      const common27 = [
+        '1-1','1-2','1-3','1-4','1-5','1-6','1-7','1-8','1-9',
+        '2-1','2-2','2-3','2-4','2-5','2-6','2-7','2-8','2-9',
+        '3-1','3-2','3-3','3-4','3-5','3-6','3-7','3-8','3-9'
+      ];
+
+      const cleanVal = String(val).trim();
+      if (common27.includes(cleanVal)) {
+        const commonRadio = document.querySelector('input[name="subClassType"][value="common"]');
+        if (commonRadio) commonRadio.checked = true;
+        document.getElementById('inputSubClassSelect').value = cleanVal;
+        document.getElementById('inputSubClassText').value = '';
+      } else {
+        const electiveRadio = document.querySelector('input[name="subClassType"][value="elective"]');
+        if (electiveRadio) electiveRadio.checked = true;
+        document.getElementById('inputSubClassText').value = cleanVal;
+      }
+      toggleSubClassTypeUI();
     }
 
     function deleteRecord(id) {
