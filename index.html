@@ -2222,34 +2222,95 @@
         isSingleDate = true;
       }
 
-      // 1. 일반 텍스트 (Plain Text: 1항목 1줄 개조식 포맷)
+      // 각 열별 시각적 최대 너비 계산 (헤더 + 데이터 행 동적 패딩용)
+      function getVisualWidth(str) {
+        if (!str) return 0;
+        let width = 0;
+        for (let i = 0; i < str.length; i++) {
+          const code = str.charCodeAt(i);
+          if (code >= 0xD800 && code <= 0xDBFF) {
+            width += 2;
+            i++;
+            continue;
+          }
+          if (
+            (code >= 0x1100 && code <= 0x11FF) ||
+            (code >= 0x3130 && code <= 0x318F) ||
+            (code >= 0xAC00 && code <= 0xD7A3) ||
+            (code >= 0x2E80 && code <= 0x9FFF) ||
+            (code >= 0xFF00 && code <= 0xFFEF) ||
+            (code >= 0x2600 && code <= 0x27BF)
+          ) {
+            width += 2;
+          } else {
+            width += 1;
+          }
+        }
+        return width;
+      }
+
+      function padRightVisual(str, targetWidth) {
+        str = String(str || '');
+        const currentWidth = getVisualWidth(str);
+        if (currentWidth >= targetWidth) return str;
+        return str + ' '.repeat(targetWidth - currentWidth);
+      }
+
+      const maxW_date = isSingleDate ? 0 : Math.max(getVisualWidth('[날짜]'), ...records.map(r => getVisualWidth(formatFormattedDate(r.date))));
+      const maxW_period = Math.max(getVisualWidth('[교시]'), ...records.map(r => getVisualWidth(r.period || '-교시')));
+      const maxW_room = Math.max(getVisualWidth('[교실]'), ...records.map(r => getVisualWidth(r.className || '-')));
+      const maxW_subClass = Math.max(getVisualWidth('[보강 학급]'), ...records.map(r => getVisualWidth(r.subClass || '-')));
+      const maxW_subject = Math.max(getVisualWidth('[보강 교과]'), ...records.map(r => getVisualWidth(r.subject || '-')));
+      const maxW_subTeacher = Math.max(getVisualWidth('[보강 교사]'), ...records.map(r => getVisualWidth(r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -')));
+      const maxW_origTeacher = Math.max(getVisualWidth('[원교사]'), ...records.map(r => getVisualWidth(r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -')));
+
+      const hasUrgentInList = records.some(r => isUrgentActive(r));
+      const urgentPrefixWidth = hasUrgentInList ? getVisualWidth('🚨[긴급] ') : 0;
+
+      // 1. 일반 텍스트 (Plain Text: 1항목 1줄 개조식 포맷, 열 구분선 수직 정렬)
       let textLines = [];
       textLines.push(`📢 [보강 알리미] 보강 현황 안내`);
       textLines.push(`📅 기간: ${dateText}`);
-      textLines.push(`========================================`);
-      const plainHeader = isSingleDate
-        ? `  📌 [교시]   |   [교실]   |   [보강 학급]   |   [보강 교과]   |   [보강 교사]  ⬅️  [원교사]`
-        : `  📌 [날짜]   |   [교시]   |   [교실]   |   [보강 학급]   |   [보강 교과]   |   [보강 교사]  ⬅️  [원교사]`;
+
+      const headerPrefix = '  📌 ' + ' '.repeat(urgentPrefixWidth);
+      const hDate = isSingleDate ? '' : padRightVisual('[날짜]', maxW_date) + '   |   ';
+      const hPeriod = padRightVisual('[교시]', maxW_period);
+      const hRoom = padRightVisual('[교실]', maxW_room);
+      const hSubClass = padRightVisual('[보강 학급]', maxW_subClass);
+      const hSubject = padRightVisual('[보강 교과]', maxW_subject);
+      const hSubTeacher = padRightVisual('[보강 교사]', maxW_subTeacher);
+      const hOrigTeacher = padRightVisual('[원교사]', maxW_origTeacher);
+
+      const plainHeader = `${headerPrefix}${hDate}${hPeriod}   |   ${hRoom}   |   ${hSubClass}   |   ${hSubject}   |   ${hSubTeacher}  ⬅️  ${hOrigTeacher}`;
+      const maxLineLen = Math.max(40, getVisualWidth(plainHeader));
+      const dividerStr = '='.repeat(maxLineLen);
+
+      textLines.push(dividerStr);
       textLines.push(plainHeader);
       textLines.push(``);
 
       records.forEach((r, idx) => {
-        const urgentTag = isUrgentActive(r) ? '🚨[긴급] ' : '';
-        const dateStr = isSingleDate ? '' : `${formatFormattedDate(r.date)}   |   `;
-        const periodStr = r.period || '-교시';
-        const roomStr = r.className || '-';
-        const subClassStr = r.subClass || '-';
-        const subjectStr = r.subject || '-';
-        const subTeacherStr = r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -';
-        const origTeacherStr = r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -';
-        const reasonStr = r.reason ? `[사유] ${r.reason}` : '[사유] -';
-        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subClassStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}`);
+        const isUrgent = isUrgentActive(r);
+        let rowPrefix = '  • ';
+        if (hasUrgentInList) {
+          rowPrefix += isUrgent ? '🚨[긴급] ' : ' '.repeat(urgentPrefixWidth);
+        }
+
+        const rDate = isSingleDate ? '' : padRightVisual(formatFormattedDate(r.date), maxW_date) + '   |   ';
+        const rPeriod = padRightVisual(r.period || '-교시', maxW_period);
+        const rRoom = padRightVisual(r.className || '-', maxW_room);
+        const rSubClass = padRightVisual(r.subClass || '-', maxW_subClass);
+        const rSubject = padRightVisual(r.subject || '-', maxW_subject);
+        const rSubTeacher = padRightVisual(r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -', maxW_subTeacher);
+        const rOrigTeacher = padRightVisual(r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -', maxW_origTeacher);
+
+        textLines.push(`${rowPrefix}${rDate}${rPeriod}   |   ${rRoom}   |   ${rSubClass}   |   ${rSubject}   |   ${rSubTeacher}  ⬅️  ${rOrigTeacher}`);
         if (idx < records.length - 1) {
           textLines.push(``);
         }
       });
 
-      textLines.push(`========================================`);
+      textLines.push(dividerStr);
       textLines.push(`(총 ${records.length}건)`);
 
       const plainText = textLines.join('\n');
@@ -2681,7 +2742,6 @@
           '보강 학급': r.subClass || '-',
           '보강 교과': r.subject || '',
           '보강 교사': r.substituteTeacher || '',
-          '확인 여부': r.confirmed ? '✅ 본인확인' : '🔔 본인 미확인',
           '결강 교사(원교사)': r.originalTeacher || ''
         };
       });
@@ -2698,7 +2758,6 @@
           { wch: 14 }, // 보강 학급
           { wch: 16 }, // 보강 교과
           { wch: 16 }, // 보강 교사
-          { wch: 14 }, // 확인 여부
           { wch: 18 }  // 결강 교사(원교사)
         ];
 
@@ -2708,7 +2767,7 @@
       } else {
         // Fallback: UTF-8 BOM CSV 파일 다운로드
         let csv = '\uFEFF';
-        const headers = ['날짜(요일)', '구분', '교시', '교실', '보강 학급', '보강 교과', '보강 교사', '확인 여부', '결강 교사(원교사)'];
+        const headers = ['날짜(요일)', '구분', '교시', '교실', '보강 학급', '보강 교과', '보강 교사', '결강 교사(원교사)'];
         csv += headers.join(',') + '\r\n';
 
         excelData.forEach(row => {
@@ -2769,10 +2828,6 @@
       let rowsHtml = '';
       records.forEach((r, idx) => {
         const formattedDate = formatFormattedDate(r.date);
-        const isConf = Boolean(r.confirmed);
-        const confBadge = isConf 
-          ? '<span style="color:#059669; font-weight:bold;">[본인확인]</span>' 
-          : '<span style="color:#d97706;">[본인 미확인]</span>';
         const urgentState = isUrgentActive(r);
         const urgentPdfBadge = urgentState ? '<span style="color:#dc2626; font-weight:bold; margin-left:2px;">🚨[긴급]</span>' : '';
 
@@ -2781,8 +2836,9 @@
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:600; font-size:10.5px;">${escapeHtml(formattedDate)}${urgentPdfBadge}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#0284c7;">${escapeHtml(r.period)}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#475569;">${escapeHtml(r.className)}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#4338ca;">${escapeHtml(r.subClass || '-')}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:10.5px; color:#0369a1;">${escapeHtml(r.subject || '-')}</td>
-            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:11px; color:#065f46; background-color:#f0fdf4;">${escapeHtml(r.substituteTeacher)} ${confBadge}</td>
+            <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-weight:bold; font-size:11px; color:#065f46; background-color:#f0fdf4;">${escapeHtml(r.substituteTeacher || '-')}</td>
             <td style="border:1px solid #cbd5e1; padding:6px 4px; text-align:center; font-size:10.5px; color:#e11d48;">${escapeHtml(r.originalTeacher || '-')}</td>
           </tr>
         `;
@@ -2802,11 +2858,12 @@
         <table style="width:100%; border-collapse:collapse; margin-bottom:12px; font-size:10.5px;">
           <thead>
             <tr style="background-color:#006b67; color:#ffffff;">
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:18%;">날짜(요일)</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:10%;">교시</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:12%;">교실</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:15%;">보강 교과</th>
-              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:27%;">보강 교사 (확인)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:17%;">날짜(요일)</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:8%;">교시</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:9%;">교실</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:14%;">보강 학급</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:16%;">보강 교과</th>
+              <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:18%;">보강 교사</th>
               <th style="border:1px solid #005753; padding:7px 4px; text-align:center; width:18%;">결강 교사(원교사)</th>
             </tr>
           </thead>
