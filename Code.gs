@@ -130,9 +130,9 @@ function onEdit(e) {
       if (!rowValues[8]) {
         sheet.getRange(r, 9).setValue(new Date().toISOString());
       }
-      // 10열 확인여부 기본값 (false)
+      // 10열 확인여부 기본값 (true)
       if (rowValues[9] === undefined || rowValues[9] === '') {
-        sheet.getRange(r, 10).setValue(false);
+        sheet.getRange(r, 10).setValue(true);
       }
       // 11열 긴급여부 기본값 (false)
       if (rowValues[10] === undefined || rowValues[10] === '') {
@@ -218,10 +218,10 @@ function getSubstitutionRecords(startDate, endDate) {
         row[8] = nowIso;
         needsFlush = true;
       }
-      // 확인여부 (10열) 기본값 보정
+      // 확인여부 (10열) 기본값 보정 (true)
       if (row[9] === undefined || row[9] === '') {
-        sheet.getRange(i + 1, 10).setValue(false);
-        row[9] = false;
+        sheet.getRange(i + 1, 10).setValue(true);
+        row[9] = true;
         needsFlush = true;
       }
       // 긴급여부 (11열) 기본값 보정
@@ -308,7 +308,7 @@ function addSubstitutionRecord(record) {
     var newId = record.id || ('SUB-' + new Date().getTime() + '-' + Math.floor(Math.random() * 1000));
     var nowIso = new Date().toISOString();
     var formattedDate = formatDateString(record.date);
-    var isConf = record.confirmed ? true : false;
+    var isConf = record.confirmed !== undefined ? (record.confirmed ? true : false) : true;
     var isUrgent = record.urgent ? true : false;
 
     sheet.appendRow([

@@ -1281,7 +1281,7 @@
                 </select>
               </th>
               <th style="background: #ecfdf5;">
-                <input type="text" class="col-filter-input col-filter-highlight" id="filterColSubTeacher" placeholder="🔔 보강교사 검색..." onkeyup="applyColumnFilters()">
+                <input type="text" class="col-filter-input col-filter-highlight" id="filterColSubTeacher" placeholder="보강교사 검색..." onkeyup="applyColumnFilters()">
               </th>
               <th>
                 <input type="text" class="col-filter-input" id="filterColOrigTeacher" placeholder="원교사 검색..." onkeyup="applyColumnFilters()">
@@ -1462,9 +1462,9 @@
 
     // 모의(Mock) 데이터 (로컬 테스트용)
     const mockData = [
-      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', subject: '수학', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장', urgent: true },
-      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', subject: '영어', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가', urgent: false },
-      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', subject: '국어', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가', urgent: false }
+      { id: 'SUB-1', date: '2026-09-02', period: '2교시', className: '203', subject: '수학', originalTeacher: '홍길동', substituteTeacher: '김철수', reason: '출장', confirmed: true, urgent: true },
+      { id: 'SUB-2', date: '2026-09-02', period: '3교시', className: '105', subject: '영어', originalTeacher: '이영희', substituteTeacher: '박민수', reason: '연가', confirmed: true, urgent: false },
+      { id: 'SUB-3', date: '2026-09-03', period: '5교시', className: '312', subject: '국어', originalTeacher: '강감찬', substituteTeacher: '최무선', reason: '공가', confirmed: true, urgent: false }
     ];
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -2170,9 +2170,7 @@
         const subTeacherStr = r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -';
         const origTeacherStr = r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -';
         const reasonStr = r.reason ? `[사유] ${r.reason}` : '[사유] -';
-        const confBadge = r.confirmed ? ` (✅본인확인)` : '';
-
-        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}${confBadge}`);
+        textLines.push(`  • ${urgentTag}${dateStr}${periodStr}   |   ${roomStr}   |   ${subjectStr}   |   ${subTeacherStr}  ⬅️  ${origTeacherStr}`);
         if (idx < records.length - 1) {
           textLines.push(``);
         }
@@ -2180,9 +2178,6 @@
 
       textLines.push(`========================================`);
       textLines.push(`(총 ${records.length}건)`);
-      textLines.push(``);
-      textLines.push(`- 이 메세지를 받으시면, [온라인교무실] 메인화면에 보이는 '보강 알리미' 목록에서 본인의 이름을 찾아 '본인 미확인' 상태를 '본인확인' 상태로 변경해 주세요.`);
-      textLines.push(`- 보강 당일 아침 보다는 이전 편하신 시간에 변경 바랍니다.`);
 
       const plainText = textLines.join('\n');
 
@@ -2195,7 +2190,6 @@
         const subjectStr = escapeHtml(r.subject || '-');
         const subTeacherStr = escapeHtml(r.substituteTeacher || '-');
         const origTeacherStr = escapeHtml(r.originalTeacher || '-');
-        const confBadge = r.confirmed ? ' <span style="color:#059669; font-weight:bold;">(✅본인확인)</span>' : '';
         const urgentState = isUrgentActive(r);
         const urgentBadgeHtml = urgentState ? '<span style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; font-size:15px; font-weight:bold; padding:1px 6px; border-radius:4px; margin-right:6px;">🚨 긴급</span>' : '';
 
@@ -2205,7 +2199,7 @@
             <strong style="color:#475569;">${roomStr}</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <span style="color:#0369a1; font-weight:bold;">${subjectStr}</span> &nbsp;&nbsp;|&nbsp;&nbsp; 
             <strong style="color:#065f46; font-size:19px;">[보강] ${subTeacherStr}</strong> &nbsp;<span style="font-size:18px;">⬅️</span>&nbsp; 
-            <span style="color:#e11d48; font-weight:bold;">[원교사] ${origTeacherStr}</span>${confBadge}
+            <span style="color:#e11d48; font-weight:bold;">[원교사] ${origTeacherStr}</span>
           </div>
         `;
       });
@@ -2217,11 +2211,7 @@
           <hr style="border: none; border-top: 2px solid #006b67; margin: 10px 0 16px 0;" />
           ${htmlRows}
           <hr style="border: none; border-top: 1px solid #cbd5e1; margin: 16px 0 8px 0;" />
-          <p style="font-size: 14px; color: #64748b; margin: 0 0 10px 0;">(총 ${records.length}건)</p>
-          <div style="font-size: 14px; color: #475569; line-height: 1.6; background: #f8fafc; border-left: 4px solid #006b67; padding: 8px 12px; margin-top: 10px; border-radius: 4px;">
-            <p style="margin: 0 0 4px 0;">- 이 메세지를 받으시면, [온라인교무실] 메인화면에 보이는 '보강 알리미' 목록에서 본인의 이름을 찾아 '본인 미확인' 상태를 '본인확인' 상태로 변경해 주세요.</p>
-            <p style="margin: 0;">- 보강 당일 아침 보다는 이전 편하신 시간에 변경 바랍니다.</p>
-          </div>
+          <p style="font-size: 14px; color: #64748b; margin: 0;">(총 ${records.length}건)</p>
         </div>
       `;
 
@@ -2661,7 +2651,6 @@
       records.forEach(item => {
         const tr = document.createElement('tr');
         const formattedDateText = formatFormattedDate(item.date);
-        const isConf = Boolean(item.confirmed);
         const urgentState = isUrgentActive(item);
         
         if (urgentState) {
@@ -2674,12 +2663,7 @@
           <td><span class="badge-class">${escapeHtml(item.className)}</span></td>
           <td><span class="badge-subject">${escapeHtml(item.subject || '-')}</span></td>
           <td class="td-highlight-sub">
-            <div class="sub-teacher-card ${isConf ? 'is-confirmed' : ''}" title="${isConf ? '클릭 시 본인 미확인으로 변경' : '클릭 시 본인확인 완료'}" onclick="toggleConfirm(event, '${item.id}')">
-              <input type="checkbox" class="sub-checkbox" ${isConf ? 'checked' : ''} onclick="event.stopPropagation(); toggleConfirm(event, '${item.id}')">
-              <i class="fa-solid ${isConf ? 'fa-circle-check' : 'fa-bell'} sub-icon" style="color: ${isConf ? '#059669' : '#d97706'};"></i>
-              <span class="sub-name">${escapeHtml(item.substituteTeacher)}</span>
-              <span class="sub-badge">${isConf ? '✅ 본인확인' : '🔔 본인 미확인'}</span>
-            </div>
+            <span class="teacher-sub">${escapeHtml(item.substituteTeacher)}</span>
           </td>
           <td><span class="teacher-orig">${escapeHtml(item.originalTeacher || '-')}</span></td>
           <td>
@@ -2803,6 +2787,7 @@
       }
 
       const targetId = editingId || ('SUB-' + Date.now());
+      const existingRecord = editingId ? currentRecords.find(r => String(r.id) === String(editingId)) : null;
       const record = {
         id: targetId,
         date: date,
@@ -2812,6 +2797,7 @@
         substituteTeacher: substituteTeacher,
         reason: reason || '',
         originalTeacher: originalTeacher || '',
+        confirmed: existingRecord ? (existingRecord.confirmed !== undefined ? Boolean(existingRecord.confirmed) : true) : true,
         urgent: urgent
       };
 

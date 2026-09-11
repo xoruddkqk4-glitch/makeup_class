@@ -1,9 +1,10 @@
 # Agent Execution Rules: Terminal-Only Fast Verification
 
 ## 1. Browser & Scratchpad Policy
-- **STRICT REQUIREMENT:** Do NOT launch Chrome, Scratchpad, or any browser instance for visual verification.
-- **NO SCREENSHOTS:** Never take screenshots or perform visual inspection after editing code.
+- **STRICT REQUIREMENT:** Do NOT launch Chrome, Scratchpad, or any browser instance for visual verification during standard code editing tasks.
+- **NO AUTOMATIC SCREENSHOTS:** Never take screenshots or perform visual inspection automatically after editing code.
 - Trust Hot Module Replacement (HMR) on the user's browser for UI updates.
+- **EXCEPTIONS (명시적 예외 조건):** 오직 사용자가 `/scratchpad`, `/action scratchpad` 명령어를 명시적으로 입력하거나 "scratchpad로 검증해줘"라고 직접 요청한 경우에 한해 본 정책의 예외가 적용되어 Scratchpad / 브라우저 시각 검증 도구를 구동할 수 있습니다.
 
 ## 2. Terminal-Based Error Verification
 - After making code changes, perform quick static verification via terminal commands instead of browser checks.
@@ -36,3 +37,7 @@
 - 사용자로부터 `/ask`, `/action ask`, 또는 `/ask`로 시작하는 질의를 받으면 프로젝트 소스 코드를 절대로 수정하지 않아야 합니다.
 - 단순 질문인 경우 대화 답변만 수행하고, 기술적/복잡한 변경 요청인 경우 `implementation_plan.md` 계획서 작성까지만 진행합니다.
 - **계획서 자동 실행 금지:** `/ask` 모드로 작성된 계획서는 시스템 자동 승인(Auto-Approve/Proceed)이 전달되더라도 절대로 자동으로 코드를 변경해서는 안 되며, 사용자의 명시적인 추가 대화 명령이 있을 때까지 대기해야 합니다.
+
+## 6. `/scratchpad` 브라우저 검증 전용 모드 정책 (Visual Verification Explicit Exception)
+- 사용자로부터 `/scratchpad`, `/action scratchpad`, 또는 "scratchpad로 검증해줘"라는 명시적인 요청을 수신하는 경우, Rule 1 정책의 명시적 예외를 적용합니다.
+- Scratchpad 및 브라우저 검증 도구(`browser_subagent`)를 활용하여 대상 페이지 및 UI 인터액션 기능을 시각적으로 직접 확인하고 결과를 사용자에게 보고합니다.
