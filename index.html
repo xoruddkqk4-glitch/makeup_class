@@ -2180,6 +2180,9 @@
 
       textLines.push(`========================================`);
       textLines.push(`(총 ${records.length}건)`);
+      textLines.push(``);
+      textLines.push(`- 이 메세지를 받으시면, [온라인교무실] 메인화면에 보이는 '보강 알리미' 목록에서 본인의 이름을 찾아 '본인 미확인' 상태를 '본인확인' 상태로 변경해 주세요.`);
+      textLines.push(`- 보강 당일 아침 보다는 이전 편하신 시간에 변경 바랍니다.`);
 
       const plainText = textLines.join('\n');
 
@@ -2214,7 +2217,11 @@
           <hr style="border: none; border-top: 2px solid #006b67; margin: 10px 0 16px 0;" />
           ${htmlRows}
           <hr style="border: none; border-top: 1px solid #cbd5e1; margin: 16px 0 8px 0;" />
-          <p style="font-size: 14px; color: #64748b; margin: 0;">(총 ${records.length}건)</p>
+          <p style="font-size: 14px; color: #64748b; margin: 0 0 10px 0;">(총 ${records.length}건)</p>
+          <div style="font-size: 14px; color: #475569; line-height: 1.6; background: #f8fafc; border-left: 4px solid #006b67; padding: 8px 12px; margin-top: 10px; border-radius: 4px;">
+            <p style="margin: 0 0 4px 0;">- 이 메세지를 받으시면, [온라인교무실] 메인화면에 보이는 '보강 알리미' 목록에서 본인의 이름을 찾아 '본인 미확인' 상태를 '본인확인' 상태로 변경해 주세요.</p>
+            <p style="margin: 0;">- 보강 당일 아침 보다는 이전 편하신 시간에 변경 바랍니다.</p>
+          </div>
         </div>
       `;
 

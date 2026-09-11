@@ -145,6 +145,12 @@
 - **검증 결과**: `.agents` 스킬/규칙 정상 적용 및 README 이력 갱신 완료
 
 
+## [2026-09-11 09:19] 업데이트 이력 (Commit ID: 95a11c0)
+- **수정 내용**: 보강 알리미 게시판 상단 '복사' 버튼 클릭 시 클립보드로 복사되는 텍스트(일반 텍스트 및 서식 HTML) 하단에 '본인확인' 요청 권고 사항 문구 2줄 추가 (`copyResultsToText`) ([index.html](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/index.html#L2180-L2225))
+- **검증 결과**: `git diff` 포맷 검증 완료 및 `README.md` 이력 업데이트 후 커밋/푸시 수행
+
+
+
 
 
 
