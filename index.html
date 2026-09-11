@@ -1864,21 +1864,11 @@
       }
     }
 
-    // 교과 필터 드롭다운 채우기
+    // 교과 필터 드롭다운 채우기 (필터링된 테이블 데이터 기반 동적 갱신 연동)
     function populateSubjectFilterDropdown() {
-      const select = document.getElementById('filterColSubject');
-      if (!select) return;
-      const currentVal = select.value;
-      select.innerHTML = '<option value="">전체 교과</option>';
-
-      subjectTags.forEach(tag => {
-        const opt = document.createElement('option');
-        opt.value = tag;
-        opt.textContent = tag;
-        select.appendChild(opt);
-      });
-
-      select.value = currentVal;
+      if (typeof applyColumnFilters === 'function') {
+        applyColumnFilters();
+      }
     }
 
     function setSubject(subjectText) {
@@ -2611,35 +2601,6 @@
 
         subClassSelect.value = currentVal;
       }
-
-      // 2. 보강 교과 드롭다운 (실제 데이터 및 태그 기반)
-      const subjectSelect = document.getElementById('filterColSubject');
-      if (subjectSelect) {
-        const currentVal = subjectSelect.value;
-        const uniqueSubjectsSet = new Set();
-
-        if (Array.isArray(subjectTags)) {
-          subjectTags.forEach(s => { if (s) uniqueSubjectsSet.add(s.trim()); });
-        }
-
-        targetRecords.forEach(r => {
-          if (r.subject && r.subject.trim() !== '' && r.subject.trim() !== '-') {
-            uniqueSubjectsSet.add(r.subject.trim());
-          }
-        });
-
-        const sortedSubjects = Array.from(uniqueSubjectsSet).sort((a, b) => a.localeCompare(b, 'ko'));
-
-        subjectSelect.innerHTML = '<option value="">전체 교과</option>';
-        sortedSubjects.forEach(s => {
-          const opt = document.createElement('option');
-          opt.value = s;
-          opt.textContent = s;
-          subjectSelect.appendChild(opt);
-        });
-
-        subjectSelect.value = currentVal;
-      }
     }
 
     // 열별 개별 필터링 (층별 전체 및 교실별 필터 대응 + 긴급 필터 + 정렬 연동)
@@ -2651,13 +2612,15 @@
       const classQuery = document.getElementById('filterColClass').value.trim();
       const subClassElem = document.getElementById('filterColSubClass');
       const subClassQuery = subClassElem ? subClassElem.value.trim() : '';
-      const subjectQuery = document.getElementById('filterColSubject').value.trim();
+      const subjectSelect = document.getElementById('filterColSubject');
+      const subjectQuery = subjectSelect ? subjectSelect.value.trim() : '';
       const subTeacherQuery = document.getElementById('filterColSubTeacher').value.toLowerCase().trim();
       const reasonElem = document.getElementById('filterColReason');
       const reasonQuery = reasonElem ? reasonElem.value.toLowerCase().trim() : '';
       const origTeacherQuery = document.getElementById('filterColOrigTeacher').value.toLowerCase().trim();
 
-      const filtered = currentRecords.filter(r => {
+      // 보강 교과 필터를 제외한 나머지 조건으로 1차 필터링 (필터링된 데이터 기반 교과 드롭다운 옵션 추출)
+      const subjectFilteredRecords = currentRecords.filter(r => {
         const urgentState = isUrgentActive(r);
         if (urgentQuery === 'urgent' && !urgentState) return false;
         if (urgentQuery === 'normal' && urgentState) return false;
@@ -2684,10 +2647,43 @@
           if (formattedSubClass !== subClassQuery && !(r.subClass || '').includes(subClassQuery)) return false;
         }
 
-        if (subjectQuery && !(r.subject || '').includes(subjectQuery)) return false;
         if (subTeacherQuery && !r.substituteTeacher.toLowerCase().includes(subTeacherQuery)) return false;
         if (reasonQuery && !r.reason.toLowerCase().includes(reasonQuery)) return false;
         if (origTeacherQuery && !r.originalTeacher.toLowerCase().includes(origTeacherQuery)) return false;
+        return true;
+      });
+
+      // 필터링된 데이터에 실제 존재하는 교과만으로 옵션 동적 채우기 ('태그관리' 미사용)
+      if (subjectSelect) {
+        const currentVal = subjectSelect.value;
+        const uniqueSubjectsSet = new Set();
+
+        subjectFilteredRecords.forEach(r => {
+          if (r.subject && r.subject.trim() !== '' && r.subject.trim() !== '-') {
+            uniqueSubjectsSet.add(r.subject.trim());
+          }
+        });
+
+        if (currentVal && currentVal.trim() !== '') {
+          uniqueSubjectsSet.add(currentVal.trim());
+        }
+
+        const sortedSubjects = Array.from(uniqueSubjectsSet).sort((a, b) => a.localeCompare(b, 'ko'));
+
+        subjectSelect.innerHTML = '<option value="">전체 교과</option>';
+        sortedSubjects.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = s;
+          opt.textContent = s;
+          subjectSelect.appendChild(opt);
+        });
+
+        subjectSelect.value = currentVal;
+      }
+
+      // 최종 보강 교과 조건까지 반영하여 화면 렌더링
+      const filtered = subjectFilteredRecords.filter(r => {
+        if (subjectQuery && !(r.subject || '').includes(subjectQuery)) return false;
         return true;
       });
 
