@@ -189,6 +189,37 @@ function formatDateString(val) {
 }
 
 /**
+ * 보강 학급 값을 '1학년 1반' 포맷으로 정규화하는 헬퍼 함수
+ * Google Sheets에서 '1-1'을 날짜(Date)로 자동 변환하는 현상을 포함하여 모든 입력 포맷을 일관되게 처리합니다.
+ */
+function formatSubClass(val) {
+  if (!val) return '-';
+  if (val instanceof Date) {
+    var g = val.getMonth() + 1;
+    var c = val.getDate();
+    return g + '학년 ' + c + '반';
+  }
+  var str = String(val).trim();
+  if (str === '' || str === '-') return '-';
+
+  if (str.indexOf('GMT') !== -1 || str.indexOf('한국 표준시') !== -1) {
+    var d = new Date(str);
+    if (!isNaN(d.getTime())) {
+      var g = d.getMonth() + 1;
+      var c = d.getDate();
+      return g + '학년 ' + c + '반';
+    }
+  }
+
+  var match = str.match(/^(\d{1,2})[-.\s\/]+(\d{1,2})$/);
+  if (match) {
+    return match[1] + '학년 ' + match[2] + '반';
+  }
+
+  return str;
+}
+
+/**
  * 보강 내역을 조회합니다. (단일 날짜 또는 시작일~종료일 기간 검색 지원)
  * 수동 작성된 행(ID 미부여 행) 자동 보정 및 세팅 지원
  * @param {string} startDate 시작 날짜 (YYYY-MM-DD 또는 'ALL')
@@ -270,7 +301,7 @@ function getSubstitutionRecords(startDate, endDate) {
         date: rowDate,
         period: String(row[2] || ''),
         className: String(row[3] || ''),
-        subClass: String(row[4] || '-'),
+        subClass: formatSubClass(row[4]),
         subject: String(row[5] || ''),
         originalTeacher: String(row[6] || ''),
         substituteTeacher: String(row[7] || ''),
@@ -323,7 +354,7 @@ function addSubstitutionRecord(record) {
       formattedDate,
       record.period,
       record.className,
-      record.subClass || '-',
+      formatSubClass(record.subClass),
       record.subject,
       record.originalTeacher || '',
       record.substituteTeacher,
@@ -382,7 +413,7 @@ function updateSubstitutionRecord(record) {
           formattedDate,
           record.period,
           record.className,
-          record.subClass || '-',
+          formatSubClass(record.subClass),
           record.subject,
           record.originalTeacher || '',
           record.substituteTeacher,
