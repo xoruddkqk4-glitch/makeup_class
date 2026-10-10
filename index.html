@@ -3474,7 +3474,7 @@
     function buildRecordsTableBlockClient(records) {
       if (!records || records.length === 0) return '';
 
-      const divider = '────────────────────────';
+      const divider = '┄┄┄┄┄┄┄┄┄┄┄┄';
       let lines = [divider];
 
       records.forEach((r, idx) => {
@@ -3499,7 +3499,6 @@
         }
       });
 
-      lines.push(divider);
       return lines.join('\n');
     }
 
@@ -3532,9 +3531,8 @@
         parts.push(buildRecordsTableBlockClient(tomorrowRecords));
         parts.push(`(기존 보강 총 ${tomorrowRecords.length}건)\n`);
       } else {
-        parts.push('────────────────────────');
-        parts.push(`배정된 기존 보강이 없습니다. 😊`);
-        parts.push('────────────────────────\n');
+        parts.push('┄┄┄┄┄┄┄┄┄┄┄┄');
+        parts.push(`배정된 기존 보강이 없습니다. 😊\n`);
       }
 
       parts.push('👉 보강 교사께서는 웹앱에서 본인 확인 체크를 완료해 주세요.');

@@ -806,7 +806,7 @@ function buildClassInfoTextGas(room, subClass) {
 function buildRecordsTableBlockGas(records) {
   if (!records || records.length === 0) return '';
 
-  var divider = '────────────────────────';
+  var divider = '┄┄┄┄┄┄┄┄┄┄┄┄';
   var lines = [divider];
 
   records.forEach(function(r, idx) {
@@ -832,7 +832,6 @@ function buildRecordsTableBlockGas(records) {
     }
   });
 
-  lines.push(divider);
   return lines.join('\n');
 }
 
@@ -879,9 +878,8 @@ function buildCombinedBroadcastMessage(urgentRecords, tomorrowRecords, tomorrowD
     msgParts.push(buildRecordsTableBlockGas(tomorrowRecords));
     msgParts.push('(기존 보강 총 ' + tomorrowRecords.length + '건)\n');
   } else {
-    msgParts.push('────────────────────────');
-    msgParts.push('배정된 기존 보강이 없습니다. 😊');
-    msgParts.push('────────────────────────\n');
+    msgParts.push('┄┄┄┄┄┄┄┄┄┄┄┄');
+    msgParts.push('배정된 기존 보강이 없습니다. 😊\n');
   }
 
   // 3. 하단 안내 및 웹앱 링크
@@ -1013,9 +1011,8 @@ function sendScheduledTomorrowNotification() {
       msgLines.push(buildRecordsTableBlockGas(records));
       msgLines.push('(내일 보강 총 ' + records.length + '건)\n');
     } else {
-      msgLines.push('────────────────────────');
-      msgLines.push('배정된 보강이 없습니다. 편안한 하루 되세요 😊');
-      msgLines.push('────────────────────────\n');
+      msgLines.push('┄┄┄┄┄┄┄┄┄┄┄┄');
+      msgLines.push('배정된 보강이 없습니다. 편안한 하루 되세요 😊\n');
     }
 
     msgLines.push('👉 보강 교사께서는 웹앱에서 본인 확인 체크를 완료해 주세요.');
