@@ -843,24 +843,36 @@ function buildRecordsTableBlockGas(records) {
 function buildCombinedBroadcastMessage(urgentRecords, tomorrowRecords, tomorrowDateStr, webAppUrl) {
   var msgParts = [];
 
-  // 1. 긴급 보강 섹션 (가시성 극대화 및 당일 일시 명시)
+  // 1. 긴급 보강 섹션 (가시성 극대화 및 일시 명시)
   if (urgentRecords && urgentRecords.length > 0) {
-    var urgentDateStr = urgentRecords[0].date;
-    var formattedUrgentDate = formatFormattedDateGas(urgentDateStr);
+    var urgentDates = [];
+    urgentRecords.forEach(function(r) {
+      if (r.date && urgentDates.indexOf(r.date) === -1) {
+        urgentDates.push(r.date);
+      }
+    });
+    var formattedUrgentDate = urgentDates.map(function(d) {
+      return formatFormattedDateGas(d);
+    }).join(' / ');
+    if (!formattedUrgentDate && urgentRecords[0] && urgentRecords[0].date) {
+      formattedUrgentDate = formatFormattedDateGas(urgentRecords[0].date);
+    }
 
-    msgParts.push('🚨🚨🚨 *[긴급 보강 알림]* 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
+    msgParts.push('🚨🚨🚨 *[긴급 보강 알림]* 긴급 보강이 발생했습니다! 🚨🚨🚨');
     msgParts.push('⚠️ 해당 선생님께서는 변동된 일정을 최우선으로 즉시 확인해 주시기 바랍니다.\n');
     msgParts.push('🔥 *[🚨 긴급 보강 내역]* (총 ' + urgentRecords.length + '건)');
-    msgParts.push('📅 일시: ' + formattedUrgentDate);
+    if (formattedUrgentDate) {
+      msgParts.push('📅 일시: ' + formattedUrgentDate);
+    }
     msgParts.push(buildRecordsTableBlockGas(urgentRecords));
     msgParts.push('');
   } else {
-    msgParts.push('ℹ️ [안내] 현재 등록된 당일 긴급 보강 건은 없습니다.\n');
+    msgParts.push('ℹ️ [안내] 현재 등록된 긴급 보강 건은 없습니다.\n');
   }
 
-  // 2. 기존 보강 현황 섹션 (긴급 보강과 대비되는 기존 배정 보강 안내)
+  // 2. 기존 보강 섹션 ('[기존 보강 내역]'으로 명칭 통일)
   var formattedTomorrow = formatFormattedDateGas(tomorrowDateStr);
-  msgParts.push('📢 *[기존 보강 현황 안내]*');
+  msgParts.push('📢 *[기존 보강 내역]*');
   msgParts.push('📅 일시: ' + formattedTomorrow);
 
   if (tomorrowRecords && tomorrowRecords.length > 0) {

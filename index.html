@@ -1615,10 +1615,10 @@
         <div style="display: flex; gap: 10px; margin-bottom: 12px; align-items: center; justify-content: space-between;">
           <div style="display: flex; gap: 8px;">
             <span class="badge" id="badgeUrgentCount" style="background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; font-size: 0.85rem; padding: 4px 8px; border-radius: 4px; font-weight: bold;">
-              🚨 당일 긴급: 0건
+              🚨 긴급 보강: 0건
             </span>
             <span class="badge" id="badgeTomorrowCount" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-size: 0.85rem; padding: 4px 8px; border-radius: 4px; font-weight: bold;">
-              📅 내일 보강: 0건
+              📅 기존 보강: 0건
             </span>
           </div>
           <button type="button" class="btn btn-outline btn-sm" onclick="openChatSettingsModal()" style="font-size: 0.75rem; padding: 3px 8px;">
@@ -3506,24 +3506,26 @@
     function buildClientPreviewText(urgentRecords, tomorrowRecords, tomorrowDateStr) {
       let parts = [];
 
-      // 1. 긴급 섹션 (가시성 극대화 및 당일 일시 명시)
+      // 1. 긴급 섹션 (가시성 극대화 및 일시 명시)
       if (urgentRecords && urgentRecords.length > 0) {
-        const urgentDateStr = urgentRecords[0].date || formatDateToString(getTodayDateObj());
-        const formattedUrgentDate = formatFormattedDate(urgentDateStr);
+        const uniqueDates = [...new Set(urgentRecords.map(r => r.date).filter(Boolean))];
+        const formattedUrgentDate = uniqueDates.map(d => formatFormattedDate(d)).join(' / ') || formatFormattedDate(formatDateToString(getTodayDateObj()));
 
-        parts.push('🚨🚨🚨 *[긴급 보강 알림]* 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
+        parts.push('🚨🚨🚨 *[긴급 보강 알림]* 긴급 보강이 발생했습니다! 🚨🚨🚨');
         parts.push('⚠️ 해당 선생님께서는 변동된 일정을 최우선으로 즉시 확인해 주시기 바랍니다.\n');
         parts.push(`🔥 *[🚨 긴급 보강 내역]* (총 ${urgentRecords.length}건)`);
-        parts.push(`📅 일시: ${formattedUrgentDate}`);
+        if (formattedUrgentDate) {
+          parts.push(`📅 일시: ${formattedUrgentDate}`);
+        }
         parts.push(buildRecordsTableBlockClient(urgentRecords));
         parts.push('');
       } else {
-        parts.push('ℹ️ [안내] 현재 등록된 당일 긴급 보강 건은 없습니다.\n');
+        parts.push('ℹ️ [안내] 현재 등록된 긴급 보강 건은 없습니다.\n');
       }
 
-      // 2. 기존 보강 섹션 (긴급 보강과 대비되는 기존 배정 보강 안내)
+      // 2. 기존 보강 섹션 ('[기존 보강 내역]'으로 명칭 통일)
       const formattedTomorrow = formatFormattedDate(tomorrowDateStr);
-      parts.push('📢 *[기존 보강 현황 안내]*');
+      parts.push('📢 *[기존 보강 내역]*');
       parts.push(`📅 일시: ${formattedTomorrow}`);
 
       if (tomorrowRecords && tomorrowRecords.length > 0) {
@@ -3542,24 +3544,25 @@
     }
 
     function openInstantBroadcastModal() {
-      // 1. 당일 긴급 보강 건 필터링
       const todayStr = formatDateToString(getTodayDateObj());
-      const urgentRecords = allFetchedRecords.filter(r => isUrgentActive(r) && r.date === todayStr);
-
-      // 2. 내일(금요일이면 월요일) 보강 건 필터링
       const tomorrowStr = getTargetTomorrowDate();
-      const tomorrowRecords = allFetchedRecords.filter(r => r.date === tomorrowStr);
+
+      // 1. 긴급 보강 건 필터링: 오늘 또는 내일(월요일) 날짜 중 긴급(urgent)인 모든 건을 긴급 섹션으로 통합
+      const urgentRecords = allFetchedRecords.filter(r => isUrgentActive(r) && (r.date === todayStr || r.date === tomorrowStr));
+
+      // 2. 기존 보강 건 필터링: 내일(월요일) 보강 건 중 긴급이 아닌 일반 보강 건만 기존 보강으로 분리
+      const regularTomorrowRecords = allFetchedRecords.filter(r => !isUrgentActive(r) && r.date === tomorrowStr);
 
       currentUrgentRecordsForBroadcast = urgentRecords;
-      currentTomorrowRecordsForBroadcast = tomorrowRecords;
+      currentTomorrowRecordsForBroadcast = regularTomorrowRecords;
       currentTomorrowDateStr = tomorrowStr;
 
       // 3. 배지 및 카운트 업데이트
-      document.getElementById('badgeUrgentCount').innerHTML = `🚨 당일 긴급: ${urgentRecords.length}건`;
-      document.getElementById('badgeTomorrowCount').innerHTML = `📅 내일 보강: ${tomorrowRecords.length}건`;
+      document.getElementById('badgeUrgentCount').innerHTML = `🚨 긴급 보강: ${urgentRecords.length}건`;
+      document.getElementById('badgeTomorrowCount').innerHTML = `📅 기존 보강: ${regularTomorrowRecords.length}건`;
 
       // 4. 미리보기 텍스트 생성
-      const previewText = buildClientPreviewText(urgentRecords, tomorrowRecords, tomorrowStr);
+      const previewText = buildClientPreviewText(urgentRecords, regularTomorrowRecords, tomorrowStr);
       document.getElementById('broadcastPreviewText').textContent = previewText;
 
       document.getElementById('instantBroadcastModal').classList.add('active');
