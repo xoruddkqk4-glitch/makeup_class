@@ -356,7 +356,7 @@
 - **검증 결과**: Node.js 정적 구문 검사(`Code.gs Syntax OK`, `index.html Script Syntax OK`) 통과, 웹훅 연동 및 매니페스트 설정 검증 완료
 
 
-## [2026-10-10 15:42] 업데이트 이력 (Commit ID: b0c767c)
+## [2026-10-10 15:42] 업데이트 이력 (Commit ID: f31e054)
 - **수정 내용**:
   1. 상단 대시보드 헤더 좌우 요소 위치 맞바꿈: 좌측 상단에 '매일 낮 12시 내일 보강 알림 구글챗으로 자동 발송' 배지 배치, 우측 상단에 '🚨 구글챗으로 긴급 공지' 버튼 및 설정('⚙️') 버튼 배치 ([index.html](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/index.html#L1160-L1185))
   2. 구글챗 전송 메시지 PC 및 모바일 반응형 가독성 전면 개선: 고정폭 코드블록(```) 및 긴 수평 테이블 제거, 2줄 카드형 개조식 포맷(1행: 교시/교실/학급/교과, 2행: 보강교사 ⬅️ 원교사) 및 구글챗 마크다운(*굵게*), 24자 모바일 친화적 유니코드 구분선 도입으로 모바일/PC 줄바꿈 글자 쪼개짐 완전 차단 ([Code.gs](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/Code.gs#L790-L845), [index.html](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/index.html#L3460-L3505))
