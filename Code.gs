@@ -622,3 +622,476 @@ function saveTagsToSheet(subjectTags, reasonTags) {
     return { success: false, error: e.toString() };
   }
 }
+
+// ============================================================================
+// 📢 구글챗(Google Chat) 스페이스방 연동 및 보강 알림 시스템
+// ============================================================================
+
+/**
+ * 구글 스프레드시트 내 '알림설정' 시트를 가져오거나 없으면 신규 생성 및 초기화합니다.
+ */
+function getNotificationSettingsSheet() {
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var ssId = scriptProperties.getProperty('SPREADSHEET_ID') || DEFAULT_SPREADSHEET_ID;
+  var ss;
+  try {
+    ss = SpreadsheetApp.openById(ssId);
+  } catch (e) {
+    ss = SpreadsheetApp.getActiveSpreadsheet();
+  }
+
+  var sheet = ss.getSheetByName('알림설정');
+  if (!sheet) {
+    sheet = ss.insertSheet('알림설정');
+    sheet.appendRow(['항목', '설정값', '설명 및 안내']);
+    sheet.getRange(1, 1, 1, 3).setFontWeight('bold').setBackground('#006b67').setFontColor('#ffffff');
+    sheet.setFrozenRows(1);
+
+    var defaultRows = [
+      ['구글챗_웹훅URL', '', '구글챗 교사 스페이스방 인커밍 웹훅 URL (https://chat.googleapis.com/... 형태)'],
+      ['자동알림_사용여부', 'TRUE', '전날 낮 12시 익일 보강 자동 공지 실행 여부 (TRUE/FALSE)'],
+      ['보강0건_알림생략', 'TRUE', '전날 12시 자동 공지 시 0건이면 발송 스킵 (TRUE/FALSE)'],
+      ['금요일_월요일공지', 'TRUE', '금요일 발송 시 주말 건너뛰고 차주 월요일 공지 (TRUE/FALSE)'],
+      ['웹앱_접속URL', '', '공지 메시지 하단에 표시될 보강 알리미 웹앱 URL']
+    ];
+    sheet.getRange(2, 1, defaultRows.length, 3).setValues(defaultRows);
+    try {
+      sheet.autoResizeColumns(1, 3);
+    } catch (err) {}
+    SpreadsheetApp.flush();
+  }
+  return sheet;
+}
+
+/**
+ * '알림설정' 시트에서 현재 설정값들을 객체 형태로 반환합니다.
+ */
+function getNotificationSettings() {
+  try {
+    var sheet = getNotificationSettingsSheet();
+    var data = sheet.getDataRange().getValues();
+    var settings = {
+      webhookUrl: '',
+      autoNotifyEnabled: true,
+      skipZero: true,
+      fridayMonday: true,
+      webAppUrl: ''
+    };
+
+    for (var i = 1; i < data.length; i++) {
+      var key = String(data[i][0] || '').trim();
+      var val = String(data[i][1] || '').trim();
+
+      if (key === '구글챗_웹훅URL') settings.webhookUrl = val;
+      else if (key === '자동알림_사용여부') settings.autoNotifyEnabled = (val.toUpperCase() === 'TRUE' || val === '1');
+      else if (key === '보강0건_알림생략') settings.skipZero = (val.toUpperCase() === 'TRUE' || val === '1');
+      else if (key === '금요일_월요일공지') settings.fridayMonday = (val.toUpperCase() === 'TRUE' || val === '1');
+      else if (key === '웹앱_접속URL') settings.webAppUrl = val;
+    }
+    return settings;
+  } catch (err) {
+    Logger.log('Error in getNotificationSettings: ' + err.toString());
+    return {
+      webhookUrl: '',
+      autoNotifyEnabled: true,
+      skipZero: true,
+      fridayMonday: true,
+      webAppUrl: ''
+    };
+  }
+}
+
+/**
+ * '알림설정' 시트에 설정값을 저장하고, 자동 트리거 설정/해제를 동기화합니다.
+ */
+function saveNotificationSettings(newSettings) {
+  try {
+    var sheet = getNotificationSettingsSheet();
+    var data = sheet.getDataRange().getValues();
+    var map = {
+      '구글챗_웹훅URL': newSettings.webhookUrl !== undefined ? String(newSettings.webhookUrl).trim() : null,
+      '자동알림_사용여부': newSettings.autoNotifyEnabled !== undefined ? (newSettings.autoNotifyEnabled ? 'TRUE' : 'FALSE') : null,
+      '보강0건_알림생략': newSettings.skipZero !== undefined ? (newSettings.skipZero ? 'TRUE' : 'FALSE') : null,
+      '금요일_월요일공지': newSettings.fridayMonday !== undefined ? (newSettings.fridayMonday ? 'TRUE' : 'FALSE') : null,
+      '웹앱_접속URL': newSettings.webAppUrl !== undefined ? String(newSettings.webAppUrl).trim() : null
+    };
+
+    for (var i = 1; i < data.length; i++) {
+      var key = String(data[i][0] || '').trim();
+      if (map[key] !== null && map[key] !== undefined) {
+        sheet.getRange(i + 1, 2).setValue(map[key]);
+      }
+    }
+    SpreadsheetApp.flush();
+
+    // 자동 알림 트리거 설정 동기화 시도 (웹앱 권한 제한 환경에서도 시트 저장이 실패하지 않도록 안전 처리)
+    try {
+      if (newSettings.autoNotifyEnabled) {
+        setupDaily12Trigger();
+      } else {
+        removeDaily12Trigger();
+      }
+    } catch (trigErr) {
+      Logger.log('트리거 자동 동기화 건너뜀 (권한 필요): ' + trigErr.toString());
+    }
+
+    return { success: true, message: '알림 설정이 [알림설정] 시트에 성공적으로 저장되었습니다!' };
+  } catch (err) {
+    Logger.log('Error in saveNotificationSettings: ' + err.toString());
+    return { success: false, message: '알림 설정 저장 실패: ' + err.message };
+  }
+}
+
+/**
+ * 텍스트의 시각적 너비를 계산하는 헬퍼 함수 (한글/특수문자 2칸, 영문/숫자 1칸)
+ */
+function getGasVisualWidth(str) {
+  if (!str) return 0;
+  var width = 0;
+  for (var i = 0; i < str.length; i++) {
+    var code = str.charCodeAt(i);
+    if (code >= 0xD800 && code <= 0xDBFF) {
+      width += 2;
+      i++;
+      continue;
+    }
+    if (
+      (code >= 0x1100 && code <= 0x11FF) ||
+      (code >= 0x3130 && code <= 0x318F) ||
+      (code >= 0xAC00 && code <= 0xD7A3) ||
+      (code >= 0x2E80 && code <= 0x9FFF) ||
+      (code >= 0xFF00 && code <= 0xFFEF) ||
+      (code >= 0x2600 && code <= 0x27BF)
+    ) {
+      width += 2;
+    } else {
+      width += 1;
+    }
+  }
+  return width;
+}
+
+function padRightVisualGas(str, targetWidth) {
+  str = String(str || '');
+  var currentWidth = getGasVisualWidth(str);
+  if (currentWidth >= targetWidth) return str;
+  return str + ' '.repeat(targetWidth - currentWidth);
+}
+
+function formatFormattedDateGas(dateStr) {
+  if (!dateStr) return '';
+  var parts = String(dateStr).split('-');
+  if (parts.length !== 3) return dateStr;
+  var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+  var days = ['일', '월', '화', '수', '목', '금', '토'];
+  return dateStr + ' (' + days[d.getDay()] + ')';
+}
+
+/**
+ * 보강 목록 레코드들을 복사 버튼과 동일한 개조식 정렬 텍스트 블록으로 생성합니다.
+ */
+function buildRecordsTableBlockGas(records) {
+  if (!records || records.length === 0) return '';
+
+  var maxW_period = Math.max(getGasVisualWidth('[교시]'), ...records.map(function(r) { return getGasVisualWidth(r.period || '-교시'); }));
+  var maxW_room = Math.max(getGasVisualWidth('[교실]'), ...records.map(function(r) { return getGasVisualWidth(r.className || '-'); }));
+  var maxW_subClass = Math.max(getGasVisualWidth('[보강 학급]'), ...records.map(function(r) { return getGasVisualWidth(r.subClass || '-'); }));
+  var maxW_subject = Math.max(getGasVisualWidth('[보강 교과]'), ...records.map(function(r) { return getGasVisualWidth(r.subject || '-'); }));
+  var maxW_subTeacher = Math.max(getGasVisualWidth('[보강 교사]'), ...records.map(function(r) { return getGasVisualWidth(r.substituteTeacher ? ('[보강] ' + r.substituteTeacher) : '[보강] -'); }));
+  var maxW_origTeacher = Math.max(getGasVisualWidth('[원교사]'), ...records.map(function(r) { return getGasVisualWidth(r.originalTeacher ? ('[원교사] ' + r.originalTeacher) : '[원교사] -'); }));
+
+  var hasUrgentInList = records.some(function(r) { return r.urgent === true || String(r.urgent).toLowerCase() === 'true'; });
+  var urgentPrefixWidth = hasUrgentInList ? getGasVisualWidth('🚨[긴급] ') : 0;
+
+  var headerPrefix = '  📌 ' + ' '.repeat(urgentPrefixWidth);
+  var hPeriod = padRightVisualGas('[교시]', maxW_period);
+  var hRoom = padRightVisualGas('[교실]', maxW_room);
+  var hSubClass = padRightVisualGas('[보강 학급]', maxW_subClass);
+  var hSubject = padRightVisualGas('[보강 교과]', maxW_subject);
+  var hSubTeacher = padRightVisualGas('[보강 교사]', maxW_subTeacher);
+  var hOrigTeacher = padRightVisualGas('[원교사]', maxW_origTeacher);
+
+  var plainHeader = headerPrefix + hPeriod + '   |   ' + hRoom + '   |   ' + hSubClass + '   |   ' + hSubject + '   |   ' + hSubTeacher + '  ⬅️  ' + hOrigTeacher;
+  var maxLineLen = Math.max(40, getGasVisualWidth(plainHeader));
+  var dividerStr = '='.repeat(maxLineLen);
+
+  var lines = [];
+  lines.push(dividerStr);
+  lines.push(plainHeader);
+  lines.push('');
+
+  records.forEach(function(r, idx) {
+    var isUrgent = (r.urgent === true || String(r.urgent).toLowerCase() === 'true');
+    var rowPrefix = '  • ';
+    if (hasUrgentInList) {
+      rowPrefix += isUrgent ? '🚨[긴급] ' : ' '.repeat(urgentPrefixWidth);
+    }
+    var rPeriod = padRightVisualGas(r.period || '-교시', maxW_period);
+    var rRoom = padRightVisualGas(r.className || '-', maxW_room);
+    var rSubClass = padRightVisualGas(r.subClass || '-', maxW_subClass);
+    var rSubject = padRightVisualGas(r.subject || '-', maxW_subject);
+    var rSubTeacher = padRightVisualGas(r.substituteTeacher ? ('[보강] ' + r.substituteTeacher) : '[보강] -', maxW_subTeacher);
+    var rOrigTeacher = padRightVisualGas(r.originalTeacher ? ('[원교사] ' + r.originalTeacher) : '[원교사] -', maxW_origTeacher);
+
+    lines.push(rowPrefix + rPeriod + '   |   ' + rRoom + '   |   ' + rSubClass + '   |   ' + rSubject + '   |   ' + rSubTeacher + '  ⬅️  ' + rOrigTeacher);
+    if (idx < records.length - 1) {
+      lines.push('');
+    }
+  });
+
+  lines.push(dividerStr);
+  return lines.join('\n');
+}
+
+/**
+ * [🚨 구글챗으로 즉시 공지] 발송용 메시지 생성:
+ * 긴급 보강 건을 최상단에 사이렌/불꽃 배너와 함께 극대화된 가시성으로 배치하고,
+ * 하단에 내일(또는 월요일) 보강 목록을 결합합니다.
+ */
+function buildCombinedBroadcastMessage(urgentRecords, tomorrowRecords, tomorrowDateStr, webAppUrl) {
+  var msgParts = [];
+
+  // 1. 긴급 보강 섹션 (가시성 극대화)
+  if (urgentRecords && urgentRecords.length > 0) {
+    msgParts.push('🚨🚨🚨 [긴급 보강 알림] 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
+    msgParts.push('⚠️ 해당 선생님께서는 변동된 일정을 최우선으로 즉시 확인해 주시기 바랍니다.\n');
+    msgParts.push('🔥 [🚨 긴급 보강 내역] (총 ' + urgentRecords.length + '건)');
+    msgParts.push('```\n' + buildRecordsTableBlockGas(urgentRecords) + '\n```\n');
+  } else {
+    msgParts.push('ℹ️ [안내] 현재 등록된 당일 긴급 보강 건은 없습니다.\n');
+  }
+
+  // 2. 내일 보강 현황 섹션
+  var formattedTomorrow = formatFormattedDateGas(tomorrowDateStr);
+  msgParts.push('📢 [내일 보강 현황 안내]');
+  msgParts.push('📅 일시: ' + formattedTomorrow);
+
+  if (tomorrowRecords && tomorrowRecords.length > 0) {
+    msgParts.push('```\n' + buildRecordsTableBlockGas(tomorrowRecords) + '\n```');
+    msgParts.push('(내일 보강 총 ' + tomorrowRecords.length + '건)\n');
+  } else {
+    msgParts.push('────────────────────────────────────────');
+    msgParts.push('내일(' + formattedTomorrow + ') 배정된 보강이 없습니다. 😊');
+    msgParts.push('────────────────────────────────────────\n');
+  }
+
+  // 3. 하단 안내 및 웹앱 링크
+  msgParts.push('👉 보강 교사께서는 웹앱에서 본인 확인 체크를 완료해 주세요.');
+  if (webAppUrl) {
+    msgParts.push('🌐 보강 알리미 바로가기: ' + webAppUrl);
+  }
+
+  return msgParts.join('\n');
+}
+
+/**
+ * 구글챗 웹훅으로 메시지를 전송합니다.
+ */
+function sendGoogleChatMessage(textMessage, customWebhookUrl) {
+  var settings = getNotificationSettings();
+  var webhookUrl = customWebhookUrl || settings.webhookUrl;
+
+  if (!webhookUrl || webhookUrl.indexOf('https://chat.googleapis.com/') !== 0) {
+    throw new Error('올바른 구글챗 웹훅 URL이 설정되지 않았습니다. 스프레드시트의 [알림설정] 시트 또는 설정창에서 웹훅 URL을 입력해 주세요.');
+  }
+
+  var payload = {
+    text: textMessage
+  };
+
+  var options = {
+    method: 'post',
+    contentType: 'application/json; charset=UTF-8',
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+
+  var response = UrlFetchApp.fetch(webhookUrl, options);
+  var responseCode = response.getResponseCode();
+  var responseText = response.getContentText();
+
+  if (responseCode !== 200) {
+    throw new Error('구글챗 전송 실패 (상태 코드 ' + responseCode + '): ' + responseText);
+  }
+
+  return { success: true, responseText: responseText };
+}
+
+/**
+ * 클라이언트 상단 툴바 [🚨 구글챗으로 즉시 공지]에서 호출하는 발송 API
+ */
+function sendInstantBroadcastFromClient(urgentRecords, tomorrowRecords, tomorrowDateStr) {
+  try {
+    var settings = getNotificationSettings();
+    var webAppUrl = settings.webAppUrl;
+    
+    // 웹앱 URL이 비어있으면 현재 배포 URL 자동 추론
+    if (!webAppUrl) {
+      try {
+        webAppUrl = ScriptApp.getService().getUrl();
+      } catch (e) {
+        webAppUrl = '';
+      }
+    }
+
+    var message = buildCombinedBroadcastMessage(urgentRecords || [], tomorrowRecords || [], tomorrowDateStr, webAppUrl);
+    sendGoogleChatMessage(message, settings.webhookUrl);
+
+    return {
+      success: true,
+      message: '구글챗 교사 스페이스방에 긴급 및 내일 보강 공지가 성공적으로 발송되었습니다!'
+    };
+  } catch (err) {
+    Logger.log('Error in sendInstantBroadcastFromClient: ' + err.toString());
+    return {
+      success: false,
+      message: err.message || '구글챗 발송 중 오류가 발생했습니다.'
+    };
+  }
+}
+
+/**
+ * 매일 낮 12:00 시간 기반 트리거로 실행되는 익일 보강 자동 공지 함수
+ */
+function sendScheduledTomorrowNotification() {
+  try {
+    var settings = getNotificationSettings();
+    if (!settings.autoNotifyEnabled) {
+      Logger.log('자동 알림이 비활성화되어 있어 실행을 건너뜁니다.');
+      return { success: true, skipped: true, reason: 'disabled' };
+    }
+
+    if (!settings.webhookUrl) {
+      Logger.log('구글챗 웹훅 URL이 등록되지 않았습니다.');
+      return { success: false, reason: 'no_webhook' };
+    }
+
+    var now = new Date();
+    var dayOfWeek = now.getDay(); // 0:일, 1:월, ..., 5:금, 6:토
+    var daysToAdd = 1;
+
+    // 금요일_월요일공지 설정 확인
+    if (settings.fridayMonday) {
+      if (dayOfWeek === 5) {
+        daysToAdd = 3; // 금요일이면 월요일(+3)
+      } else if (dayOfWeek === 6) {
+        daysToAdd = 2; // 토요일이면 월요일(+2)
+      }
+    }
+
+    var targetDateObj = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
+    var targetDateStr = formatDateString(targetDateObj);
+
+    var records = getSubstitutionRecords(targetDateStr, targetDateStr);
+
+    // 0건일 때 스킵 정책
+    if ((!records || records.length === 0) && settings.skipZero) {
+      Logger.log(targetDateStr + ' 보강 내역 0건으로 자동 공지를 생략합니다.');
+      return { success: true, skipped: true, count: 0 };
+    }
+
+    var webAppUrl = settings.webAppUrl;
+    if (!webAppUrl) {
+      try { webAppUrl = ScriptApp.getService().getUrl(); } catch (e) { webAppUrl = ''; }
+    }
+
+    var formattedDate = formatFormattedDateGas(targetDateStr);
+    var msgLines = [];
+    msgLines.push('📢 [보강 알리미] 내일 보강 현황 안내');
+    msgLines.push('📅 기간: ' + formattedDate);
+
+    if (records && records.length > 0) {
+      msgLines.push('```\n' + buildRecordsTableBlockGas(records) + '\n```');
+      msgLines.push('(총 ' + records.length + '건)\n');
+    } else {
+      msgLines.push('────────────────────────────────────────');
+      msgLines.push('배정된 보강이 없습니다. 편안한 하루 되세요 😊');
+      msgLines.push('────────────────────────────────────────\n');
+    }
+
+    msgLines.push('👉 보강 교사께서는 웹앱에서 본인 확인 체크를 완료해 주세요.');
+    if (webAppUrl) {
+      msgLines.push('🌐 보강 알리미 바로가기: ' + webAppUrl);
+    }
+
+    sendGoogleChatMessage(msgLines.join('\n'), settings.webhookUrl);
+    Logger.log(targetDateStr + ' 보강 공지 완료 (총 ' + records.length + '건)');
+    return { success: true, count: records.length };
+  } catch (err) {
+    Logger.log('Error in sendScheduledTomorrowNotification: ' + err.toString());
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * 매일 낮 12:00 시간 기반 트리거를 생성합니다. (중복 방지)
+ */
+function setupDaily12Trigger() {
+  removeDaily12Trigger();
+  ScriptApp.newTrigger('sendScheduledTomorrowNotification')
+    .timeBased()
+    .atHour(12)
+    .everyDays(1)
+    .create();
+  Logger.log('매일 낮 12시 정기 알림 트리거가 등록되었습니다.');
+}
+
+/**
+ * 기등록된 낮 12:00 정기 알림 트리거를 삭제합니다.
+ */
+function removeDaily12Trigger() {
+  var triggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'sendScheduledTomorrowNotification') {
+      ScriptApp.deleteTrigger(triggers[i]);
+    }
+  }
+  Logger.log('기존 낮 12시 정기 알림 트리거가 삭제되었습니다.');
+}
+
+/**
+ * 현재 트리거 등록 상태를 반환합니다.
+ */
+function getTriggerStatus() {
+  var triggers = ScriptApp.getProjectTriggers();
+  var isScheduled = false;
+  for (var i = 0; i < triggers.length; i++) {
+    if (triggers[i].getHandlerFunction() === 'sendScheduledTomorrowNotification') {
+      isScheduled = true;
+      break;
+    }
+  }
+  return { isScheduled: isScheduled };
+}
+
+/**
+ * 구글챗 웹훅 연결 테스트 함수
+ */
+function testGoogleChatWebhook(customUrl) {
+  try {
+    var testMsg = '🔔 [홍익 보강 알리미] 구글챗 웹훅 연결 테스트 성공!\n교사 스페이스방과 보강 알리미 시스템이 정상적으로 연결되었습니다. 🎉';
+    sendGoogleChatMessage(testMsg, customUrl);
+    return { success: true, message: '테스트 메시지가 성공적으로 발송되었습니다.' };
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+}
+
+/**
+ * 🔑 [최초 1회 실행 전용] 구글 필수 권한 승인 강제 호출 함수
+ * try/catch 없이 직접 호출하여 구글의 권한 검토 팝업창을 발생시킵니다.
+ */
+function authorizePermissions() {
+  Logger.log('1. UrlFetchApp(웹훅 전송) 권한 확인 중...');
+  var res = UrlFetchApp.fetch('https://www.google.com', { muteHttpExceptions: true });
+  Logger.log('UrlFetchApp 응답 코드: ' + res.getResponseCode());
+
+  Logger.log('2. ScriptApp(낮 12시 트리거) 권한 확인 중...');
+  var triggers = ScriptApp.getProjectTriggers();
+  Logger.log('등록된 트리거 개수: ' + triggers.length);
+
+  Logger.log('🎉 축하합니다! 모든 필수 권한(UrlFetchApp, ScriptApp)이 정상 승인되었습니다.');
+}
+
+
+
