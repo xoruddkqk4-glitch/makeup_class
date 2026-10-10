@@ -51,11 +51,75 @@
       margin: 0 auto;
     }
 
-    /* 상단 대시보드 헤더 (컴팩트) */
+    /* 상단 대시보드 헤더 (컴팩트 3단 레이아웃: 좌측 자동공지 안내 | 중앙 타이틀 및 새로고침 | 우측 긴급공지 버튼) */
     .app-header {
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       margin-bottom: 12px;
-      padding-bottom: 0;
+      padding: 0 4px;
+      gap: 10px;
+    }
+
+    .header-side-left {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1 1 0;
+      justify-content: flex-start;
+    }
+
+    .header-side-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex: 1 1 0;
+      justify-content: flex-end;
+    }
+
+    .btn-header-urgent {
+      font-size: 0.775rem !important;
+      font-weight: 700 !important;
+      padding: 5px 11px !important;
+      border-radius: 6px !important;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 1px 3px rgba(220, 38, 38, 0.15);
+      cursor: pointer;
+    }
+
+    .btn-header-settings {
+      font-size: 0.775rem !important;
+      padding: 5px 8px !important;
+      border-radius: 6px !important;
+      color: #64748b !important;
+      border: 1px solid #cbd5e1 !important;
+      background: #ffffff !important;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-header-settings:hover {
+      background: #f1f5f9 !important;
+      color: #334155 !important;
+    }
+
+    .header-auto-notify-badge {
+      font-size: 0.775rem;
+      font-weight: 600;
+      color: #0369a1;
+      background: #f0f9ff;
+      border: 1px solid #bae6fd;
+      padding: 5px 12px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
     }
 
     .app-title {
@@ -68,7 +132,8 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      flex-wrap: wrap;
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .header-date-badge {
@@ -1079,6 +1144,8 @@
     }
 
     @media (max-width: 768px) {
+      .app-header { flex-direction: column; gap: 8px; }
+      .header-side-left, .header-side-right { justify-content: center; width: 100%; }
       .app-title { font-size: 1.6rem; }
       .control-panel { flex-direction: column; align-items: stretch; }
       .left-controls { flex-direction: column; align-items: stretch; }
@@ -1092,8 +1159,14 @@
 <body>
 
   <div class="container">
-    <!-- 헤더 영역 (제목 옆 검색 날짜 표기 및 새로 고침 버튼) -->
+    <!-- 헤더 영역 (좌측 자동공지 안내 | 중앙 타이틀 및 새로고침 | 우측 긴급공지 버튼) -->
     <header class="app-header">
+      <div class="header-side-left">
+        <div class="header-auto-notify-badge" title="매일 낮 12시 익일 보강 내역이 교사 스페이스방으로 자동 공지됩니다">
+          <i class="fa-regular fa-clock" style="color: #0284c7;"></i> 매일 낮 12시 내일 보강 알림 구글챗으로 자동 발송
+        </div>
+      </div>
+
       <h1 class="app-title">
         <i class="fa-solid fa-clipboard-user"></i> 보강 알리미
         <span id="currentDateLabel" class="header-date-badge"></span>
@@ -1102,6 +1175,15 @@
           <span id="headerRefreshText">새로 고침</span>
         </button>
       </h1>
+
+      <div class="header-side-right">
+        <button type="button" class="btn btn-urgent-broadcast btn-header-urgent" id="btnInstantBroadcast" onclick="openInstantBroadcastModal()" title="[긴급 보강 + 내일 보강] 구글챗 교사 스페이스 즉시 공지">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> 구글챗으로 긴급 공지
+        </button>
+        <button type="button" class="btn btn-header-settings" id="btnChatSettings" onclick="openChatSettingsModal()" title="구글챗 웹훅 및 알림 설정">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+      </div>
     </header>
 
     <!-- 메인 보강 목록 테이블 (통합 툴바 적용) -->
@@ -1135,9 +1217,6 @@
         </div>
 
         <div class="header-controls-right">
-          <button class="btn btn-outline btn-sm btn-action-sm btn-urgent-broadcast" id="btnInstantBroadcast" onclick="openInstantBroadcastModal()" title="[긴급 보강 + 내일 보강] 구글챗 교사 스페이스 즉시 공지">
-            <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i> 구글챗으로 즉시 공지
-          </button>
           <button class="btn btn-outline btn-sm btn-action-sm" id="btnCopyText" onclick="copyResultsToText()" title="검색 결과 개조식 텍스트 복사 (교내 메신저용)">
             <i class="fa-regular fa-copy" style="color: #0284c7;"></i> 복사
           </button>
@@ -1149,9 +1228,6 @@
           </button>
           <button class="btn btn-primary btn-sm btn-action-sm" onclick="openAddModal()" title="새 보강 등록 모달 열기">
             <i class="fa-solid fa-plus"></i> 보강 등록
-          </button>
-          <button class="btn btn-outline btn-sm btn-action-sm" id="btnChatSettings" onclick="openChatSettingsModal()" title="구글챗 웹훅 및 알림 설정">
-            <i class="fa-solid fa-gear" style="color: #475569;"></i>
           </button>
         </div>
       </div>
@@ -1555,7 +1631,7 @@
         </div>
 
         <div style="position: relative;">
-          <pre id="broadcastPreviewText" style="background: #0f172a; color: #f8fafc; font-family: 'Consolas', 'Courier New', monospace; font-size: 0.8rem; line-height: 1.5; padding: 14px; border-radius: 6px; max-height: 320px; overflow-y: auto; white-space: pre; border: 1px solid #334155; margin: 0;"></pre>
+          <pre id="broadcastPreviewText" style="background: #0f172a; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; font-size: 0.825rem; line-height: 1.6; padding: 14px; border-radius: 6px; max-height: 320px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; border: 1px solid #334155; margin: 0;"></pre>
         </div>
 
         <div style="margin-top: 10px; font-size: 0.775rem; color: #64748b;">
@@ -3383,114 +3459,80 @@
       return formatDateToString(target);
     }
 
+    function formatPeriodTextClient(period) {
+      if (!period) return '-교시';
+      return String(period).indexOf('교시') !== -1 ? String(period) : `${period}교시`;
+    }
+
+    function buildClassInfoTextClient(room, subClass) {
+      if (room && subClass) return `${room} (${subClass})`;
+      if (room) return room;
+      if (subClass) return subClass;
+      return '-';
+    }
+
     function buildRecordsTableBlockClient(records) {
       if (!records || records.length === 0) return '';
 
-      function calcVisualWidth(str) {
-        if (!str) return 0;
-        let width = 0;
-        for (let i = 0; i < str.length; i++) {
-          const code = str.charCodeAt(i);
-          if (code >= 0xD800 && code <= 0xDBFF) { width += 2; i++; continue; }
-          if (
-            (code >= 0x1100 && code <= 0x11FF) ||
-            (code >= 0x3130 && code <= 0x318F) ||
-            (code >= 0xAC00 && code <= 0xD7A3) ||
-            (code >= 0x2E80 && code <= 0x9FFF) ||
-            (code >= 0xFF00 && code <= 0xFFEF) ||
-            (code >= 0x2600 && code <= 0x27BF)
-          ) {
-            width += 2;
-          } else {
-            width += 1;
-          }
-        }
-        return width;
-      }
-
-      function padRightVisualLocal(str, targetWidth) {
-        str = String(str || '');
-        const currentWidth = calcVisualWidth(str);
-        if (currentWidth >= targetWidth) return str;
-        return str + ' '.repeat(targetWidth - currentWidth);
-      }
-
-      const maxW_period = Math.max(calcVisualWidth('[교시]'), ...records.map(r => calcVisualWidth(r.period || '-교시')));
-      const maxW_room = Math.max(calcVisualWidth('[교실]'), ...records.map(r => calcVisualWidth(r.className || '-')));
-      const maxW_subClass = Math.max(calcVisualWidth('[보강 학급]'), ...records.map(r => calcVisualWidth(r.subClass || '-')));
-      const maxW_subject = Math.max(calcVisualWidth('[보강 교과]'), ...records.map(r => calcVisualWidth(r.subject || '-')));
-      const maxW_subTeacher = Math.max(calcVisualWidth('[보강 교사]'), ...records.map(r => calcVisualWidth(r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -')));
-      const maxW_origTeacher = Math.max(calcVisualWidth('[원교사]'), ...records.map(r => calcVisualWidth(r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -')));
-
-      const hasUrgentInList = records.some(r => isUrgentActive(r));
-      const urgentPrefixWidth = hasUrgentInList ? calcVisualWidth('🚨[긴급] ') : 0;
-
-      const headerPrefix = '  📌 ' + ' '.repeat(urgentPrefixWidth);
-      const hPeriod = padRightVisualLocal('[교시]', maxW_period);
-      const hRoom = padRightVisualLocal('[교실]', maxW_room);
-      const hSubClass = padRightVisualLocal('[보강 학급]', maxW_subClass);
-      const hSubject = padRightVisualLocal('[보강 교과]', maxW_subject);
-      const hSubTeacher = padRightVisualLocal('[보강 교사]', maxW_subTeacher);
-      const hOrigTeacher = padRightVisualLocal('[원교사]', maxW_origTeacher);
-
-      const plainHeader = `${headerPrefix}${hPeriod}   |   ${hRoom}   |   ${hSubClass}   |   ${hSubject}   |   ${hSubTeacher}  ⬅️  ${hOrigTeacher}`;
-      const maxLineLen = Math.max(40, calcVisualWidth(plainHeader));
-      const dividerStr = '='.repeat(maxLineLen);
-
-      let lines = [];
-      lines.push(dividerStr);
-      lines.push(plainHeader);
-      lines.push('');
+      const divider = '────────────────────────';
+      let lines = [divider];
 
       records.forEach((r, idx) => {
         const isUrgent = isUrgentActive(r);
-        let rowPrefix = '  • ';
-        if (hasUrgentInList) {
-          rowPrefix += isUrgent ? '🚨[긴급] ' : ' '.repeat(urgentPrefixWidth);
-        }
-        const rPeriod = padRightVisualLocal(r.period || '-교시', maxW_period);
-        const rRoom = padRightVisualLocal(r.className || '-', maxW_room);
-        const rSubClass = padRightVisualLocal(r.subClass || '-', maxW_subClass);
-        const rSubject = padRightVisualLocal(r.subject || '-', maxW_subject);
-        const rSubTeacher = padRightVisualLocal(r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -', maxW_subTeacher);
-        const rOrigTeacher = padRightVisualLocal(r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -', maxW_origTeacher);
+        const periodStr = formatPeriodTextClient(r.period);
+        const classInfo = buildClassInfoTextClient(r.className, r.subClass);
+        const subjectStr = r.subject || '-';
+        const subTeacher = r.substituteTeacher ? `[보강] ${r.substituteTeacher}` : '[보강] -';
+        const origTeacher = r.originalTeacher ? `[원교사] ${r.originalTeacher}` : '[원교사] -';
 
-        lines.push(`${rowPrefix}${rPeriod}   |   ${rRoom}   |   ${rSubClass}   |   ${rSubject}   |   ${rSubTeacher}  ⬅️  ${rOrigTeacher}`);
+        // PC와 모바일 좁은 화면 모두에서 줄바꿈 왜곡 없이 직관적으로 읽히는 2줄 카드 포맷
+        if (isUrgent) {
+          lines.push(`• 🚨 *[${periodStr} 긴급]* ${classInfo} | ${subjectStr}`);
+          lines.push(`  👉 *${subTeacher}* ⬅️ ${origTeacher}`);
+        } else {
+          lines.push(`• *[${periodStr}]* ${classInfo} | ${subjectStr}`);
+          lines.push(`  👉 *${subTeacher}* ⬅️ ${origTeacher}`);
+        }
+
         if (idx < records.length - 1) {
           lines.push('');
         }
       });
 
-      lines.push(dividerStr);
+      lines.push(divider);
       return lines.join('\n');
     }
 
     function buildClientPreviewText(urgentRecords, tomorrowRecords, tomorrowDateStr) {
       let parts = [];
 
-      // 1. 긴급 섹션
+      // 1. 긴급 섹션 (가시성 극대화 및 당일 일시 명시)
       if (urgentRecords && urgentRecords.length > 0) {
-        parts.push('🚨🚨🚨 [긴급 보강 알림] 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
+        const urgentDateStr = urgentRecords[0].date || formatDateToString(getTodayDateObj());
+        const formattedUrgentDate = formatFormattedDate(urgentDateStr);
+
+        parts.push('🚨🚨🚨 *[긴급 보강 알림]* 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
         parts.push('⚠️ 해당 선생님께서는 변동된 일정을 최우선으로 즉시 확인해 주시기 바랍니다.\n');
-        parts.push(`🔥 [🚨 긴급 보강 내역] (총 ${urgentRecords.length}건)`);
+        parts.push(`🔥 *[🚨 긴급 보강 내역]* (총 ${urgentRecords.length}건)`);
+        parts.push(`📅 일시: ${formattedUrgentDate}`);
         parts.push(buildRecordsTableBlockClient(urgentRecords));
         parts.push('');
       } else {
         parts.push('ℹ️ [안내] 현재 등록된 당일 긴급 보강 건은 없습니다.\n');
       }
 
-      // 2. 내일 보강 섹션
+      // 2. 기존 보강 섹션 (긴급 보강과 대비되는 기존 배정 보강 안내)
       const formattedTomorrow = formatFormattedDate(tomorrowDateStr);
-      parts.push('📢 [내일 보강 현황 안내]');
+      parts.push('📢 *[기존 보강 현황 안내]*');
       parts.push(`📅 일시: ${formattedTomorrow}`);
 
       if (tomorrowRecords && tomorrowRecords.length > 0) {
         parts.push(buildRecordsTableBlockClient(tomorrowRecords));
-        parts.push(`(내일 보강 총 ${tomorrowRecords.length}건)\n`);
+        parts.push(`(기존 보강 총 ${tomorrowRecords.length}건)\n`);
       } else {
-        parts.push('────────────────────────────────────────');
-        parts.push(`내일(${formattedTomorrow}) 배정된 보강이 없습니다. 😊`);
-        parts.push('────────────────────────────────────────\n');
+        parts.push('────────────────────────');
+        parts.push(`배정된 기존 보강이 없습니다. 😊`);
+        parts.push('────────────────────────\n');
       }
 
       parts.push('👉 보강 교사께서는 웹앱에서 본인 확인 체크를 완료해 주세요.');

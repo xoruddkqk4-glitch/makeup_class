@@ -787,92 +787,89 @@ function formatFormattedDateGas(dateStr) {
   return dateStr + ' (' + days[d.getDay()] + ')';
 }
 
+function formatPeriodTextGas(period) {
+  if (!period) return '-교시';
+  return String(period).indexOf('교시') !== -1 ? String(period) : (period + '교시');
+}
+
+function buildClassInfoTextGas(room, subClass) {
+  if (room && subClass) return room + ' (' + subClass + ')';
+  if (room) return room;
+  if (subClass) return subClass;
+  return '-';
+}
+
 /**
- * 보강 목록 레코드들을 복사 버튼과 동일한 개조식 정렬 텍스트 블록으로 생성합니다.
+ * 모바일 및 PC 구글챗 화면에서 글자 쪼개짐과 줄바꿈 왜곡 없이
+ * 최적의 가독성을 제공하는 2줄 카드형 개조식 보강 목록 텍스트 블록을 생성합니다.
  */
 function buildRecordsTableBlockGas(records) {
   if (!records || records.length === 0) return '';
 
-  var maxW_period = Math.max(getGasVisualWidth('[교시]'), ...records.map(function(r) { return getGasVisualWidth(r.period || '-교시'); }));
-  var maxW_room = Math.max(getGasVisualWidth('[교실]'), ...records.map(function(r) { return getGasVisualWidth(r.className || '-'); }));
-  var maxW_subClass = Math.max(getGasVisualWidth('[보강 학급]'), ...records.map(function(r) { return getGasVisualWidth(r.subClass || '-'); }));
-  var maxW_subject = Math.max(getGasVisualWidth('[보강 교과]'), ...records.map(function(r) { return getGasVisualWidth(r.subject || '-'); }));
-  var maxW_subTeacher = Math.max(getGasVisualWidth('[보강 교사]'), ...records.map(function(r) { return getGasVisualWidth(r.substituteTeacher ? ('[보강] ' + r.substituteTeacher) : '[보강] -'); }));
-  var maxW_origTeacher = Math.max(getGasVisualWidth('[원교사]'), ...records.map(function(r) { return getGasVisualWidth(r.originalTeacher ? ('[원교사] ' + r.originalTeacher) : '[원교사] -'); }));
-
-  var hasUrgentInList = records.some(function(r) { return r.urgent === true || String(r.urgent).toLowerCase() === 'true'; });
-  var urgentPrefixWidth = hasUrgentInList ? getGasVisualWidth('🚨[긴급] ') : 0;
-
-  var headerPrefix = '  📌 ' + ' '.repeat(urgentPrefixWidth);
-  var hPeriod = padRightVisualGas('[교시]', maxW_period);
-  var hRoom = padRightVisualGas('[교실]', maxW_room);
-  var hSubClass = padRightVisualGas('[보강 학급]', maxW_subClass);
-  var hSubject = padRightVisualGas('[보강 교과]', maxW_subject);
-  var hSubTeacher = padRightVisualGas('[보강 교사]', maxW_subTeacher);
-  var hOrigTeacher = padRightVisualGas('[원교사]', maxW_origTeacher);
-
-  var plainHeader = headerPrefix + hPeriod + '   |   ' + hRoom + '   |   ' + hSubClass + '   |   ' + hSubject + '   |   ' + hSubTeacher + '  ⬅️  ' + hOrigTeacher;
-  var maxLineLen = Math.max(40, getGasVisualWidth(plainHeader));
-  var dividerStr = '='.repeat(maxLineLen);
-
-  var lines = [];
-  lines.push(dividerStr);
-  lines.push(plainHeader);
-  lines.push('');
+  var divider = '────────────────────────';
+  var lines = [divider];
 
   records.forEach(function(r, idx) {
     var isUrgent = (r.urgent === true || String(r.urgent).toLowerCase() === 'true');
-    var rowPrefix = '  • ';
-    if (hasUrgentInList) {
-      rowPrefix += isUrgent ? '🚨[긴급] ' : ' '.repeat(urgentPrefixWidth);
-    }
-    var rPeriod = padRightVisualGas(r.period || '-교시', maxW_period);
-    var rRoom = padRightVisualGas(r.className || '-', maxW_room);
-    var rSubClass = padRightVisualGas(r.subClass || '-', maxW_subClass);
-    var rSubject = padRightVisualGas(r.subject || '-', maxW_subject);
-    var rSubTeacher = padRightVisualGas(r.substituteTeacher ? ('[보강] ' + r.substituteTeacher) : '[보강] -', maxW_subTeacher);
-    var rOrigTeacher = padRightVisualGas(r.originalTeacher ? ('[원교사] ' + r.originalTeacher) : '[원교사] -', maxW_origTeacher);
+    var periodStr = formatPeriodTextGas(r.period);
+    var classInfo = buildClassInfoTextGas(r.className, r.subClass);
+    var subjectStr = r.subject || '-';
+    var subTeacher = r.substituteTeacher ? ('[보강] ' + r.substituteTeacher) : '[보강] -';
+    var origTeacher = r.originalTeacher ? ('[원교사] ' + r.originalTeacher) : '[원교사] -';
 
-    lines.push(rowPrefix + rPeriod + '   |   ' + rRoom + '   |   ' + rSubClass + '   |   ' + rSubject + '   |   ' + rSubTeacher + '  ⬅️  ' + rOrigTeacher);
+    // 1행: 핵심 수업 정보 (교시, 교실/학급, 교과)
+    // 2행: 교사 인수인계 정보 (보강교사 ⬅️ 원교사)
+    if (isUrgent) {
+      lines.push('• 🚨 *[' + periodStr + ' 긴급]* ' + classInfo + ' | ' + subjectStr);
+      lines.push('  👉 *' + subTeacher + '* ⬅️ ' + origTeacher);
+    } else {
+      lines.push('• *[' + periodStr + ']* ' + classInfo + ' | ' + subjectStr);
+      lines.push('  👉 *' + subTeacher + '* ⬅️ ' + origTeacher);
+    }
+
     if (idx < records.length - 1) {
       lines.push('');
     }
   });
 
-  lines.push(dividerStr);
+  lines.push(divider);
   return lines.join('\n');
 }
 
 /**
- * [🚨 구글챗으로 즉시 공지] 발송용 메시지 생성:
- * 긴급 보강 건을 최상단에 사이렌/불꽃 배너와 함께 극대화된 가시성으로 배치하고,
- * 하단에 내일(또는 월요일) 보강 목록을 결합합니다.
+ * [🚨 구글챗으로 긴급 공지] 발송용 메시지 생성:
+ * 모바일과 PC 모두에서 줄바꿈 깨짐 없이 최상의 가독성으로 긴급 및 내일 보강을 결합합니다.
  */
 function buildCombinedBroadcastMessage(urgentRecords, tomorrowRecords, tomorrowDateStr, webAppUrl) {
   var msgParts = [];
 
-  // 1. 긴급 보강 섹션 (가시성 극대화)
+  // 1. 긴급 보강 섹션 (가시성 극대화 및 당일 일시 명시)
   if (urgentRecords && urgentRecords.length > 0) {
-    msgParts.push('🚨🚨🚨 [긴급 보강 알림] 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
+    var urgentDateStr = urgentRecords[0].date;
+    var formattedUrgentDate = formatFormattedDateGas(urgentDateStr);
+
+    msgParts.push('🚨🚨🚨 *[긴급 보강 알림]* 당일 긴급 보강이 발생했습니다! 🚨🚨🚨');
     msgParts.push('⚠️ 해당 선생님께서는 변동된 일정을 최우선으로 즉시 확인해 주시기 바랍니다.\n');
-    msgParts.push('🔥 [🚨 긴급 보강 내역] (총 ' + urgentRecords.length + '건)');
-    msgParts.push('```\n' + buildRecordsTableBlockGas(urgentRecords) + '\n```\n');
+    msgParts.push('🔥 *[🚨 긴급 보강 내역]* (총 ' + urgentRecords.length + '건)');
+    msgParts.push('📅 일시: ' + formattedUrgentDate);
+    msgParts.push(buildRecordsTableBlockGas(urgentRecords));
+    msgParts.push('');
   } else {
     msgParts.push('ℹ️ [안내] 현재 등록된 당일 긴급 보강 건은 없습니다.\n');
   }
 
-  // 2. 내일 보강 현황 섹션
+  // 2. 기존 보강 현황 섹션 (긴급 보강과 대비되는 기존 배정 보강 안내)
   var formattedTomorrow = formatFormattedDateGas(tomorrowDateStr);
-  msgParts.push('📢 [내일 보강 현황 안내]');
+  msgParts.push('📢 *[기존 보강 현황 안내]*');
   msgParts.push('📅 일시: ' + formattedTomorrow);
 
   if (tomorrowRecords && tomorrowRecords.length > 0) {
-    msgParts.push('```\n' + buildRecordsTableBlockGas(tomorrowRecords) + '\n```');
-    msgParts.push('(내일 보강 총 ' + tomorrowRecords.length + '건)\n');
+    msgParts.push(buildRecordsTableBlockGas(tomorrowRecords));
+    msgParts.push('(기존 보강 총 ' + tomorrowRecords.length + '건)\n');
   } else {
-    msgParts.push('────────────────────────────────────────');
-    msgParts.push('내일(' + formattedTomorrow + ') 배정된 보강이 없습니다. 😊');
-    msgParts.push('────────────────────────────────────────\n');
+    msgParts.push('────────────────────────');
+    msgParts.push('배정된 기존 보강이 없습니다. 😊');
+    msgParts.push('────────────────────────\n');
   }
 
   // 3. 하단 안내 및 웹앱 링크
@@ -997,16 +994,16 @@ function sendScheduledTomorrowNotification() {
 
     var formattedDate = formatFormattedDateGas(targetDateStr);
     var msgLines = [];
-    msgLines.push('📢 [보강 알리미] 내일 보강 현황 안내');
-    msgLines.push('📅 기간: ' + formattedDate);
+    msgLines.push('📢 *[보강 알리미] 내일 보강 현황 안내*');
+    msgLines.push('📅 일시: ' + formattedDate);
 
     if (records && records.length > 0) {
-      msgLines.push('```\n' + buildRecordsTableBlockGas(records) + '\n```');
-      msgLines.push('(총 ' + records.length + '건)\n');
+      msgLines.push(buildRecordsTableBlockGas(records));
+      msgLines.push('(내일 보강 총 ' + records.length + '건)\n');
     } else {
-      msgLines.push('────────────────────────────────────────');
+      msgLines.push('────────────────────────');
       msgLines.push('배정된 보강이 없습니다. 편안한 하루 되세요 😊');
-      msgLines.push('────────────────────────────────────────\n');
+      msgLines.push('────────────────────────\n');
     }
 
     msgLines.push('👉 보강 교사께서는 웹앱에서 본인 확인 체크를 완료해 주세요.');
