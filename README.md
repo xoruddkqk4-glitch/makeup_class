@@ -365,7 +365,7 @@
 - **검증 결과**: Node.js 정적 구문 검사(`Code.gs Syntax OK`, `index.html Script Syntax OK`) 통과, 2줄 카드형 및 마크다운 메시지 시뮬레이션 출력 검증 완료
 
 
-## [2026-10-10 15:53] 업데이트 이력 (Commit ID: fda6afe)
+## [2026-10-10 15:53] 업데이트 이력 (Commit ID: 1a980d1)
 - **수정 내용**:
   1. 긴급 보강 분류 로직 수정 및 내일 긴급 건 분리: 오늘(todayStr) 또는 내일(tomorrowStr) 날짜의 모든 긴급(`urgent: true`) 건을 상단 `[🚨 긴급 보강 내역]`으로 통합하고, 하단 `[기존 보강 내역]`에는 일반 보강(`!urgent`) 건만 분리하여 내일 배정된 긴급 보강이 기존 보강 목록에 잘못 노출되는 버그 완전 수정 ([index.html](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/index.html#L3540-L3565))
   2. 섹션 명칭 일관성 통일: 상단 `[🚨 긴급 보강 내역]`에 맞추어 하단 섹션 명칭을 '기존 보강 현황 안내'에서 `*[기존 보강 내역]*`으로 수정 및 모달 카운트 배지 라벨('긴급 보강', '기존 보강') 통일 ([Code.gs](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/Code.gs#L860-L875), [index.html](file:///c:/Users/user/Desktop/appsscript/20-21-%ED%99%8D%EC%9D%B5%20%EB%B3%B4%EA%B0%95/20-%ED%99%8D%EC%9D%B5-%EB%B3%B4%EA%B0%95%20%EC%95%8C%EB%A6%AC%EB%AF%B8/index.html#L3525-L3535))
